@@ -4,6 +4,7 @@ const rp = require('request-promise')
 const request = require('request')
 destination = './temp.zip'
 var AdmZip = require('adm-zip');
+nwgui = require('nw.gui')
 //Version compare---------------------------------------------------------------------
 function compareVersion(v1, v2) {
     if (typeof v1 !== 'string') return false;
@@ -20,6 +21,17 @@ function compareVersion(v1, v2) {
     return v1.length == v2.length ? 0 : (v1.length < v2.length ? -1 : 1);
 }
 //------------------------------------------------------------------End Version Compare
+//Close Loading Modal------------------------------------------------------------------
+function CloseLoadingModal() {
+	loadingmodal.style.display = "none";
+	loadingmodal.style.visibility= "hidden";
+	document.getElementById('HandsOnTableValue').style.display = "block"
+}
+//------------------------------------------------------------------End Closing
+//CheckVersion--------------------------------------------------------------------------
+loadingmodal.style.display = "block";
+loadingmodal.style.visibility= "visible";
+setTimeout(GetPackageFile,1000);
 GetPackageFile()
 
 function GetPackageFile(x) {
@@ -37,14 +49,19 @@ function GetPackageFile(x) {
             if (compareVersion(LocalVersion,CloudVersion) < 0){
             GetAllFiles()
             }
+            else (CloseLoadingModal())
         })
         .catch(function (err) {
             console.log(err)
-            window.alert('Parsing Hyperfind Failed ' + err.error)
+            window.alert('Failed to read version' + err.error)
             CloseLoadingModal()
             return
         });
 }
+
+
+//------------------------------------------------------------------------------End Check Version
+//Get All Files and Copy them and Clean up------------------------------------------------------
 function GetAllFiles(x) {
     request('https://codeload.github.com/marcelmrottmann/ConfigEditor/zip/master')
         .pipe(fs.createWriteStream('temp.zip'))
@@ -72,7 +89,9 @@ function ReadFiles(x) {
             console.log(stats);//here we got all information of file in stats variable
          
             if (err) {
+                CloseLoadingModal()
                 return console.error(err);
+                
             }
          
             fs.unlink('./temp.zip',function(err){
@@ -80,6 +99,9 @@ function ReadFiles(x) {
                  console.log('file deleted successfully');
             });  
          });
+         nwgui.Window.get().reload(3);
+
+     
 }
 
 
@@ -106,7 +128,7 @@ function deleteFolderRecursive(path)
   }
   catch (e) { 
       console.log(e)
-      showUpdateVisuals(true)
+      CloseLoadingModal()
   }
 }
 function makeFolderIfNotExist(pth)
