@@ -84,7 +84,7 @@ function ReadFiles(x) {
               return console.error(err);
             }
             console.log('done!');
-		window.alert('A new version has been downloaded, the application will now restart')
+		window.alert('A new version has been downloaded you will see the effective changes immediately')
 		nwgui.Window.get().reload(3);
            });
            
