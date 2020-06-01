@@ -1,0 +1,284 @@
+<html>
+
+<head>
+	<meta name="viewport" content="width=device-width, user-scalable=yes">
+	<link rel="stylesheet" href="./node_modules/handsontable/dist/handsontable.full.css" rel="stylesheet">
+	<link href="./css/style.css" rel="stylesheet">
+	<title>Pay Code Distributions</title>
+
+	<!-- The Modal -->
+	<div id="myModal" class="modal">
+		<!-- Modal content -->
+		<div id="myModalcontent" class="modal-content" style="height:80%">
+			<span class="close">&times;</span>
+			<embed src="./information/PCD Editor by Marcel Rottmann.pdf" width="100%" height="95%"></embed>
+			<p id="myModalcontenttext"></p>
+		</div>
+
+	</div>
+
+	<!-- The Loading Modal -->
+	<div id="loading" class="modal">
+		<!-- Modal content -->
+		<div id="loadingcontent" class="modal-content">
+			<span class="close">&times;</span>
+			<img src="./img/loading.gif" alt="Instructions">
+			<div id="loadingcontenttext" text>test</div>
+			<p id="myModalcontenttext"></p>
+		</div>
+
+	</div>
+
+</head>
+
+
+
+
+<body>
+
+	<div id="SideBar" class="sidenav">
+		<a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+		<a href="#">
+			<form action="index.html">
+				<input type="submit" value="PCDs" />
+			</form>
+		</a>
+		<a href="#">
+			<form action="PayCodes.html">
+				<input type="submit" value="Pay Codes" />
+			</form>
+		</a>
+		<a href="#">
+			<form action="AdjustmentRules.html">
+				<input type="submit" value="Adjustment Rules" />
+			</form>
+		</a>
+		<a href="#">
+			<form action="Devices.html">
+				<input type="submit" value="Devices" />
+			</form>
+		</a>
+		<a href="#">
+			<form action="WorkRules.html">
+				<input type="submit" value="Work Rules" />
+			</form>
+		</a>
+		<a href="#">
+			<form action="RequestManager.html">
+				<input type="submit" value="Request Manager" />
+			</form>
+		</a>
+		<a href="#">
+			<form action="BSExtractor.html">
+				<input type="submit" value="BS Extracter" />
+			</form>
+		</a>
+		<a href="#">
+			<form action="PersonData.html">
+				<input type="submit" value="Person Data" />
+			</form>
+		</a>
+		<a href="#">
+			<form action="LCEL.html">
+				<input type="submit" value="LC Entry Lists" />
+			</form>
+		</a>
+	</div>
+	<div id="SideBarRight" class="sidenavRight">
+		<a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+		<a href="#">
+			<form action="index.html">
+				<input type="submit" value="PCD Editor" />
+			</form>
+		</a>
+		<!---
+		   <a href="#">
+		   <form action = "KnownPlaces.html">
+		   <input type="submit" value="Known Places"/>
+		   </form>		
+		   </a>
+	   -->
+	</div>
+	<header id="fullMenuBar">
+		<div class="form-group-wrapper-line">
+			<div id="hamburgermenuID" class="hamburgermenu" onclick="hamburgermenu(this)">
+				<div class="bar1"></div>
+				<div class="bar2"></div>
+				<div class="bar3"></div>
+			</div>
+			<div class="logo" id="about">
+				<h1>PCDs</h1>
+			</div>
+			<div id="form-group-wrapper" class='form-group-wrapper' style="width: 20%;">
+				<div id="form-wrapper-file">
+					<label for="ChooseFile">Enter .Zip File Name Here</label>
+					<input id="ChooseFile" type="file" accept=".zip" style="top:-3; width:100%" />
+				</div>
+			</div>
+			<div id="form-group-wrapper" class='form-group-wrapper'>
+				<div id="form-wrapper">
+					<label for="UploadAndParse">Refresh data</label>
+					<input id="UploadAndParse" type="button" value="Refresh" />
+				</div>
+			</div>
+			<div id="form-group-wrapper" class='form-group-wrapper'>
+				<div id="form-wrapper">
+					<label for="DownloadNewFile">Save Changes</label>
+					<input id="DownloadNewFile" type="button" value="Save" />
+				</div>
+			</div>
+			<div id="form-group-wrapper" class='form-group-wrapper'>
+				<div id="form-wrapper">
+					<label for="DownloadFinalFile">Export Zip</label>
+					<input id="DownloadFinalFile" type="button" value="Export" />
+				</div>
+			</div>
+			<div id="form-group-wrapper" class='form-group-wrapper' style="width: 20%;">
+				<div id="form-wrapper">
+					<label for="ruleName">Name of Rule</label>
+					<select id="ruleName" class="form-control" type="text" style="width: 100%;">
+						<option value="DefaultRule" selected disabled hidden>Rule Name Here</option>
+					</select>
+				</div>
+			</div>
+		</div>
+		<!--
+			<div id="form-group-wrapper" class='form-group-wrapper'>
+				<div id="form-wrapper-check">
+					<label for="OldSchool">Tabular/List View</label><br>
+					<input type="checkbox" id="OldSchool" name="OldSchool" checked="checked">
+				</div>
+			</div>
+			<div id="form-group-wrapper" class='form-group-wrapper'>
+				<div id="form-wrapper-check">
+					<label for="HideHelpers">Hide Helper Columns</label><br>
+					<input type="checkbox" id="HideHelpers" name="HideHelpers"> </input>
+				</div>
+			</div>
+			<div id="form-group-wrapper" class='form-group-wrapper'>
+				<div id="form-wrapper-check">
+					<label for="OnlySaveFiltered">Only Save Filtered Rows</label><br>
+					<input type="checkbox" id="OnlySaveFiltered" name="OnlySaveFiltered"> </input>
+				</div>
+			</div>
+			<div id="form-group-wrapper" class='form-group-wrapper'>
+				<div id="form-wrapper-check">
+					<label for="DisableEditingOfConfigCol ">Config Col Read Only</label><br>
+					<input type="checkbox" id="DisableEditingOfConfigCol" name="DisableEditingOfConfigCol" checked="checked"> </input>
+				</div>
+			</div>
+		-->
+		<div class="form-group-wrapper-second-line">
+
+			<div id="form-group-wrapper" class='form-group-wrapper' style="width: 15.5%;">
+				<div id="form-wrapper-text">
+					<label for="search_field">Search for</label><br>
+					<input type="text" id="search_field" name="search_field">
+				</div>
+			</div>
+			<div id="form-group-wrapper" class='form-group-wrapper' style="width: 15.5%;">
+				<div id="form-wrapper-text">
+					<label for="replace_field">Replace with</label><br>
+					<input type="text" id="replace_field" name="replace_field" list="paycodelist">
+				</div>
+			</div>
+			<div id="form-group-wrapper" class='form-group-wrapper'>
+				<div id="form-wrapper">
+					<label for="Replace">Replace</label>
+					<input id="Replace" type="button" value="Replace" />
+				</div>
+			</div>
+			<div id="form-group-wrapper" class='form-group-wrapper' style="width: 16%;">
+				<div id="form-wrapper-text">
+					<label for="paycode_name">Paycode Name</label><br>
+					<input type="text" id="paycode_name" name="paycode_name" list="paycodelist">
+					<datalist id="paycodelist">
+					</datalist>
+				</div>
+			</div>
+			<div id="form-group-wrapper" class='form-group-wrapper'>
+				<div id="form-wrapper">
+					<label for="AddPaycode">Add Paycode</label>
+					<input id="AddPaycode" type="button" value="Add" />
+				</div>
+			</div>
+			<div id="form-group-wrapper" class='form-group-wrapper'>
+				<div id="form-wrapper">
+					<label for="DeletePaycode">Delete Paycode</label>
+					<input id="DeletePaycode" type="button" value="Delete" />
+				</div>
+			</div>
+		</div>
+		</div>
+
+		<div class="form-group-wrapper-checkboxes">
+
+			<div id="form-wrapper-check">
+				<label for="OldSchool">Tabular/List View</label>
+				<input type="checkbox" id="OldSchool" name="OldSchool" checked="checked">
+			</div>
+			<hr style="height:5px; visibility:hidden; padding:0; margin:0;" />
+
+			<div id="form-wrapper-check">
+				<label for="HideHelpers">Hide Helper Columns</label>
+				<input type="checkbox" id="HideHelpers" name="HideHelpers"> </input>
+			</div>
+			<hr style="height:5px; visibility:hidden; padding:0; margin:0;" />
+
+			<div id="form-wrapper-check">
+				<label for="OnlySaveFiltered">Only Save Filtered Rows</label>
+				<input type="checkbox" id="OnlySaveFiltered" name="OnlySaveFiltered"> </input>
+			</div>
+			<hr style="height:5px; visibility:hidden; padding:0; margin:0;" />
+
+			<div id="form-wrapper-check">
+				<label for="DisableEditingOfConfigCol ">Config Col Read Only</label>
+				<input type="checkbox" id="DisableEditingOfConfigCol" name="DisableEditingOfConfigCol"
+					checked="checked"> </input>
+			</div>
+
+
+		</div>
+
+
+
+		</div>
+
+	</header>
+
+
+
+	<div id="load"></div>
+	<div id="HandsontableWrapper" class="HandsontableWrapper">
+		<div id="HandsOnTableValue" style="width: 100%; height:50%"></div>
+	</div>
+	<script type="text/javascript" src="./js/app.js"></script>
+	<script src="./node_modules/handsontable/dist/handsontable.full.js"></script>
+
+
+
+
+
+</body>
+
+
+<script>
+	document.onreadystatechange = function () {
+		var state = document.readyState
+		console.log(state)
+		if (state == 'interactive') {
+			document.getElementById('HandsOnTableValue').style.visibility = "hidden";
+		}
+		else if (state == 'complete') {
+
+			document.getElementById('interactive');
+			document.getElementById('load').style.visibility = "hidden";
+			document.getElementById('HandsOnTableValue').style.visibility = "visible";
+
+		}
+	}
+</script>
+
+
+
+</html>
