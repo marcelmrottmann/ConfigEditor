@@ -5,6 +5,7 @@ const request = require('request')
 destination = './temp.zip'
 var AdmZip = require('adm-zip');
 nwgui = require('nw.gui')
+cleanup()
 //Version compare---------------------------------------------------------------------
 function compareVersion(v1, v2) {
     if (typeof v1 !== 'string') return false;
