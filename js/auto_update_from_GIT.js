@@ -101,7 +101,7 @@ function ReadFiles(x) {
                  console.log('file deleted successfully');
             });  
          });
-window.alert('A new version has been downloaded, please restart the app to enjoy the new updates')
+//window.alert('A new version has been downloaded, please restart the app to enjoy the new updates')
      
 }
 
