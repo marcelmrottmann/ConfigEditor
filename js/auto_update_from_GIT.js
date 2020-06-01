@@ -99,13 +99,7 @@ function ReadFiles(x) {
                  console.log('file deleted successfully');
             });  
          });
-// Load native UI library
-var ngui = require('nw.gui');
-// Get the current window
-var nwin = ngui.Window.get();
-// this will do a hard refresh
-nwin.reloadIgnoringCache();
-
+window.alert('A new version has been downloaded, please restart the app to enjoy the new updates')
      
 }
 
