@@ -84,6 +84,7 @@ function ReadFiles(x) {
               return console.error(err);
             }
             console.log('done!');
+		nwgui.Window.get().reload(3);
            });
            
            fs.stat('./temp.zip', function (err, stats) {
