@@ -84,6 +84,7 @@ function ReadFiles(x) {
               return console.error(err);
             }
             console.log('done!');
+		window.alert('A new version has been downloaded, the application will now restart')
 		nwgui.Window.get().reload(3);
            });
            
@@ -101,7 +102,7 @@ function ReadFiles(x) {
                  console.log('file deleted successfully');
             });  
          });
-//window.alert('A new version has been downloaded, please restart the app to enjoy the new updates')
+//
      
 }
 
