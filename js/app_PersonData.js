@@ -48,7 +48,11 @@ span.addEventListener("click", function () {
 	document.getElementById('HandsOnTableValue').style.display = "block"
 })
 //---------------------------------------Empty connections Drop Down
-
+function RemoveNullFromArray(array) {
+	return array.filter(function (e) {
+		return e;
+	});
+}
 //-----------------------------------------Fill Connections Dropdown.
 function RefreshConnections(x) {
 
@@ -377,8 +381,10 @@ function parseInputJson(data) {
 					else AccrualProfile = ""
 					if (g.allExtension.accrualExtension.fullTimeEquivalencyForExtensionSnapshotDate instanceof Array == true) {
 						FTE = g.allExtension.accrualExtension.fullTimeEquivalencyForExtensionSnapshotDate[0].fullTimeEquivalencyPercent
+						FTEFTHours = g.allExtension.accrualExtension.fullTimeEquivalencyForExtensionSnapshotDate[0].fullTimeStandardHoursQuantity
+						FTEEMPHours = g.allExtension.accrualExtension.fullTimeEquivalencyForExtensionSnapshotDate[0].employeeStandardHoursQuantity
 					}
-					else FTE = ""
+					else { FTE = ""; FTEFTHours = ""; FTEEMPHours = "" }
 				}
 				if (g.allExtension.timekeepingExtension) {
 					if (g.allExtension.timekeepingExtension.baseWagesForExtensionSnapshotDate instanceof Array == true) {
@@ -414,7 +420,7 @@ function parseInputJson(data) {
 						MGRPCE = g.allExtension.timekeepingExtension.accessAssignmentDetailsDataEntries.payCodeProfile
 					}
 					else MGRPCE = ""
-					
+
 					if (g.allExtension.timekeepingExtension.accessAssignmentDetailsDataEntries) {
 						MGRPCV = g.allExtension.timekeepingExtension.accessAssignmentDetailsDataEntries.payCodeViewProfile
 					}
@@ -436,18 +442,65 @@ function parseInputJson(data) {
 				}
 
 				if (g.allExtension.deviceExtension) {
-					if (g.allExtension.deviceExtension.badgeDetailsForExtensionSnapshotDate instanceof Array == true) {
-						BadgeID = g.allExtension.deviceExtension.badgeDetailsForExtensionSnapshotDate[0].badgeNumber
+					if (g.allExtension.deviceExtension.badgeDetailsForExtensionSnapshotDate instanceof Array == true && g.allExtension.deviceExtension.badgeDetailsForExtensionSnapshotDate.length > 0) {
+						BadgeID = g.allExtension.deviceExtension.badgeDetailsForExtensionSnapshotDate[g.allExtension.deviceExtension.badgeDetailsForExtensionSnapshotDate.length - 1].badgeNumber
 					}
 					else BadgeID = ""
 				}
+
+				if (g.allExtension.employeeExtension && g.allExtension.employeeExtension.postalAddressDataEntries) {
+					if (g.allExtension.employeeExtension.postalAddressDataEntries instanceof Array == true && g.allExtension.employeeExtension.postalAddressDataEntries.length > 0) {
+						city = g.allExtension.employeeExtension.postalAddressDataEntries[0].city
+						country = g.allExtension.employeeExtension.postalAddressDataEntries[0].country
+						state = g.allExtension.employeeExtension.postalAddressDataEntries[0].state
+						zipCode = g.allExtension.employeeExtension.postalAddressDataEntries[0].zipCode
+						street = g.allExtension.employeeExtension.postalAddressDataEntries[0].street
+					}
+					else { city = ""; country = ""; state = ""; zipCode = ""; street = "" }
+				}
+				else { city = ""; country = ""; state = ""; zipCode = ""; street = "" }
+
+				if (g.allExtension.employeeExtension) {
+					if (g.allExtension.employeeExtension.licenseTypeList instanceof Array == true) {
+						LicensesCSV = RemoveNullFromArray(g.allExtension.employeeExtension.licenseTypeList
+							.map(function (licenseitem) {
+								if (
+									['Workforce MobileEmployee', 'Workforce TabletEmployee','Workforce MobileManager', 'Workforce TabletManager']
+										.includes(licenseitem.licenseType) == false
+								) { return licenseitem.licenseType }
+							})
+						)
+							.join('|')
+					}
+					else LicensesCSV = ""
+
+				}
+				else LicensesCSV = ""
+
+				if (g.allExtension.employeeExtension) {
+					if (g.allExtension.employeeExtension.personCustomDataEntries instanceof Array == true) {
+						CDATACSV = RemoveNullFromArray(g.allExtension.employeeExtension.personCustomDataEntries
+							.map(function (licenseitem) {
+								if (licenseitem.customText != null && licenseitem.customText != '')
+									{ return licenseitem.customDataType + ':' +licenseitem.customText} 
+							})
+						)
+							.join('|')
+					}
+					else CDATACSV = ""
+				}
+				else CDATACSV = ""
 
 
 
 				map =
 				{
 					"PersonNumber": g.allExtension.employeeExtension.personNumber,
-					"FullName": g.allExtension.employeeExtension.fullName,
+					"FirstName": g.allExtension.employeeExtension.firstName,
+					"LastName": g.allExtension.employeeExtension.lastName,
+					"Middle Initial": g.allExtension.employeeExtension.middleName,
+					"Short Name": g.allExtension.employeeExtension.shortName,
+					"Birth Date": g.allExtension.employeeExtension.birthDate,
 					"UserName": g.allExtension.employeeExtension.userName,
 					"Display Profile": DisplayProfile,
 					"FAP": g.allExtension.employeeExtension.accessProfile,
@@ -458,7 +511,16 @@ function parseInputJson(data) {
 					"Notification Profile": g.allExtension.employeeExtension.notificationProfile,
 					"Accrual Profile": AccrualProfile,
 					"TimeZone": g.allExtension.employeeExtension.timeZone,
-					"FTE": FTE,
+					"Licenses": LicensesCSV,
+					"CustomData": CDATACSV,
+					"City": city,
+					"Country": country,
+					"State": state,
+					"ZipCode": zipCode,
+					"Street": street,
+					"FTE %": FTE,
+					"FTE Full Time Hours": FTEFTHours,
+					"FTE Employee Hours": FTEEMPHours,
 					"ManagerID": g.allExtension.employeeExtension.supervisorPersonNumber,
 					"Base Wage": BaseWage,
 					"Currency": g.allExtension.timekeepingExtension.employeeCurrency.currencyCode,
@@ -466,6 +528,7 @@ function parseInputJson(data) {
 					"WorkerType": g.allExtension.timekeepingExtension.workerType,
 					"ETerm": Eterm,
 					"BadgeID": BadgeID,
+					"DeviceGroup": g.allExtension.deviceExtension.deviceGroup,
 					"Emp Group": EmpGroup,
 					"Org Set": OrgSet,
 					"JTS": JTS,
@@ -473,11 +536,11 @@ function parseInputJson(data) {
 					"Pattern Template Profile": g.allExtension.schedulingExtension.schedulePattern,
 					"Schedule Group Profile": g.allExtension.schedulingExtension.groupSchedule,
 					"TEType": TEType,
-					"Employee Work Rule Profile":SSEWRP,
-					"Employee Pay Code Profile":SSEPCP,
-					"Manager Work Rule Profile":MGRWRP,
-					"Manager Pay Code Edit":MGRPCE,
-					"Manager Pay Code View":MGRPCV,
+					"Employee Work Rule Profile": SSEWRP,
+					"Employee Pay Code Profile": SSEPCP,
+					"Manager Work Rule Profile": MGRWRP,
+					"Manager Pay Code Edit": MGRPCE,
+					"Manager Pay Code View": MGRPCV,
 					"ExpectedDaily": g.allExtension.schedulingExtension.expectedDailyHours,
 					"ExpectedWeekly": g.allExtension.schedulingExtension.expectedWeeklyHours,
 					"ExpectedPayPeriod": g.allExtension.schedulingExtension.expectedByPayPeriodHours
@@ -555,7 +618,7 @@ function parseInputJson(data) {
 			rowHeaders: true,
 			colHeaders: headers,
 			columns: columneditorsettings,
-			contextMenu: ['cut', 'copy', 'row_above', 'row_below', 'remove_row', 'undo', 'redo'],
+			contextMenu: ['cut', 'copy', 'row_above', 'row_below', 'remove_row', 'undo', 'redo','hidden_columns_hide','hidden_columns_show'],
 			columnSorting: { sortEmptyCells: true },
 			filters: true,
 			dropdownMenu: ['---------', 'filter_by_condition', 'filter_by_value', 'filter_action_bar'],
@@ -563,6 +626,9 @@ function parseInputJson(data) {
 			autoRowSize: true,
 			manualRowResize: true,
 			manualColumnResize: true,
+			hiddenColumns: {
+				indicators: true
+			  },
 			//fixedColumnsLeft: fixcolumns,
 			outsideClickDeselects: false,
 			//hiddenColumns: hiddencolumn,
