@@ -13,6 +13,8 @@ var AccessToken;
 var AddOrEdit;
 var Complete;
 var complete;
+var BASEPERSON;
+var ADJUSTMENTRULES = [];
 //IncludeStatuses = document.getElementById("Status").options[document.getElementById("Status").selectedIndex].value
 //StartDate = document.getElementById("From Date").value
 //EndDate = document.getElementById("To Date").value
@@ -244,8 +246,8 @@ function parseInputJson(data) {
 				console.log(parsedBody)
 				Types = document.getElementById('REQUESTTYPE').value
 				console.log(Types)
-
-				GetRequests(parsedBody)
+				GETADJUSTMENTRULES(parsedBody)
+				GETBASEPERSON(parsedBody)
 				console.log("TOR")
 
 			})
@@ -256,7 +258,7 @@ function parseInputJson(data) {
 				return
 			});
 	}
-	function GetRequests(x) {
+	function GETBASEPERSON(x) {
 		moment = require('moment')
 		CurrentDate = moment().format('YYYY-MM-DD')
 		x = JSON.parse(x)
@@ -301,6 +303,7 @@ function parseInputJson(data) {
 		rp(options3)
 			.then(function (parsedBody) {
 				console.log(parsedBody)
+				BASEPERSON = parsedBody
 				RenderHandsOnTable(parsedBody)
 			})
 			.catch(function (err) {
@@ -310,7 +313,62 @@ function parseInputJson(data) {
 				return
 			});
 	}
+	function GETADJUSTMENTRULES(x) {
+		moment = require('moment')
+		CurrentDate = moment().format('YYYY-MM-DD')
+		x = JSON.parse(x)
+		PersonNumbers = []
+		for (let i = 0, l = x.result.refs.length; i < l; i++) {
+			PersonNumbers.push(x.result.refs[i].qualifier)
+		}
 
+		BodyCreator = JSON.stringify(
+			{
+				"returnUnassignedEmployees": false,
+				"where": {
+					"employees": {
+						"key": "PERSONNUMBER",
+						"values": PersonNumbers
+					},
+					//"extensionType": "ADJUSTMENT_RULES",
+					"hyperFindFilter": {
+						"dateRange": {
+							"symbolicPeriod": {
+								"qualifier": "Today"
+							}
+						},
+						"hyperfind": {
+							"qualifier": "All Home"
+						}
+					},
+					"snapshotDate": CurrentDate
+				}
+			}
+		)
+		var options3 = {
+			'method': 'POST',
+			'url': 'https://' + SelectedConnection.url + '/api/v1/commons/persons/adjustment_rule/multi_read',
+			'headers': {
+				'appkey': SelectedConnection.appKey,
+				'Authorization': AccessToken,
+				'Content-Type': ['application/json']
+			},
+			body: BodyCreator
+
+		};
+		rp(options3)
+			.then(function (parsedBody) {
+				console.log(parsedBody)
+				ADJUSTMENTRULES = parsedBody
+				//RenderHandsOnTable(parsedBody)
+			})
+			.catch(function (err) {
+				console.log(err)
+				window.alert('Could not retrieve employee requests ' + err.error)
+				CloseLoadingModal()
+				return
+			});
+	}
 	function Access(z) {
 		var options = {
 			'method': 'POST',
@@ -358,9 +416,12 @@ function parseInputJson(data) {
 			FinalArray = []
 			Periods = []
 
-			console.log(x)
-			if (JSON.parse(x) instanceof Array == true && JSON.parse(x).length == 0) { window.alert('No Requests found in target system'); CloseLoadingModal(); return }
-			FinalArray = JSON.parse(x)
+			//console.log(x)
+			//if (JSON.parse(x) instanceof Array == true && JSON.parse(x).length == 0) { window.alert('No Requests found in target system'); CloseLoadingModal(); return }
+			FinalArray = JSON.parse(BASEPERSON)
+			AdjustmentRuleFinalArray = JSON.parse(ADJUSTMENTRULES)
+
+
 			console.log(FinalArray)
 
 			for (let i = 0, l = FinalArray.length; i < l; i++) {
@@ -372,6 +433,14 @@ function parseInputJson(data) {
 
 				//	Periods = Periods.join(',\n')
 				try { DisplayProfile = g.allExtension.employeeExtension.preferenceProfileDataEntry.preferenceProfile } catch{ DisplayProfile = "" }
+
+					
+				AdjustmentRule = ""
+				for  (let y = 0, f = AdjustmentRuleFinalArray.length; y < f; y++) {
+					if (AdjustmentRuleFinalArray[y].personIdentity.personNumber == g.allExtension.employeeExtension.personNumber){
+						AdjustmentRule = AdjustmentRuleFinalArray[y].processor
+					}
+				}
 
 
 				if (g.allExtension.accrualExtension) {
@@ -439,6 +508,15 @@ function parseInputJson(data) {
 						JTS = g.allExtension.schedulingExtension.jobTransferForSnapshotDate[0].professionalTransferOrganizationSet
 					}
 					else JTS = ""
+					if (g.allExtension.schedulingExtension.jobTransferForSnapshotDate instanceof Array == true) {
+						ManagerAdditionsJTS = g.allExtension.schedulingExtension.jobTransferForSnapshotDate[0].empMgrTransferOrganizationSet
+					}
+					else ManagerAdditionsJTS = ""
+					if (g.allExtension.schedulingExtension.groupAssignmentsForExtensionSnapshotDate instanceof Array == true &&
+						g.allExtension.schedulingExtension.groupAssignmentsForExtensionSnapshotDate.length >0) {
+						ScheduleGroupEmp = g.allExtension.schedulingExtension.groupAssignmentsForExtensionSnapshotDate[0].group
+					}
+					else ScheduleGroupEmp = ""
 				}
 
 				if (g.allExtension.deviceExtension) {
@@ -465,7 +543,7 @@ function parseInputJson(data) {
 						LicensesCSV = RemoveNullFromArray(g.allExtension.employeeExtension.licenseTypeList
 							.map(function (licenseitem) {
 								if (
-									['Workforce MobileEmployee', 'Workforce TabletEmployee','Workforce MobileManager', 'Workforce TabletManager']
+									['Workforce MobileEmployee', 'Workforce TabletEmployee', 'Workforce MobileManager', 'Workforce TabletManager']
 										.includes(licenseitem.licenseType) == false
 								) { return licenseitem.licenseType }
 							})
@@ -481,8 +559,7 @@ function parseInputJson(data) {
 					if (g.allExtension.employeeExtension.personCustomDataEntries instanceof Array == true) {
 						CDATACSV = RemoveNullFromArray(g.allExtension.employeeExtension.personCustomDataEntries
 							.map(function (licenseitem) {
-								if (licenseitem.customText != null && licenseitem.customText != '')
-									{ return licenseitem.customDataType + ':' +licenseitem.customText} 
+								if (licenseitem.customText != null && licenseitem.customText != '') { return licenseitem.customDataType + ':' + licenseitem.customText }
 							})
 						)
 							.join('|')
@@ -490,7 +567,27 @@ function parseInputJson(data) {
 					else CDATACSV = ""
 				}
 				else CDATACSV = ""
+				if (!g.allExtension.timekeepingExtension.workEmployee) {
+					defaultActivityName = ''
+					idleActivityName = ''
+					paidActivityName = ''
+					unpaidActivityName = ''
+					profileName = ''
+				}
+				else {
+					defaultActivityName = g.allExtension.timekeepingExtension.workEmployee.defaultActivityName
+					idleActivityName = g.allExtension.timekeepingExtension.workEmployee.idleActivityName
+					paidActivityName = g.allExtension.timekeepingExtension.workEmployee.paidActivityName
+					unpaidActivityName = g.allExtension.timekeepingExtension.workEmployee.unpaidActivityName
+					profileName = g.allExtension.timekeepingExtension.workEmployee.profileName
+				}
 
+				if (!g.allExtension.timekeepingExtension.userCurrency){UserCurrencyCode = ''}
+				else {UserCurrencyCode = g.allExtension.timekeepingExtension.userCurrency.currencyCode}
+
+				if (!g.allExtension.employeeExtension.dataAccessGroupsForSnapshotDate){GDAP = ''}
+				else {GDAP = g.allExtension.employeeExtension.dataAccessGroupsForSnapshotDate[0].dataAccessGroup}
+				
 
 
 				map =
@@ -502,6 +599,7 @@ function parseInputJson(data) {
 					"Short Name": g.allExtension.employeeExtension.shortName,
 					"Birth Date": g.allExtension.employeeExtension.birthDate,
 					"UserName": g.allExtension.employeeExtension.userName,
+					//"Password": g.allExtension.employeeExtension.password,
 					"Display Profile": DisplayProfile,
 					"FAP": g.allExtension.employeeExtension.accessProfile,
 					"Delegate Profile": g.allExtension.employeeExtension.delegateProfile,
@@ -510,6 +608,7 @@ function parseInputJson(data) {
 					"Logon profile": g.allExtension.employeeExtension.logonProfile,
 					"Notification Profile": g.allExtension.employeeExtension.notificationProfile,
 					"Accrual Profile": AccrualProfile,
+					"Adjustment Rules":AdjustmentRule,
 					"TimeZone": g.allExtension.employeeExtension.timeZone,
 					"Licenses": LicensesCSV,
 					"CustomData": CDATACSV,
@@ -521,6 +620,7 @@ function parseInputJson(data) {
 					"FTE %": FTE,
 					"FTE Full Time Hours": FTEFTHours,
 					"FTE Employee Hours": FTEEMPHours,
+					"Employee Schedule Group": ScheduleGroupEmp,
 					"ManagerID": g.allExtension.employeeExtension.supervisorPersonNumber,
 					"Base Wage": BaseWage,
 					"Currency": g.allExtension.timekeepingExtension.employeeCurrency.currencyCode,
@@ -532,10 +632,27 @@ function parseInputJson(data) {
 					"Emp Group": EmpGroup,
 					"Org Set": OrgSet,
 					"JTS": JTS,
+					"Default Activity": defaultActivityName,
+					"Idle Activity": idleActivityName,
+					"Paid Activity": paidActivityName,
+					"Unpaid Activity": unpaidActivityName,
+					"Activity Profile": profileName,
+					"Employee Process Profile": g.allExtension.employeeExtension.processEmployeeProfile,
+					"Manager Process Profile": g.allExtension.employeeExtension.processManagerProfile,
+					"Delegate Profile": g.allExtension.employeeExtension.delegateProfile,
+					"User Currency": UserCurrencyCode,
+					"GDAP":GDAP,
+					"JTS Manager Additions": ManagerAdditionsJTS,
 					"Shift Template Profile": g.allExtension.schedulingExtension.shiftCode,
 					"Pattern Template Profile": g.allExtension.schedulingExtension.schedulePattern,
 					"Schedule Group Profile": g.allExtension.schedulingExtension.groupSchedule,
+					"Forecast Category Profile": g.allExtension.schedulingExtension.forecastingCategoryProfile,
 					"TEType": TEType,
+					"Can Approve OT Requests": g.allExtension.timekeepingExtension.accessAssignmentDetailsDataEntries.canApproveOvertime,
+					"Employee LC Profile": g.allExtension.timekeepingExtension.accessAssignmentDetailsDataEntries.sseLaborCategoryProfile,
+					"Employee LC Profile Manager Additions": g.allExtension.timekeepingExtension.accessAssignmentDetailsDataEntries.sseMgrLaborCategoryProfile,
+					"Manager LC Profile": g.allExtension.timekeepingExtension.accessAssignmentDetailsDataEntries.laborCategoryProfile,
+					"Report Profile": g.allExtension.timekeepingExtension.accessAssignmentDetailsDataEntries.reportName,
 					"Employee Work Rule Profile": SSEWRP,
 					"Employee Pay Code Profile": SSEPCP,
 					"Manager Work Rule Profile": MGRWRP,
@@ -618,7 +735,7 @@ function parseInputJson(data) {
 			rowHeaders: true,
 			colHeaders: headers,
 			columns: columneditorsettings,
-			contextMenu: ['cut', 'copy', 'row_above', 'row_below', 'remove_row', 'undo', 'redo','hidden_columns_hide','hidden_columns_show'],
+			contextMenu: ['cut', 'copy', 'row_above', 'row_below', 'remove_row', 'undo', 'redo', 'hidden_columns_hide', 'hidden_columns_show'],
 			columnSorting: { sortEmptyCells: true },
 			filters: true,
 			dropdownMenu: ['---------', 'filter_by_condition', 'filter_by_value', 'filter_action_bar'],
@@ -628,7 +745,7 @@ function parseInputJson(data) {
 			manualColumnResize: true,
 			hiddenColumns: {
 				indicators: true
-			  },
+			},
 			//fixedColumnsLeft: fixcolumns,
 			outsideClickDeselects: false,
 			//hiddenColumns: hiddencolumn,
