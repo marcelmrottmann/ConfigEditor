@@ -246,13 +246,13 @@ function parseInputJson(data) {
 				console.log(parsedBody)
 				Types = document.getElementById('REQUESTTYPE').value
 				console.log(Types)
-				GETADJUSTMENTRULES(parsedBody)
+				GETADDITIONALASSIGNMENTS(parsedBody, '/api/v1/commons/persons/adjustment_rule/multi_read', ADJUSTMENTRULES)
 				GETBASEPERSON(parsedBody)
 				console.log("TOR")
 
 			})
 			.catch(function (err) {
-				//console.log(err)
+				console.log(err)
 				window.alert('Parsing Hyperfind Failed ' + err.error)
 				CloseLoadingModal()
 				return
@@ -313,7 +313,7 @@ function parseInputJson(data) {
 				return
 			});
 	}
-	function GETADJUSTMENTRULES(x) {
+	function GETADDITIONALASSIGNMENTS(x, y, variable) {
 		moment = require('moment')
 		CurrentDate = moment().format('YYYY-MM-DD')
 		x = JSON.parse(x)
@@ -321,53 +321,59 @@ function parseInputJson(data) {
 		for (let i = 0, l = x.result.refs.length; i < l; i++) {
 			PersonNumbers.push(x.result.refs[i].qualifier)
 		}
+		BatchPersonData = []
+		while (PersonNumbers.length) {
+			BatchPersonData.push(PersonNumbers.splice(0, 100));
+		}
+		console.log(BatchPersonData)
+		for (let f = 0, g = BatchPersonData.length; f < g; f++) {
 
-		BodyCreator = JSON.stringify(
-			{
-				"returnUnassignedEmployees": false,
-				"where": {
-					"employees": {
-						"key": "PERSONNUMBER",
-						"values": PersonNumbers
-					},
-					//"extensionType": "ADJUSTMENT_RULES",
-					"hyperFindFilter": {
-						"dateRange": {
-							"symbolicPeriod": {
-								"qualifier": "Today"
+			BodyCreator = JSON.stringify(
+				{
+					"returnUnassignedEmployees": false,
+					"where": {
+						"employees": {
+							"key": "PERSONNUMBER",
+							"values": BatchPersonData[f]
+						},
+						"hyperFindFilter": {
+							"dateRange": {
+								"symbolicPeriod": {
+									"qualifier": "Today"
+								}
+							},
+							"hyperfind": {
+								"qualifier": "All Home"
 							}
 						},
-						"hyperfind": {
-							"qualifier": "All Home"
-						}
-					},
-					"snapshotDate": CurrentDate
+						"snapshotDate": CurrentDate
+					}
 				}
-			}
-		)
-		var options3 = {
-			'method': 'POST',
-			'url': 'https://' + SelectedConnection.url + '/api/v1/commons/persons/adjustment_rule/multi_read',
-			'headers': {
-				'appkey': SelectedConnection.appKey,
-				'Authorization': AccessToken,
-				'Content-Type': ['application/json']
-			},
-			body: BodyCreator
+			)
+			var options3 = {
+				'method': 'POST',
+				'url': 'https://' + SelectedConnection.url + y,
+				'headers': {
+					'appkey': SelectedConnection.appKey,
+					'Authorization': AccessToken,
+					'Content-Type': ['application/json']
+				},
+				body: BodyCreator
 
-		};
-		rp(options3)
-			.then(function (parsedBody) {
-				console.log(parsedBody)
-				ADJUSTMENTRULES = parsedBody
-				//RenderHandsOnTable(parsedBody)
-			})
-			.catch(function (err) {
-				console.log(err)
-				window.alert('Could not retrieve employee requests ' + err.error)
-				CloseLoadingModal()
-				return
-			});
+			};
+			rp(options3)
+				.then(function (parsedBody) {
+					console.log(parsedBody)
+					variable.push(JSON.parse(parsedBody))
+					//RenderHandsOnTable(parsedBody)
+				})
+				.catch(function (err) {
+					console.log(err)
+					window.alert('Could not retrieve Adjustment Rule Assignments ' + err.error)
+					CloseLoadingModal()
+					return
+				});
+		}
 	}
 	function Access(z) {
 		var options = {
@@ -418,8 +424,8 @@ function parseInputJson(data) {
 
 			//console.log(x)
 			//if (JSON.parse(x) instanceof Array == true && JSON.parse(x).length == 0) { window.alert('No Requests found in target system'); CloseLoadingModal(); return }
-			FinalArray = JSON.parse(BASEPERSON)
-			AdjustmentRuleFinalArray = JSON.parse(ADJUSTMENTRULES)
+			FinalArray = JSON.parse(BASEPERSON) 
+			AdjustmentRuleFinalArray = [].concat.apply([],ADJUSTMENTRULES)
 
 
 			console.log(FinalArray)
@@ -434,10 +440,10 @@ function parseInputJson(data) {
 				//	Periods = Periods.join(',\n')
 				try { DisplayProfile = g.allExtension.employeeExtension.preferenceProfileDataEntry.preferenceProfile } catch{ DisplayProfile = "" }
 
-					
+
 				AdjustmentRule = ""
-				for  (let y = 0, f = AdjustmentRuleFinalArray.length; y < f; y++) {
-					if (AdjustmentRuleFinalArray[y].personIdentity.personNumber == g.allExtension.employeeExtension.personNumber){
+				for (let y = 0, f = AdjustmentRuleFinalArray.length; y < f; y++) {
+					if (AdjustmentRuleFinalArray[y].personIdentity.personNumber == g.allExtension.employeeExtension.personNumber) {
 						AdjustmentRule = AdjustmentRuleFinalArray[y].processor
 					}
 				}
@@ -513,7 +519,7 @@ function parseInputJson(data) {
 					}
 					else ManagerAdditionsJTS = ""
 					if (g.allExtension.schedulingExtension.groupAssignmentsForExtensionSnapshotDate instanceof Array == true &&
-						g.allExtension.schedulingExtension.groupAssignmentsForExtensionSnapshotDate.length >0) {
+						g.allExtension.schedulingExtension.groupAssignmentsForExtensionSnapshotDate.length > 0) {
 						ScheduleGroupEmp = g.allExtension.schedulingExtension.groupAssignmentsForExtensionSnapshotDate[0].group
 					}
 					else ScheduleGroupEmp = ""
@@ -582,12 +588,12 @@ function parseInputJson(data) {
 					profileName = g.allExtension.timekeepingExtension.workEmployee.profileName
 				}
 
-				if (!g.allExtension.timekeepingExtension.userCurrency){UserCurrencyCode = ''}
-				else {UserCurrencyCode = g.allExtension.timekeepingExtension.userCurrency.currencyCode}
+				if (!g.allExtension.timekeepingExtension.userCurrency) { UserCurrencyCode = '' }
+				else { UserCurrencyCode = g.allExtension.timekeepingExtension.userCurrency.currencyCode }
 
-				if (!g.allExtension.employeeExtension.dataAccessGroupsForSnapshotDate){GDAP = ''}
-				else {GDAP = g.allExtension.employeeExtension.dataAccessGroupsForSnapshotDate[0].dataAccessGroup}
-				
+				if (!g.allExtension.employeeExtension.dataAccessGroupsForSnapshotDate) { GDAP = '' }
+				else { GDAP = g.allExtension.employeeExtension.dataAccessGroupsForSnapshotDate[0].dataAccessGroup }
+
 
 
 				map =
@@ -608,7 +614,7 @@ function parseInputJson(data) {
 					"Logon profile": g.allExtension.employeeExtension.logonProfile,
 					"Notification Profile": g.allExtension.employeeExtension.notificationProfile,
 					"Accrual Profile": AccrualProfile,
-					"Adjustment Rules":AdjustmentRule,
+					"Adjustment Rules": AdjustmentRule,
 					"TimeZone": g.allExtension.employeeExtension.timeZone,
 					"Licenses": LicensesCSV,
 					"CustomData": CDATACSV,
@@ -641,7 +647,7 @@ function parseInputJson(data) {
 					"Manager Process Profile": g.allExtension.employeeExtension.processManagerProfile,
 					"Delegate Profile": g.allExtension.employeeExtension.delegateProfile,
 					"User Currency": UserCurrencyCode,
-					"GDAP":GDAP,
+					"GDAP": GDAP,
 					"JTS Manager Additions": ManagerAdditionsJTS,
 					"Shift Template Profile": g.allExtension.schedulingExtension.shiftCode,
 					"Pattern Template Profile": g.allExtension.schedulingExtension.schedulePattern,
