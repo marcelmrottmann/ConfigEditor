@@ -15,6 +15,8 @@ var Complete;
 var complete;
 var BASEPERSON;
 var ADJUSTMENTRULES = [];
+var CERTIFICATIONS = [];
+var PAYCODEVALUEPROFILES = [];
 //IncludeStatuses = document.getElementById("Status").options[document.getElementById("Status").selectedIndex].value
 //StartDate = document.getElementById("From Date").value
 //EndDate = document.getElementById("To Date").value
@@ -247,6 +249,9 @@ function parseInputJson(data) {
 				Types = document.getElementById('REQUESTTYPE').value
 				console.log(Types)
 				GETADDITIONALASSIGNMENTS(parsedBody, '/api/v1/commons/persons/adjustment_rule/multi_read', ADJUSTMENTRULES)
+				GETADDITIONALASSIGNMENTS(parsedBody, '/api/v1/commons/persons/certifications/multi_read', CERTIFICATIONS)
+				GETADDITIONALASSIGNMENTS(parsedBody, '/api/v1/commons/persons/pay_code_value_profiles/multi_read', PAYCODEVALUEPROFILES)
+				
 				GETBASEPERSON(parsedBody)
 				console.log("TOR")
 
@@ -425,9 +430,11 @@ function parseInputJson(data) {
 			//console.log(x)
 			//if (JSON.parse(x) instanceof Array == true && JSON.parse(x).length == 0) { window.alert('No Requests found in target system'); CloseLoadingModal(); return }
 			FinalArray = JSON.parse(BASEPERSON) 
+			console.log(JSON.stringify(PAYCODEVALUEPROFILES))
 			AdjustmentRuleFinalArray = [].concat.apply([],ADJUSTMENTRULES)
-
-
+			CertificationsFinalArray = [].concat.apply([],CERTIFICATIONS)
+			PCVPFinalArray = [].concat.apply([],PAYCODEVALUEPROFILES)
+			
 			console.log(FinalArray)
 
 			for (let i = 0, l = FinalArray.length; i < l; i++) {
@@ -447,6 +454,23 @@ function parseInputJson(data) {
 						AdjustmentRule = AdjustmentRuleFinalArray[y].processor
 					}
 				}
+				PCVP = ""
+				for (let y = 0, f = PCVPFinalArray.length; y < f; y++) {
+					if (PCVPFinalArray[y].personIdentity.personNumber == g.allExtension.employeeExtension.personNumber) {
+						if (PCVPFinalArray[y].payCodeValueProfile){
+						PCVP = PCVPFinalArray[y].payCodeValueProfile.qualifier
+						}
+					}
+				}
+				Certifications = ""
+				for (let y = 0, f = CertificationsFinalArray.length; y < f; y++) {
+					if (CertificationsFinalArray[y].personIdentity.personNumber == g.allExtension.employeeExtension.personNumber) {
+						Certifications = CertificationsFinalArray[y].assignments
+						.map(function(cert){return cert.certification.qualifier + "-&-" + cert.proficiencyLevel.qualifier + "-&-" + cert.effectiveDate + "-&-"+ cert.expirationDate})
+						.join('|')
+					}
+				}
+
 
 
 				if (g.allExtension.accrualExtension) {
@@ -605,6 +629,8 @@ function parseInputJson(data) {
 					"Short Name": g.allExtension.employeeExtension.shortName,
 					"Birth Date": g.allExtension.employeeExtension.birthDate,
 					"UserName": g.allExtension.employeeExtension.userName,
+					"Certifications": Certifications,
+					"PCVP":PCVP,
 					//"Password": g.allExtension.employeeExtension.password,
 					"Display Profile": DisplayProfile,
 					"FAP": g.allExtension.employeeExtension.accessProfile,
