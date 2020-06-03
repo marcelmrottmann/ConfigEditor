@@ -17,6 +17,11 @@ var BASEPERSON;
 var ADJUSTMENTRULES = [];
 var CERTIFICATIONS = [];
 var PAYCODEVALUEPROFILES = [];
+var VARIABLESTORAGE = {}
+VARIABLESTORAGE.ATTESTATIONPROFILES = [];
+VARIABLESTORAGE.ADJUSTMENTRULES = [];
+VARIABLESTORAGE.CERTIFICATIONS = [];
+VARIABLESTORAGE.PAYCODEVALUEPROFILES = [];
 //IncludeStatuses = document.getElementById("Status").options[document.getElementById("Status").selectedIndex].value
 //StartDate = document.getElementById("From Date").value
 //EndDate = document.getElementById("To Date").value
@@ -248,11 +253,13 @@ function parseInputJson(data) {
 				console.log(parsedBody)
 				Types = document.getElementById('REQUESTTYPE').value
 				console.log(Types)
-				GETADDITIONALASSIGNMENTS(parsedBody, '/api/v1/commons/persons/adjustment_rule/multi_read', ADJUSTMENTRULES)
-				GETADDITIONALASSIGNMENTS(parsedBody, '/api/v1/commons/persons/certifications/multi_read', CERTIFICATIONS)
-				GETADDITIONALASSIGNMENTS(parsedBody, '/api/v1/commons/persons/pay_code_value_profiles/multi_read', PAYCODEVALUEPROFILES)
-				
-				GETBASEPERSON(parsedBody)
+				GETADDITIONALASSIGNMENTS(parsedBody, '/api/v1/commons/persons/adjustment_rule/multi_read', "ADJUSTMENTRULES", 'AdjustmentRules')
+				GETADDITIONALASSIGNMENTS(parsedBody, '/api/v1/commons/persons/certifications/multi_read', "CERTIFICATIONS", "Certifications")
+				GETADDITIONALASSIGNMENTS(parsedBody, '/api/v1/commons/persons/pay_code_value_profiles/multi_read', "PAYCODEVALUEPROFILES", "PaycodeValueProfiles")
+				GETADDITIONALASSIGNMENTS(parsedBody, '/api/v1/commons/persons/attestation_profile_assignments/multi_read', "ATTESTATIONPROFILES", "ATKProfiles")
+				console.log('testting')
+
+				setTimeout(function () { GETBASEPERSON(parsedBody); }, 15000);
 				console.log("TOR")
 
 			})
@@ -264,6 +271,7 @@ function parseInputJson(data) {
 			});
 	}
 	function GETBASEPERSON(x) {
+		console.log('testting')
 		moment = require('moment')
 		CurrentDate = moment().format('YYYY-MM-DD')
 		x = JSON.parse(x)
@@ -318,7 +326,7 @@ function parseInputJson(data) {
 				return
 			});
 	}
-	function GETADDITIONALASSIGNMENTS(x, y, variable) {
+	function GETADDITIONALASSIGNMENTS(x, y, variable, vname) {
 		moment = require('moment')
 		CurrentDate = moment().format('YYYY-MM-DD')
 		x = JSON.parse(x)
@@ -355,6 +363,30 @@ function parseInputJson(data) {
 					}
 				}
 			)
+			if (vname == "ATKProfiles") {
+				BodyCreator = JSON.stringify(
+					{
+						"where": {
+							"employees": {
+								"qualifiers": BatchPersonData[f]
+							},
+							"hyperFindFilter": {
+								"dateRange": {
+									"symbolicPeriod": {
+										"qualifier": "Today"
+									}
+								},
+								"hyperfind": {
+									"qualifier": "All Home"
+								}
+							}
+						}
+					}
+				)
+
+
+			}
+
 			var options3 = {
 				'method': 'POST',
 				'url': 'https://' + SelectedConnection.url + y,
@@ -369,13 +401,18 @@ function parseInputJson(data) {
 			rp(options3)
 				.then(function (parsedBody) {
 					console.log(parsedBody)
-					variable.push(JSON.parse(parsedBody))
+					//[variable].push(JSON.parse(parsedBody))
 					//RenderHandsOnTable(parsedBody)
+					console.log(variable)
+					console.log(JSON.parse(parsedBody))
+					if (JSON.parse(parsedBody).errorCode) { parsedBody = JSON.stringify(JSON.parse(parsedBody).details.results) }
+					VARIABLESTORAGE[variable].push(JSON.parse(parsedBody))
+					console.log(VARIABLESTORAGE[variable])
 				})
 				.catch(function (err) {
 					console.log(err)
-					window.alert('Could not retrieve Adjustment Rule Assignments ' + err.error)
-					CloseLoadingModal()
+					window.alert('Could not retrieve ' + vname + ': ' + err.error)
+					//CloseLoadingModal()
 					return
 				});
 		}
@@ -429,12 +466,28 @@ function parseInputJson(data) {
 
 			//console.log(x)
 			//if (JSON.parse(x) instanceof Array == true && JSON.parse(x).length == 0) { window.alert('No Requests found in target system'); CloseLoadingModal(); return }
-			FinalArray = JSON.parse(BASEPERSON) 
-			console.log(JSON.stringify(PAYCODEVALUEPROFILES))
-			AdjustmentRuleFinalArray = [].concat.apply([],ADJUSTMENTRULES)
-			CertificationsFinalArray = [].concat.apply([],CERTIFICATIONS)
-			PCVPFinalArray = [].concat.apply([],PAYCODEVALUEPROFILES)
-			
+			console.log(VARIABLESTORAGE)
+			FinalArray = JSON.parse(BASEPERSON)
+			console.log(JSON.stringify(VARIABLESTORAGE.PAYCODEVALUEPROFILES))
+			console.log(VARIABLESTORAGE.CERTIFICATIONS)
+			console.log(VARIABLESTORAGE.ATTESTATIONPROFILES)
+			AdjustmentRuleFinalArray = [].concat.apply([], VARIABLESTORAGE.ADJUSTMENTRULES)
+			CertificationsFinalArray = [].concat.apply([], VARIABLESTORAGE.CERTIFICATIONS)
+			PCVPFinalArray = [].concat.apply([], VARIABLESTORAGE.PAYCODEVALUEPROFILES)
+
+
+			VARIABLESTORAGE.ATTESTATIONPROFILES.filter(function (fil) { return fil })
+
+			for (let i = 0, l = VARIABLESTORAGE.ATTESTATIONPROFILES.length; i < l; i++) {
+				if (VARIABLESTORAGE.ATTESTATIONPROFILES[i].errorCode) {
+					VARIABLESTORAGE.ATTESTATIONPROFILES[i] = VARIABLESTORAGE.ATTESTATIONPROFILES[i].results
+				}
+			}
+			console.log(VARIABLESTORAGE.ATTESTATIONPROFILES)
+			ATKProfileFinalArray = [].concat.apply([], VARIABLESTORAGE.ATTESTATIONPROFILES)
+
+			console.log(ATKProfileFinalArray)
+
 			console.log(FinalArray)
 
 			for (let i = 0, l = FinalArray.length; i < l; i++) {
@@ -454,11 +507,32 @@ function parseInputJson(data) {
 						AdjustmentRule = AdjustmentRuleFinalArray[y].processor
 					}
 				}
+
 				PCVP = ""
 				for (let y = 0, f = PCVPFinalArray.length; y < f; y++) {
-					if (PCVPFinalArray[y].personIdentity.personNumber == g.allExtension.employeeExtension.personNumber) {
-						if (PCVPFinalArray[y].payCodeValueProfile){
-						PCVP = PCVPFinalArray[y].payCodeValueProfile.qualifier
+					if (PCVPFinalArray[y].errorCode)
+						if (PCVPFinalArray[y].personIdentity.personNumber == g.allExtension.employeeExtension.personNumber) {
+							if (PCVPFinalArray[y].payCodeValueProfile) {
+								PCVP = PCVPFinalArray[y].payCodeValueProfile.qualifier
+							}
+						}
+				}
+
+				ATKProfile = ""
+				for (let y = 0, f = ATKProfileFinalArray.length; y < f; y++) {
+					if (!ATKProfileFinalArray[y].employee) {
+						if (!ATKProfileFinalArray[y].error) {
+							if (ATKProfileFinalArray[y].success.employee.qualifier == g.allExtension.employeeExtension.personNumber) {
+								if (ATKProfileFinalArray[y].success.attestationProfileAssignments instanceof Array == true && ATKProfileFinalArray[y].success.attestationProfileAssignments.length > 0) {
+									ATKProfile = ATKProfileFinalArray[y].success.attestationProfileAssignments[0].profile.qualifier
+								}
+
+							}
+						}
+					}
+					else if (ATKProfileFinalArray[y].employee.qualifier == g.allExtension.employeeExtension.personNumber) {
+						if (ATKProfileFinalArray[y].attestationProfileAssignments instanceof Array == true && ATKProfileFinalArray[y].attestationProfileAssignments.length > 0) {
+							ATKProfile = ATKProfileFinalArray[y].attestationProfileAssignments[0].profile.qualifier
 						}
 					}
 				}
@@ -466,8 +540,8 @@ function parseInputJson(data) {
 				for (let y = 0, f = CertificationsFinalArray.length; y < f; y++) {
 					if (CertificationsFinalArray[y].personIdentity.personNumber == g.allExtension.employeeExtension.personNumber) {
 						Certifications = CertificationsFinalArray[y].assignments
-						.map(function(cert){return cert.certification.qualifier + "-&-" + cert.proficiencyLevel.qualifier + "-&-" + cert.effectiveDate + "-&-"+ cert.expirationDate})
-						.join('|')
+							.map(function (cert) { return cert.certification.qualifier + "-&-" + cert.proficiencyLevel.qualifier + "-&-" + cert.effectiveDate + "-&-" + cert.expirationDate })
+							.join('|')
 					}
 				}
 
@@ -630,7 +704,8 @@ function parseInputJson(data) {
 					"Birth Date": g.allExtension.employeeExtension.birthDate,
 					"UserName": g.allExtension.employeeExtension.userName,
 					"Certifications": Certifications,
-					"PCVP":PCVP,
+					"PCVP": PCVP,
+					"ATK Profile": ATKProfile,
 					//"Password": g.allExtension.employeeExtension.password,
 					"Display Profile": DisplayProfile,
 					"FAP": g.allExtension.employeeExtension.accessProfile,
