@@ -22,6 +22,10 @@ VARIABLESTORAGE.ATTESTATIONPROFILES = [];
 VARIABLESTORAGE.ADJUSTMENTRULES = [];
 VARIABLESTORAGE.CERTIFICATIONS = [];
 VARIABLESTORAGE.PAYCODEVALUEPROFILES = [];
+VARIABLESTORAGE.CASCADEPROFILES = []
+VARIABLESTORAGE.PERCENTALLOCATIONRULES = []
+VARIABLESTORAGE.SKILLS = []
+UNAVAILABLEITEMS = []
 //IncludeStatuses = document.getElementById("Status").options[document.getElementById("Status").selectedIndex].value
 //StartDate = document.getElementById("From Date").value
 //EndDate = document.getElementById("To Date").value
@@ -257,6 +261,9 @@ function parseInputJson(data) {
 				GETADDITIONALASSIGNMENTS(parsedBody, '/api/v1/commons/persons/certifications/multi_read', "CERTIFICATIONS", "Certifications")
 				GETADDITIONALASSIGNMENTS(parsedBody, '/api/v1/commons/persons/pay_code_value_profiles/multi_read', "PAYCODEVALUEPROFILES", "PaycodeValueProfiles")
 				GETADDITIONALASSIGNMENTS(parsedBody, '/api/v1/commons/persons/attestation_profile_assignments/multi_read', "ATTESTATIONPROFILES", "ATKProfiles")
+				GETADDITIONALASSIGNMENTS(parsedBody, '/api/v1/commons/persons/cascade_profile/multi_read', "CASCADEPROFILES", "Cascade Profiles")
+				GETADDITIONALASSIGNMENTS(parsedBody, '/api/v1/commons/persons/percentage_allocation_rules/multi_read', "PERCENTALLOCATIONRULES", "Percent Allocation Rules")
+				GETADDITIONALASSIGNMENTS(parsedBody, '/api/v1/commons/persons/skills/multi_read', "SKILLS", "Skills")
 				console.log('testting')
 
 				setTimeout(function () { GETBASEPERSON(parsedBody); }, 15000);
@@ -264,10 +271,13 @@ function parseInputJson(data) {
 
 			})
 			.catch(function (err) {
-				console.log(err)
+				console.log(JSON.parse(err.error).errorCode)
+			if (JSON.parse(err.error).errorCode != "WCO-101271"){
 				window.alert('Parsing Hyperfind Failed ' + err.error)
+			}
 				CloseLoadingModal()
 				return
+				
 			});
 	}
 	function GETBASEPERSON(x) {
@@ -321,8 +331,10 @@ function parseInputJson(data) {
 			})
 			.catch(function (err) {
 				console.log(err)
+
 				window.alert('Could not retrieve employee requests ' + err.error)
 				CloseLoadingModal()
+				
 				return
 			});
 	}
@@ -343,7 +355,7 @@ function parseInputJson(data) {
 
 			BodyCreator = JSON.stringify(
 				{
-					"returnUnassignedEmployees": false,
+					"returnUnassignedEmployees": true,
 					"where": {
 						"employees": {
 							"key": "PERSONNUMBER",
@@ -403,6 +415,7 @@ function parseInputJson(data) {
 					console.log(parsedBody)
 					//[variable].push(JSON.parse(parsedBody))
 					//RenderHandsOnTable(parsedBody)
+					
 					console.log(variable)
 					console.log(JSON.parse(parsedBody))
 					if (JSON.parse(parsedBody).errorCode) { parsedBody = JSON.stringify(JSON.parse(parsedBody).details.results) }
@@ -411,7 +424,12 @@ function parseInputJson(data) {
 				})
 				.catch(function (err) {
 					console.log(err)
-					window.alert('Could not retrieve ' + vname + ': ' + err.error)
+					console.log(JSON.parse(err.error).errorCode)
+					//if (JSON.parse(err.error).errorCode != "WCO-101271"){
+					//window.alert('Could not retrieve ' + vname + ': ' + err.error)
+					
+					//}
+					UNAVAILABLEITEMS.push(vname + "with error: " + JSON.parse(err.error).errorCode + " : " + JSON.parse(err.error).message)
 					//CloseLoadingModal()
 					return
 				});
@@ -449,6 +467,8 @@ function parseInputJson(data) {
 
 	Access()
 	function RenderHandsOnTable(x) {
+		console.log(UNAVAILABLEITEMS)
+		if (UNAVAILABLEITEMS.length > 0){window.alert("These items may not have loaded correctly due to errors\n" + UNAVAILABLEITEMS.join(',\n'))}
 
 		Types = document.getElementById('REQUESTTYPE').value
 		if (Types == "Base Person") {
@@ -464,6 +484,7 @@ function parseInputJson(data) {
 			FinalArray = []
 			Periods = []
 
+			
 			//console.log(x)
 			//if (JSON.parse(x) instanceof Array == true && JSON.parse(x).length == 0) { window.alert('No Requests found in target system'); CloseLoadingModal(); return }
 			console.log(VARIABLESTORAGE)
@@ -473,9 +494,10 @@ function parseInputJson(data) {
 			console.log(VARIABLESTORAGE.ATTESTATIONPROFILES)
 			AdjustmentRuleFinalArray = [].concat.apply([], VARIABLESTORAGE.ADJUSTMENTRULES)
 			CertificationsFinalArray = [].concat.apply([], VARIABLESTORAGE.CERTIFICATIONS)
+			SkillsFinalArray = [].concat.apply([], VARIABLESTORAGE.SKILLS)
 			PCVPFinalArray = [].concat.apply([], VARIABLESTORAGE.PAYCODEVALUEPROFILES)
-
-
+			CascadeProfileFinalArray = [].concat.apply([], VARIABLESTORAGE.CASCADEPROFILES)
+			PercentAllocationRuleFinalArray = [].concat.apply([], VARIABLESTORAGE.PERCENTALLOCATIONRULES)
 			VARIABLESTORAGE.ATTESTATIONPROFILES.filter(function (fil) { return fil })
 
 			for (let i = 0, l = VARIABLESTORAGE.ATTESTATIONPROFILES.length; i < l; i++) {
@@ -505,6 +527,21 @@ function parseInputJson(data) {
 				for (let y = 0, f = AdjustmentRuleFinalArray.length; y < f; y++) {
 					if (AdjustmentRuleFinalArray[y].personIdentity.personNumber == g.allExtension.employeeExtension.personNumber) {
 						AdjustmentRule = AdjustmentRuleFinalArray[y].processor
+					}
+				}
+				PercentAllocationRule = ""
+				for (let y = 0, f = PercentAllocationRuleFinalArray.length; y < f; y++) {
+					if (PercentAllocationRuleFinalArray[y].personIdentity.personNumber == g.allExtension.employeeExtension.personNumber) {
+						if (PercentAllocationRuleFinalArray[y].processor){
+						PercentAllocationRule = PercentAllocationRuleFinalArray[y].processor.qualifier
+						}
+					}
+				}
+				
+				CascadeProfile = ""
+				for (let y = 0, f = CascadeProfileFinalArray.length; y < f; y++) {
+					if (CascadeProfileFinalArray[y].personIdentity.personNumber == g.allExtension.employeeExtension.personNumber) {
+						CascadeProfile = CascadeProfileFinalArray[y].assignmentProfile
 					}
 				}
 
@@ -544,6 +581,16 @@ function parseInputJson(data) {
 							.join('|')
 					}
 				}
+
+				skills = ""
+				for (let y = 0, f = SkillsFinalArray.length; y < f; y++) {
+					if (SkillsFinalArray[y].personIdentity.personNumber == g.allExtension.employeeExtension.personNumber) {
+						skills = SkillsFinalArray[y].assignments
+							.map(function (cert) { return cert.skill.qualifier + "-&-" + cert.proficiencyLevel.qualifier})
+							.join('|')
+					}
+				}
+
 
 
 
@@ -692,6 +739,13 @@ function parseInputJson(data) {
 				if (!g.allExtension.employeeExtension.dataAccessGroupsForSnapshotDate) { GDAP = '' }
 				else { GDAP = g.allExtension.employeeExtension.dataAccessGroupsForSnapshotDate[0].dataAccessGroup }
 
+				if (g.allExtension.employeeExtension.telContactDataEntries){
+					g.allExtension.employeeExtension.telContactDataEntries.map(function(contact){
+						return "Type:" +contact.contactType + " Value " + contact.contactData + "SMS?: "+contact.smsswitch 
+
+					})
+				}
+
 
 
 				map =
@@ -699,23 +753,47 @@ function parseInputJson(data) {
 					"PersonNumber": g.allExtension.employeeExtension.personNumber,
 					"FirstName": g.allExtension.employeeExtension.firstName,
 					"LastName": g.allExtension.employeeExtension.lastName,
-					"Middle Initial": g.allExtension.employeeExtension.middleName,
 					"Short Name": g.allExtension.employeeExtension.shortName,
-					"Birth Date": g.allExtension.employeeExtension.birthDate,
-					"UserName": g.allExtension.employeeExtension.userName,
-					"Certifications": Certifications,
-					"PCVP": PCVP,
+					"Middle Initial": g.allExtension.employeeExtension.middleName,
+					"Pay Rule": g.allExtension.timekeepingExtension.payRuleName,
+					"Primary Job": g.allExtension.employeeExtension.effDatedPrimaryJobAccountForSnapshotDate[0].primaryJob,
+					"Primary LC": g.allExtension.employeeExtension.effDatedPrimaryJobAccountForSnapshotDate[0].primaryLaborCategory,
+					"ETerm": Eterm,
+					"Accrual Profile": AccrualProfile,
+					"FTE %": FTE,
+					"FTE Full Time Hours": FTEFTHours,
+					"FTE Employee Hours": FTEEMPHours,
+					"Cascade Profile": CascadeProfile,
+					"Percent Allocation Rules": PercentAllocationRule,
+					"Adjustment Rules": AdjustmentRule,
+					"Base Wage": BaseWage,
+					"Currency": g.allExtension.timekeepingExtension.employeeCurrency.currencyCode,
 					"ATK Profile": ATKProfile,
-					//"Password": g.allExtension.employeeExtension.password,
+					"DeviceGroup": g.allExtension.deviceExtension.deviceGroup,
+					"BadgeID": BadgeID,
+					"UserName": g.allExtension.employeeExtension.userName,
+					"Password": g.allExtension.employeeExtension.password,
+					"Logon profile": g.allExtension.employeeExtension.logonProfile,
+					"MFA Required": g.allExtension.employeeExtension.mfaRequired,
+
+					"Birth Date": g.allExtension.employeeExtension.birthDate,
+					
+					"Certifications": Certifications,
+					"Skills":skills,
+					"PCVP": PCVP,
+					
+					
+					
+					
 					"Display Profile": DisplayProfile,
 					"FAP": g.allExtension.employeeExtension.accessProfile,
 					"Delegate Profile": g.allExtension.employeeExtension.delegateProfile,
 					"Auth Type": g.allExtension.employeeExtension.authenticationType,
 					"Locale": g.allExtension.employeeExtension.localeProfile,
-					"Logon profile": g.allExtension.employeeExtension.logonProfile,
+					
 					"Notification Profile": g.allExtension.employeeExtension.notificationProfile,
-					"Accrual Profile": AccrualProfile,
-					"Adjustment Rules": AdjustmentRule,
+					
+					
 					"TimeZone": g.allExtension.employeeExtension.timeZone,
 					"Licenses": LicensesCSV,
 					"CustomData": CDATACSV,
@@ -724,18 +802,14 @@ function parseInputJson(data) {
 					"State": state,
 					"ZipCode": zipCode,
 					"Street": street,
-					"FTE %": FTE,
-					"FTE Full Time Hours": FTEFTHours,
-					"FTE Employee Hours": FTEEMPHours,
+					
 					"Employee Schedule Group": ScheduleGroupEmp,
 					"ManagerID": g.allExtension.employeeExtension.supervisorPersonNumber,
-					"Base Wage": BaseWage,
-					"Currency": g.allExtension.timekeepingExtension.employeeCurrency.currencyCode,
-					"Pay Rule": g.allExtension.timekeepingExtension.payRuleName,
+					
+					
 					"WorkerType": g.allExtension.timekeepingExtension.workerType,
-					"ETerm": Eterm,
-					"BadgeID": BadgeID,
-					"DeviceGroup": g.allExtension.deviceExtension.deviceGroup,
+					
+					
 					"Emp Group": EmpGroup,
 					"Org Set": OrgSet,
 					"JTS": JTS,
