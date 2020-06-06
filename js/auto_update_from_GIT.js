@@ -81,7 +81,12 @@ function ReadFiles(x) {
     console.log('true')
         ncp("./temp/ConfigEditor-master", "./", function (err) {
             if (err) {
+              
+              PackageJSON = JSON.parse(fs.readFileSync('./package.json'))
+              PackageJSON.version = "1.0.0"
+              fs.writeFileSync('./package.json',JSON.stringify(PackageJSON))
               return console.error(err);
+
             }
             console.log('done!');
 		window.alert('A new version has been downloaded you will see the effective changes immediately')
