@@ -97,9 +97,15 @@ function ReadFiles(x) {
                 
             }
          
-            fs.unlink('./temp.zip',function(err){
-                 if(err) return console.log(err);
+            fs.unlink('./temp.zip',function(err) {
+                 CloseLoadingModal()
                  console.log('file deleted successfully');
+                 if(err) return console.log(err);
+                 //Force Redownload next time
+                 PackageJSON = JSON.parse(fs.readFileSync('./package.json'))
+                 PackageJSON.version = "1.0.0"
+                 fs.writeFileSync('./package.json',JSON.stringify(PackageJSON))
+                 
             });  
          });
 //
