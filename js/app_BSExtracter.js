@@ -12,6 +12,7 @@ var ExportConfig;
 var AccessToken;
 var AddOrEdit;
 
+
 StartDate = document.getElementById("From Date").value
 RootNode = document.getElementById("RootNode").value
 var SelectedConnection;
@@ -21,6 +22,9 @@ function CloseLoadingModal() {
 	loadingmodal.style.visibility = "hidden";
 	document.getElementById('HandsOnTableValue').style.display = "block"
 }
+//DownloadCSV
+
+
 //---------------------------------------------Display Help Guide-----------------------------
 document.getElementById("about").addEventListener("click", (function () {
 	var modal = document.getElementById("myModal");
@@ -313,6 +317,8 @@ function parseInputJson(data) {
 
 			map =
 			{	
+				"Action":"None",
+				"Status":"None",
 				"Type": g.orgNodeTypeRef.qualifier,
 				"Full Node Path":g.parentNodeRef.qualifier + '/' + g.name,
 				"parentNode":g.parentNodeRef.qualifier,
@@ -321,6 +327,7 @@ function parseInputJson(data) {
 				"description": g.description,
 				"EffectiveDate":g.effectiveDate,
 				"ExpirationDate":g.expirationDate,
+				"LastRevision":g.lastRevision,
 				"address":g.address,
 				"Cost Center":CostCenters,
 				"directWorkPercent":g.directWorkPercent,
@@ -356,6 +363,8 @@ function parseInputJson(data) {
 		console.log(headers)
 
 		headers = [
+			"Action",
+			"Status",
 			"Type",
 			"parentNode",
 			"name",
@@ -363,11 +372,12 @@ function parseInputJson(data) {
 			"description",
 			"EffectiveDate",
 			"ExpirationDate",
+			"LastRevision",
 			"address",
 			"Cost Center",
 			"directWorkPercent",
 			"indirectWorkPercent",
-			"timezoneRef",
+			//"timezoneRef",
 			"transferable",
 			"currency",
 			"Full Node Path",
@@ -378,23 +388,14 @@ function parseInputJson(data) {
 
 
 		for (let i = 0, l = headers.length; i < l; i++) {
-			if (headers[i] == 'approve?') { columneditorsettings.push({ data: headers[i], type: 'dropdown', source: ['No Action', 'Approve', 'Refuse', 'Cancel'] }) }
+			if (headers[i] == 'Action') { columneditorsettings.push({ data: headers[i], type: 'dropdown', source: ['None', 'Update'] }) }
 			else if (headers[i] == 'GUID') { columneditorsettings.push({ name: headers[i], data: headers[i], readOnly: true, width: '300' }) }
 			else if (headers[i] == "periods") { columneditorsettings.push({ name: headers[i], data: headers[i], readOnly: true, renderer: 'html' }) }
-			else { columneditorsettings.push({ name: headers[i], data: headers[i], readOnly: true }) }
+			else if (headers[i] == "ExpirationDate") { columneditorsettings.push({ name: headers[i], data: headers[i], readOnly: false }) }
+			else if (headers[i] == "EffectiveDate") { columneditorsettings.push({ name: headers[i], data: headers[i], readOnly: false}) }
+			else if (headers[i] == "LastRevision") { columneditorsettings.push({ name: headers[i], data: headers[i], readOnly: false }) }
+			else { columneditorsettings.push({ name: headers[i], data: headers[i], readOnly: false }) }
 		}
-
-	
-
-	
-
-
-
-
-
-
-
-
 
 		function checkRenderer(instance, td, row, col, prop, value, cellProperties) {
 			Handsontable.renderers.CheckboxRenderer.apply(this, arguments);
@@ -456,6 +457,9 @@ function parseInputJson(data) {
 
 		Handsontable.dom.addEvent(SearchField, 'keyup', function (event) {
 			var search = hot.getPlugin('search');
+			
+
+
 			queryResult = search.query(this.value);
 			hot.render();
 		});
@@ -470,13 +474,16 @@ function parseInputJson(data) {
 
 
 
-
+	document.getElementById("DownloadtoCSV").addEventListener('click', function() {
+		var exportPlugin = hotdata.getPlugin('exportFile');
+		exportPlugin.downloadFile('csv', {filename: 'CSVExport', columnHeaders: true,});
+	  });
 
 
 
 //console.log(document.getElementById("example").Handsontable)
 
-/*document.getElementById("DownloadNewFile").addEventListener("click", function (change_data) {
+document.getElementById("DownloadNewFile").addEventListener("click", function (change_data) {
 	loadingmodal.style.display = "block";
 	loadingmodal.style.visibility = "visible";
 	setTimeout(downloadNewFile, 1000, change_data);
@@ -548,28 +555,62 @@ function downloadNewFile(change_data) {
 
 
 		for (let i = 0, l = ObjectArray.length; i < l; i++) {
-			if (ObjectArray[i]['approve?'] == "Approve" || ObjectArray[i]['approve?'] == "Refuse" || ObjectArray[i]['approve?'] == "Cancel") {
+			if (ObjectArray[i].Action == "Update") {
 				console.log(ObjectArray[i])
 				console.log(AccessToken)
-				hot2.setDataAtCell(i, 1, "In Progress")
-				if (ObjectArray[i]['approve?'] == "Approve") { StatusToChange = "Approved" }
-				else if (ObjectArray[i]['approve?'] == "Refuse") { StatusToChange = "Refused" }
-				else if (ObjectArray[i]['approve?'] == "Cancel") { StatusToChange = "Cancelled" }
+				hot2.setCellMeta(i, 1, 'className','YellowCellBackground')
+				BodyCreator =
+				{
+					"lastRevision": ObjectArray[i].LastRevision,
+					"expirationDate": ObjectArray[i].ExpirationDate,
+					"effectiveDate": ObjectArray[i].EffectiveDate,
+					"fullName":ObjectArray[i].FullName,
+					"description":ObjectArray[i].description,
+					"transferable":ObjectArray[i].transferable,
+					"costCenterRef":{"qualifier":ObjectArray[i]['Cost Center']},
+					"address":ObjectArray[i].address,
+					"currencyRef":{"qualifier":ObjectArray[i].currency},
+					"name": ObjectArray[i].name,
+					"genericJobRef": {"qualifier": ObjectArray[i].name},
+					"directWorkPercent":ObjectArray[i].directWorkPercent,
+					"indirectWorkPercent":ObjectArray[i].indirectWorkPercent,
+					//"timezoneRef":{"qualifier":ObjectArray[i].timezoneRef},
+					"externalId":ObjectArray[i].externalID				
+				}
+				if (ObjectArray[i].Type != "Job") { delete BodyCreator.genericJobRef }
+				if (ObjectArray[i].currency == "Inherited"){delete BodyCreator.currencyRef}
+				if (ObjectArray[i]['Cost Center'] == "" || ObjectArray[i]['Cost Center'] == null){delete BodyCreator.costCenterRef}
+				if (ObjectArray[i].externalId == "" || ObjectArray[i].externalId == null){delete BodyCreator.externalId}
+				if (ObjectArray[i].directWorkPercent == "" || ObjectArray[i].directWorkPercent == null){delete BodyCreator.directWorkPercent}
+				if (ObjectArray[i].indirectWorkPercent == "" || ObjectArray[i].indirectWorkPercent == null){delete BodyCreator.indirectWorkPercent}
+				if (ObjectArray[i].address == "" || ObjectArray[i].address == null){delete BodyCreator.address}
+
+
+				
+				//if (ObjectArray[i].timezoneRef == "" || ObjectArray[i].timezoneRef == null || ObjectArray[i].timezoneRef == undefined){delete BodyCreator.timeZoneRef}
+
+				console.log(BodyCreator)
+
 				var options4 = {
 					'method': 'POST',
-					'url': 'https://'+SelectedConnection.url+'/api/v1/scheduling/timeoff/apply_update',
+					'url': 'https://'+SelectedConnection.url+'/api/v1/commons/locations/' + ObjectArray[i].nodeID,
 					'headers': {
 						'appkey': SelectedConnection.appKey ,
 						'Authorization': AccessToken,
 						'Content-Type': ['application/json']
 					},
-					body: JSON.stringify({ "changeState": { "do": { "toStatus": { "name": StatusToChange } }, "where": { "timeOffRequestId": ObjectArray[i].id } } })
+
+
+
+					body: JSON.stringify(BodyCreator)
+						
+					  
 
 				};
 				rp(options4)
 					.then(function (parsedBody) {
-						hot2.setDataAtCell(i, 1, StatusToChange)
-						hot2.setDataAtCell(i, 0, "No Action");
+						hot2.setDataAtCell(i, 1, ObjectArray[i].Action)
+						hot2.setDataAtCell(i, 0, "None");
 						hot2.setCellMeta(i, 1, 'className','GreenCellBackground')
 						hot2.render()
 						console.log(parsedBody)
@@ -580,7 +621,7 @@ function downloadNewFile(change_data) {
 						console.log('fail')
 						console.log(err)
 						hot2.setDataAtCell(i, 1, "Error" + err.error);
-						hot2.setDataAtCell(i, 0, "No Action");
+						hot2.setDataAtCell(i, 0, "None");
 						hot2.setCellMeta(i, 1, 'className','RedCellBackground')
 						hot2.render()
 					});
