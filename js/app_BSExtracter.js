@@ -197,6 +197,7 @@ function parseInputJson(data) {
 	RootNode = document.getElementById("RootNode").value
 	console.log(global_data)
 	SelectedConnectionName = document.getElementById("Connection").options[document.getElementById("Connection").selectedIndex].value
+	SelectedMapType = document.getElementById("Status").options[document.getElementById("Status").selectedIndex].value
 	SelectedConnection = {}
 	for (let i = 0, l = global_data.length; i < l; i++) {
 		if (global_data[i].name == SelectedConnectionName) {
@@ -211,7 +212,7 @@ function parseInputJson(data) {
 			{
 				"where": {
 				  "descendantsOf": {
-					"context": "ORG",
+					"context": SelectedMapType,
 					"date": StartDate,
 					"locationRef": {
 					  "qualifier": RootNode
@@ -220,6 +221,7 @@ function parseInputJson(data) {
 				}
 			  }
 			)
+			console.log(BodyCreator)
 		var options3 = {
 			'method': 'POST',
 			'url': 'https://'+ SelectedConnection.url + '/api/v1/commons/locations/multi_read',
@@ -312,6 +314,7 @@ function parseInputJson(data) {
 			map =
 			{	
 				"Type": g.orgNodeTypeRef.qualifier,
+				"Full Node Path":g.parentNodeRef.qualifier + '/' + g.name,
 				"parentNode":g.parentNodeRef.qualifier,
 				"name": g.name,
 				"FullName":g.fullName,
@@ -367,6 +370,7 @@ function parseInputJson(data) {
 			"timezoneRef",
 			"transferable",
 			"currency",
+			"Full Node Path",
 			"externalID",
 			"nodeID",
 			"GUID",
