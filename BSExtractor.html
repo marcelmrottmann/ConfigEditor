@@ -157,7 +157,7 @@
 			<div id="form-group-wrapper" class='form-group-wrapper' style="width: 20%;">
 				<div id="form-wrapper">
 					<label for="Connection">Connection</label>
-					<select id="Connection" class="form-control" type="text" style="width: 100%;">
+					<select id="Connection" class="form-control" type="text" style="width: 100%;"onchange="reloadDropDown()">
 						<option value="Connection" selected disabled hidden>List of Connections</option>
 					</select>
 				</div>
@@ -189,34 +189,31 @@
 						<input type="text" id="search_field" name="search_field">
 					</div>
 				</div>
-				<!--
+				
 				<div id="form-group-wrapper" class='form-group-wrapper' style="width: 12%;">
 					<div id="form-wrapper">
-						<label for="REQUESTTYPE">Type</label>
-						<select id="REQUESTTYPE" class="form-control" type="text" style="width: 100%;">
-							<option value="Time Off Requests" selected>Time Off</option>
-						
-							<option value="Open Shift Requests" >Open Shifts</option>
-							
-							<option value="Shift Swap Requests" >Shift Swaps</option>
-							
+						<label for="RootNode">Root Node</label>
+						<select id="RootNode" class="form-control" type="text" style="width: 100%; display:block" >
 						</select>
+						<input type="text" id="RootNode2" name="RootNode2" value = "" style="width: 100%; display:none" >
 					</div>
 				</div>
-			-->
+			<!--
 				<div id="form-group-wrapper" class='form-group-wrapper' style = "width: 15%;">
 					<div id="form-wrapper-text">
 						<label for="RootNode">Root Node</label><br>
 						<input type="text" id="RootNode" name="RootNode" value = "Organization">
 					</div>
 				</div>
+				-->
 				<div id="form-group-wrapper" class='form-group-wrapper' style="width: 12%;">
 					<div id="form-wrapper">
 						<label for="Status">Type</label>
-						<select id="Status" class="form-control" type="text" style="width: 100%;">
+						<select id="Status" class="form-control" type="text" style="width: 100%; ">
 							<option value="ORG" selected>BS</option>
 							<option value="FORECAST" >Forecast Map</option>
 						</select>
+						
 					</div>
 				</div>
 				<div id="form-group-wrapper" class='form-group-wrapper' style = "width: 10%;">
