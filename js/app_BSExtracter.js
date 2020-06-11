@@ -56,8 +56,8 @@ function RefreshConnections(x) {
 			SelectedConnection = global_data[i]
 		}
 	}
-	
-
+	reloadDropDown()
+	CloseLoadingModal()
 }
 //------------------------------------------Close the loading thing---------------
 function CloseLoadingModal() {
