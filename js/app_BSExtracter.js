@@ -15,7 +15,7 @@ var AddOrEdit;
 var RootNodeOptions;
 RootNodeOptions = []
 
-
+RefreshConnections()
 
 
 StartDate = document.getElementById("From Date").value
@@ -61,6 +61,7 @@ function RefreshConnections(x) {
 }
 //------------------------------------------Close the loading thing---------------
 function CloseLoadingModal() {
+	var loadingmodal = document.getElementById("load");
 	loadingmodal.style.display = "none";
 	loadingmodal.style.visibility = "hidden";
 	document.getElementById('HandsOnTableValue').style.display = "block"
@@ -220,7 +221,7 @@ function toggleField(hideObj,showObj){
 	showObj.focus();
    }
 
-RefreshConnections()
+
 
 
 //---------------------------------------------Hamburger Menu-----------------------------
@@ -309,6 +310,7 @@ if (typeof Object.assign != 'function') {
 
 //---------------------------------------------ParseInput function---------------------------------
 document.getElementById("UploadAndParse").addEventListener("click", function () {
+	var loadingmodal = document.getElementById("load");
 	loadingmodal.style.display = "block";
 	loadingmodal.style.visibility = "visible";
 	setTimeout(parseInputJson, 1000);
@@ -316,7 +318,7 @@ document.getElementById("UploadAndParse").addEventListener("click", function () 
 
 
 function parseInputJson(data) {
-	RefreshConnections()
+	//RefreshConnections()
 
 	//--------------------------------------------Require functions----------------------------------------------
 	console.log(SDMZipFileName)
