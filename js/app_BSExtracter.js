@@ -3,6 +3,7 @@
 var hotdata;
 var changedata;
 var global_data;
+var CurrentConnection;
 var SDMZipFileName;
 var hot;
 var SelectedRuleIndex;
@@ -11,49 +12,21 @@ var paycodesResponse;
 var ExportConfig;
 var AccessToken;
 var AddOrEdit;
+var RootNodeOptions;
+RootNodeOptions = []
+
+
 
 
 StartDate = document.getElementById("From Date").value
 RootNode = document.getElementById("RootNode").value
 var SelectedConnection;
-//------------------------------------------Close the loading thing---------------
-function CloseLoadingModal() {
-	loadingmodal.style.display = "none";
-	loadingmodal.style.visibility = "hidden";
-	document.getElementById('HandsOnTableValue').style.display = "block"
-}
-//DownloadCSV
 
 
-//---------------------------------------------Display Help Guide-----------------------------
-document.getElementById("about").addEventListener("click", (function () {
-	var modal = document.getElementById("myModal");
-	modal.style.display = "block";
-	document.getElementById('HandsOnTableValue').style.display = "none"
-	const fs = require('fs')
-	info = fs.readFileSync('./information/Info.txt', 'UTF-8')
-	info = info.toString()
-})
-)
-window.addEventListener("click", function (event) {
-	var modal = document.getElementById("myModal");
-	if (event.target == modal) {
-		modal.style.display = "none";
-		document.getElementById('HandsOnTableValue').style.display = "block"
-	}
-})
-var span = document.getElementsByClassName("close")[0];
-span.addEventListener("click", function () {
-	var modal = document.getElementById("myModal");
-	modal.style.display = "none";
-	document.getElementById('HandsOnTableValue').style.display = "block"
-})
-//---------------------------------------Empty connections Drop Down
-
-//-----------------------------------------Fill Connections Dropdown.
 function RefreshConnections(x) {
 
 	SelectedRuleIndex = document.getElementById("Connection").value
+	CurrentConnection = SelectedRuleIndex
 	var select = document.getElementById("Connection");
 	var length = select.options.length;
 	for (i = length - 1; i >= 0; i--) {
@@ -86,7 +59,166 @@ function RefreshConnections(x) {
 	
 
 }
+//------------------------------------------Close the loading thing---------------
+function CloseLoadingModal() {
+	loadingmodal.style.display = "none";
+	loadingmodal.style.visibility = "hidden";
+	document.getElementById('HandsOnTableValue').style.display = "block"
+}
+//DownloadCSV
 
+function reloadDropDown(x){
+	console.log('trigger')
+	var request = require('request');
+	var rp = require('request-promise')
+	SelectedConnectionName = document.getElementById("Connection").options[document.getElementById("Connection").selectedIndex].value
+	SelectedMapType = document.getElementById("Status").options[document.getElementById("Status").selectedIndex].value
+	SelectedConnection = {}
+	for (let i = 0, l = global_data.length; i < l; i++) {
+		if (global_data[i].name == SelectedConnectionName) {
+			SelectedConnection = global_data[i]
+		}
+	}
+
+
+	function GETBSROOTS(x) {
+		x = JSON.parse(x)
+		AccessToken = x.access_token
+		BodyCreator = JSON.stringify(
+			{
+				"where": {
+					"query": {
+						"context": SelectedMapType,
+						"date": StartDate,
+						"q": "/"
+					}
+				}
+			}
+			)
+			console.log(BodyCreator)
+			console.log(SelectedConnection.url)
+		var options3 = {
+			'method': 'POST',
+			'url': 'https://'+ SelectedConnection.url + '/api/v1/commons/locations/multi_read',
+			'headers': {
+				'appkey': SelectedConnection.appKey,
+				'Authorization': AccessToken,
+				'Content-Type': ['application/json']
+			},
+			body: BodyCreator
+
+		};
+		rp(options3)
+			.then(function (parsedBody) {
+				console.log(parsedBody)
+				parseresponse = JSON.parse(parsedBody)
+				var select = document.getElementById("RootNode");
+				var length = select.options.length;
+				for (i = length - 1; i >= 0; i--) {
+				select.options[i] = null;
+				RootNodeOptions = []
+				}
+	
+			for (let i = 0, l = parseresponse.length; i < l; i++) {
+				value = parseresponse[i].name
+				var x = document.getElementById("RootNode");
+				var option = document.createElement("option");
+				option.text = value;
+				RootNodeOptions.push(value)
+				x.add(option);
+			}
+		
+			if (parseresponse.length > 0){
+				RootNode = parseresponse[0].name
+				document.getElementById('RootNode').style.display = "block"
+				document.getElementById('RootNode2').style.display = "none"
+			}
+			else {
+				document.getElementById('RootNode').style.display = "none"
+				document.getElementById('RootNode2').style.display = "block"
+			}
+				
+		
+			})
+			.catch(function (err) {
+				console.log(err)
+				window.alert('Could not retrieve the business structure ' + err.error)
+				CloseLoadingModal()
+				return
+			});
+	}
+	function Access2(z) {
+		var options = {
+			'method': 'POST',
+			'url': 'https://'+ SelectedConnection.url + '/api/authentication/access_token',
+			'headers': {
+				'Content-Type': ['application/x-www-form-urlencoded'],
+				'appkey': SelectedConnection.appKey
+			},
+			form: {
+				'username': SelectedConnection.username,
+				'password': SelectedConnection.password,
+				'client_id': SelectedConnection.auth_ID,
+				'client_secret': SelectedConnection.auth_secret,
+				'grant_type': 'password',
+				'auth_chain': 'OAuthLdapService'
+			}
+		};
+		rp(options)
+			.then(function (parsedBody) {
+				console.log(parsedBody)
+				GETBSROOTS(parsedBody)
+				
+
+			})
+			.catch(function (err) {
+				
+				console.log(err)
+				window.alert('Login failed ' + err.error)
+				CloseLoadingModal()
+				
+				return
+			});
+	}
+
+	Access2()
+
+}
+//---------------------------------------------Display Help Guide-----------------------------
+document.getElementById("about").addEventListener("click", (function () {
+	
+	var modal = document.getElementById("myModal");
+	modal.style.display = "block";
+	document.getElementById('HandsOnTableValue').style.display = "none"
+	const fs = require('fs')
+	info = fs.readFileSync('./information/Info.txt', 'UTF-8')
+	info = info.toString()
+})
+)
+window.addEventListener("click", function (event) {
+	var modal = document.getElementById("myModal");
+	if (event.target == modal) {
+		modal.style.display = "none";
+		document.getElementById('HandsOnTableValue').style.display = "block"
+	}
+})
+var span = document.getElementsByClassName("close")[0];
+span.addEventListener("click", function () {
+	var modal = document.getElementById("myModal");
+	modal.style.display = "none";
+	document.getElementById('HandsOnTableValue').style.display = "block"
+})
+//---------------------------------------Empty connections Drop Down
+
+//-----------------------------------------Fill Connections Dropdown.
+
+function toggleField(hideObj,showObj){
+	hideObj.disabled=true;		
+	hideObj.style.display='none';
+	showObj.disabled=false;	
+	showObj.style.display='inline';
+	showObj.focus();
+   }
 
 RefreshConnections()
 
@@ -199,6 +331,9 @@ function parseInputJson(data) {
 	AccessToken = ""
 	StartDate = document.getElementById("From Date").value
 	RootNode = document.getElementById("RootNode").value
+	RootNode2 = document.getElementById("RootNode2")
+	if (window.getComputedStyle(RootNode2).display === "block") {RootNode  = RootNode2.value}
+	
 	console.log(global_data)
 	SelectedConnectionName = document.getElementById("Connection").options[document.getElementById("Connection").selectedIndex].value
 	SelectedMapType = document.getElementById("Status").options[document.getElementById("Status").selectedIndex].value
@@ -250,6 +385,47 @@ function parseInputJson(data) {
 			});
 	}
 	
+
+	
+	function GETBSROOTS(x) {
+		x = JSON.parse(x)
+		AccessToken = x.access_token
+		BodyCreator = JSON.stringify(
+			{
+				"where": {
+					"query": {
+						"context": SelectedMapType,
+						"date": StartDate,
+						"q": "/"
+					}
+				}
+			}
+			)
+			console.log(BodyCreator)
+		var options3 = {
+			'method': 'POST',
+			'url': 'https://'+ SelectedConnection.url + '/api/v1/commons/locations/multi_read',
+			'headers': {
+				'appkey': SelectedConnection.appKey,
+				'Authorization': AccessToken,
+				'Content-Type': ['application/json']
+			},
+			body: BodyCreator
+
+		};
+		rp(options3)
+			.then(function (parsedBody) {
+				console.log(parsedBody)
+				parseresponse = JSON.parse(parsedBody)
+				GETBS(parsedBody)
+			})
+			.catch(function (err) {
+				console.log(err)
+				window.alert('Could not retrieve the business structure ' + err.error)
+				CloseLoadingModal()
+				return
+			});
+	}
 
 
 	function Access(z) {
