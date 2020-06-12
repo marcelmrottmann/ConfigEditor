@@ -30,7 +30,7 @@ function RefreshConnections(x) {
 	var select = document.getElementById("Connection");
 	var length = select.options.length;
 	for (i = length - 1; i >= 0; i--) {
-	select.options[i] = null;
+		select.options[i] = null;
 	}
 	const fs = require('fs')
 	const config = require('./Settings/connections.json')
@@ -44,11 +44,11 @@ function RefreshConnections(x) {
 		option.text = value;
 		x.add(option);
 	}
-	if (SelectedRuleIndex == '' || SelectedRuleIndex == null || SelectedRuleIndex == 'Connection'){SelectedRuleIndex = global_data[0].name}
+	if (SelectedRuleIndex == '' || SelectedRuleIndex == null || SelectedRuleIndex == 'Connection') { SelectedRuleIndex = global_data[0].name }
 	console.log(SelectedRuleIndex)
 	console.log(document.getElementById("Connection").value)
 	document.getElementById("Connection").value = SelectedRuleIndex
-	
+
 	SelectedConnectionName = document.getElementById("Connection").options[document.getElementById("Connection").selectedIndex].value
 	SelectedConnection = {}
 	for (let i = 0, l = global_data.length; i < l; i++) {
@@ -68,7 +68,7 @@ function CloseLoadingModal() {
 }
 //DownloadCSV
 
-function reloadDropDown(x){
+function reloadDropDown(x) {
 	console.log('trigger')
 	var request = require('request');
 	var rp = require('request-promise')
@@ -95,12 +95,12 @@ function reloadDropDown(x){
 					}
 				}
 			}
-			)
-			console.log(BodyCreator)
-			console.log(SelectedConnection.url)
+		)
+		console.log(BodyCreator)
+		console.log(SelectedConnection.url)
 		var options3 = {
 			'method': 'POST',
-			'url': 'https://'+ SelectedConnection.url + '/api/v1/commons/locations/multi_read',
+			'url': 'https://' + SelectedConnection.url + '/api/v1/commons/locations/multi_read',
 			'headers': {
 				'appkey': SelectedConnection.appKey,
 				'Authorization': AccessToken,
@@ -116,30 +116,85 @@ function reloadDropDown(x){
 				var select = document.getElementById("RootNode");
 				var length = select.options.length;
 				for (i = length - 1; i >= 0; i--) {
-				select.options[i] = null;
-				RootNodeOptions = []
+					select.options[i] = null;
+					RootNodeOptions = []
 				}
-	
-			for (let i = 0, l = parseresponse.length; i < l; i++) {
-				value = parseresponse[i].name
-				var x = document.getElementById("RootNode");
-				var option = document.createElement("option");
-				option.text = value;
-				RootNodeOptions.push(value)
-				x.add(option);
+
+				for (let i = 0, l = parseresponse.length; i < l; i++) {
+					value = parseresponse[i].name
+					var x = document.getElementById("RootNode");
+					var option = document.createElement("option");
+					option.text = value;
+					RootNodeOptions.push(value)
+					x.add(option);
+				}
+
+				if (parseresponse.length > 0) {
+					RootNode = parseresponse[0].name
+					document.getElementById('RootNode').style.display = "block"
+					document.getElementById('RootNode2').style.display = "none"
+				}
+				else {
+					document.getElementById('RootNode').style.display = "none"
+					document.getElementById('RootNode2').style.display = "block"
+				}
+
+
+			})
+			.catch(function (err) {
+				console.log(err)
+				window.alert('Could not retrieve the business structure ' + err.error)
+				CloseLoadingModal()
+				return
+			});
+	}
+	function GETLCTYPES(x) {
+		x = JSON.parse(x)
+		AccessToken = x.access_token
+		var options3 = {
+			'method': 'GET',
+			'url': 'https://' + SelectedConnection.url + '/api/v1/commons/labor_categories',
+			'headers': {
+				'appkey': SelectedConnection.appKey,
+				'Authorization': AccessToken,
+				'Content-Type': ['application/json']
 			}
-		
-			if (parseresponse.length > 0){
-				RootNode = parseresponse[0].name
-				document.getElementById('RootNode').style.display = "block"
-				document.getElementById('RootNode2').style.display = "none"
-			}
-			else {
-				document.getElementById('RootNode').style.display = "none"
-				document.getElementById('RootNode2').style.display = "block"
-			}
-				
-		
+			//,body: BodyCreator
+
+		};
+		rp(options3)
+			.then(function (parsedBody) {
+				console.log(parsedBody)
+				parseresponse = JSON.parse(parsedBody)
+				var select = document.getElementById("RootNode");
+				var length = select.options.length;
+				for (i = length - 1; i >= 0; i--) {
+					select.options[i] = null;
+					RootNodeOptions = []
+				}
+
+				for (let i = 0, l = parseresponse.length; i < l; i++) {
+					value = parseresponse[i].name
+					idvalue = parseresponse[i].id
+					var x = document.getElementById("RootNode");
+					var option = document.createElement("option");
+					option.text = value;
+					option.value = idvalue
+					RootNodeOptions.push(value)
+					x.add(option);
+				}
+
+				if (parseresponse.length > 0) {
+					RootNode = parseresponse[0].name
+					document.getElementById('RootNode').style.display = "block"
+					document.getElementById('RootNode2').style.display = "none"
+				}
+				else {
+					document.getElementById('RootNode').style.display = "none"
+					document.getElementById('RootNode2').style.display = "block"
+				}
+
+
 			})
 			.catch(function (err) {
 				console.log(err)
@@ -149,9 +204,10 @@ function reloadDropDown(x){
 			});
 	}
 	function Access2(z) {
+		SelectedMapType = document.getElementById("Status").options[document.getElementById("Status").selectedIndex].value
 		var options = {
 			'method': 'POST',
-			'url': 'https://'+ SelectedConnection.url + '/api/authentication/access_token',
+			'url': 'https://' + SelectedConnection.url + '/api/authentication/access_token',
 			'headers': {
 				'Content-Type': ['application/x-www-form-urlencoded'],
 				'appkey': SelectedConnection.appKey
@@ -168,16 +224,20 @@ function reloadDropDown(x){
 		rp(options)
 			.then(function (parsedBody) {
 				console.log(parsedBody)
-				GETBSROOTS(parsedBody)
-				
+				if (SelectedMapType == 'LCENTRIES') {
+					GETLCTYPES(parsedBody)
+				}
+				else {
+					GETBSROOTS(parsedBody)
+				}
 
 			})
 			.catch(function (err) {
-				
+
 				console.log(err)
 				window.alert('Login failed ' + err.error)
 				CloseLoadingModal()
-				
+
 				return
 			});
 	}
@@ -187,7 +247,7 @@ function reloadDropDown(x){
 }
 //---------------------------------------------Display Help Guide-----------------------------
 document.getElementById("about").addEventListener("click", (function () {
-	
+
 	var modal = document.getElementById("myModal");
 	modal.style.display = "block";
 	document.getElementById('HandsOnTableValue').style.display = "none"
@@ -213,13 +273,13 @@ span.addEventListener("click", function () {
 
 //-----------------------------------------Fill Connections Dropdown.
 
-function toggleField(hideObj,showObj){
-	hideObj.disabled=true;		
-	hideObj.style.display='none';
-	showObj.disabled=false;	
-	showObj.style.display='inline';
+function toggleField(hideObj, showObj) {
+	hideObj.disabled = true;
+	hideObj.style.display = 'none';
+	showObj.disabled = false;
+	showObj.style.display = 'inline';
 	showObj.focus();
-   }
+}
 
 
 
@@ -334,8 +394,8 @@ function parseInputJson(data) {
 	StartDate = document.getElementById("From Date").value
 	RootNode = document.getElementById("RootNode").value
 	RootNode2 = document.getElementById("RootNode2")
-	if (window.getComputedStyle(RootNode2).display === "block") {RootNode  = RootNode2.value}
-	
+	if (window.getComputedStyle(RootNode2).display === "block") { RootNode = RootNode2.value }
+
 	console.log(global_data)
 	SelectedConnectionName = document.getElementById("Connection").options[document.getElementById("Connection").selectedIndex].value
 	SelectedMapType = document.getElementById("Status").options[document.getElementById("Status").selectedIndex].value
@@ -352,20 +412,20 @@ function parseInputJson(data) {
 		BodyCreator = JSON.stringify(
 			{
 				"where": {
-				  "descendantsOf": {
-					"context": SelectedMapType,
-					"date": StartDate,
-					"locationRef": {
-					  "qualifier": RootNode
+					"descendantsOf": {
+						"context": SelectedMapType,
+						"date": StartDate,
+						"locationRef": {
+							"qualifier": RootNode
+						}
 					}
-				  }
 				}
-			  }
-			)
-			console.log(BodyCreator)
+			}
+		)
+		console.log(BodyCreator)
 		var options3 = {
 			'method': 'POST',
-			'url': 'https://'+ SelectedConnection.url + '/api/v1/commons/locations/multi_read',
+			'url': 'https://' + SelectedConnection.url + '/api/v1/commons/locations/multi_read',
 			'headers': {
 				'appkey': SelectedConnection.appKey,
 				'Authorization': AccessToken,
@@ -386,9 +446,53 @@ function parseInputJson(data) {
 				return
 			});
 	}
-	
 
-	
+
+	function GETLCENTRIES(x) {
+		x = JSON.parse(x)
+		AccessToken = x.access_token
+		BodyCreator = JSON.stringify(
+			{
+				"where": {
+					"descendantsOf": {
+						"context": SelectedMapType,
+						"date": StartDate,
+						"locationRef": {
+							"qualifier": RootNode
+						}
+					}
+				}
+			}
+		)
+		console.log(BodyCreator)
+		var options3 = {
+			'method': 'GET',
+			'url': 'https://' + SelectedConnection.url + '/api/v1/commons/labor_entries?categoryId=' + RootNode,
+			'headers': {
+				'appkey': SelectedConnection.appKey,
+				'Authorization': AccessToken,
+				'Content-Type': ['application/json']
+			}
+			//,			body: BodyCreator
+
+		};
+		console.log(options3.url)
+
+		rp(options3)
+			.then(function (parsedBody) {
+				console.log(parsedBody)
+				RenderHandsOnTable(parsedBody)
+			})
+			.catch(function (err) {
+				console.log(err)
+				window.alert('Could not retrieve the business structure ' + err.error)
+				CloseLoadingModal()
+				return
+			});
+	}
+
+
+
 	function GETBSROOTS(x) {
 		x = JSON.parse(x)
 		AccessToken = x.access_token
@@ -402,11 +506,11 @@ function parseInputJson(data) {
 					}
 				}
 			}
-			)
-			console.log(BodyCreator)
+		)
+		console.log(BodyCreator)
 		var options3 = {
 			'method': 'POST',
-			'url': 'https://'+ SelectedConnection.url + '/api/v1/commons/locations/multi_read',
+			'url': 'https://' + SelectedConnection.url + '/api/v1/commons/locations/multi_read',
 			'headers': {
 				'appkey': SelectedConnection.appKey,
 				'Authorization': AccessToken,
@@ -433,7 +537,7 @@ function parseInputJson(data) {
 	function Access(z) {
 		var options = {
 			'method': 'POST',
-			'url': 'https://'+ SelectedConnection.url + '/api/authentication/access_token',
+			'url': 'https://' + SelectedConnection.url + '/api/authentication/access_token',
 			'headers': {
 				'Content-Type': ['application/x-www-form-urlencoded'],
 				'appkey': SelectedConnection.appKey
@@ -450,16 +554,20 @@ function parseInputJson(data) {
 		rp(options)
 			.then(function (parsedBody) {
 				console.log(parsedBody)
-				GETBS(parsedBody)
-				
+				if (SelectedMapType == 'LCENTRIES') {
+					GETLCENTRIES(parsedBody)
+				}
+				else {
+					GETBS(parsedBody)
+				}
 
 			})
 			.catch(function (err) {
-				
+
 				console.log(err)
 				window.alert('Login failed ' + err.error)
 				CloseLoadingModal()
-				
+
 				return
 			});
 	}
@@ -480,7 +588,88 @@ function parseInputJson(data) {
 		console.log(x)
 		//if (JSON.parse(x) instanceof Array == true && JSON.parse(x).length == 0){window.alert('No Requests found in target system') ;CloseLoadingModal(); return}
 		FinalArray = JSON.parse(x)
+		if (SelectedMapType == 'LCENTRIES') {
+			for (let i = 0, l = FinalArray.length; i < l; i++) {
+				g = FinalArray[i]
 
+				map =
+				{
+					//"Action": "None",
+					//"Status": "None",
+					"Labor Category Type": g.laborCategory.qualifier,
+					"name": g.name,
+					"description": g.description,
+					"Inactive": g.inactive,
+					"Id": g.id
+					
+				}
+	
+				Complete.push(map)
+			}
+	
+	
+			FinalArray = Complete
+			console.log(FinalArray)
+			try {
+				for (let y = 0, x = FinalArray.length; y < x; y++) {
+					for (let x = 0, z = FinalArray.length; x < z; x++) {
+						headers.push(Object.keys(FinalArray[y])[x])
+					}
+				}
+			}
+			catch { window.alert("File is empty"); CloseLoadingModal(); return; }
+	
+	
+	
+			headers = Array.from(new Set(headers))
+			var container = document.getElementById('HandsOnTableValue');
+			headers = headers.filter(function (fil) { return fil != null })
+			console.log(headers)
+	
+			headers = [
+					//"Action": "None",
+					//"Status": "None",
+				"Labor Category Type",
+				"name",
+				"description",
+				"Inactive",
+				"Id"
+			]
+	
+	
+			for (let i = 0, l = headers.length; i < l; i++) {
+				if (headers[i] == 'Action') { columneditorsettings.push({ data: headers[i], type: 'dropdown', source: ['None', 'Update'] }) }
+				//else if (headers[i] == 'GUID') { columneditorsettings.push({ name: headers[i], data: headers[i], readOnly: true, width: '300' }) }
+				//else if (headers[i] == "periods") { columneditorsettings.push({ name: headers[i], data: headers[i], readOnly: true, renderer: 'html' }) }
+				//else if (headers[i] == "ExpirationDate") { columneditorsettings.push({ name: headers[i], data: headers[i], readOnly: false }) }
+				//else if (headers[i] == "EffectiveDate") { columneditorsettings.push({ name: headers[i], data: headers[i], readOnly: false }) }
+				//else if (headers[i] == "LastRevision") { columneditorsettings.push({ name: headers[i], data: headers[i], readOnly: false }) }
+				else { columneditorsettings.push({ name: headers[i], data: headers[i], readOnly: true }) }
+			}
+	
+			function checkRenderer(instance, td, row, col, prop, value, cellProperties) {
+				Handsontable.renderers.CheckboxRenderer.apply(this, arguments);
+				if (value == true) {
+					td.style.color = 'black';
+					td.style.background = '#90ee90';
+				} else if (value == false) {
+					td.style.color = 'black';
+					td.style.background = '#ffcccb';
+				}
+			}
+			function checktextRenderer(instance, td, row, col, prop, value, cellProperties) {
+				Handsontable.renderers.TextRenderer.apply(this, arguments);
+				if (value == true) {
+					td.style.color = 'black';
+					td.style.background = '#90ee90';
+				} else if (value == false) {
+					td.style.color = 'black';
+					td.style.background = '#ffcccb';
+				}
+			}
+		}
+
+		else {
 
 		for (let i = 0, l = FinalArray.length; i < l; i++) {
 			g = FinalArray[i]
@@ -489,31 +678,31 @@ function parseInputJson(data) {
 			var Currencies
 
 
-			if (g.costCenterRef == "" || g.costCenterRef == null){CostCenters = null} else CostCenters =  g.costCenterRef.qualifier
-			if (g.timezoneRef == "" || g.timezoneRef == null){TimeZones = null} else TimeZones =  g.timezoneRef.qualifier
-			if (g.currencyRef == "" || g.currencyRef == null){Currencies = "Inherited"} else Currencies =  g.currencyRef.qualifier
+			if (g.costCenterRef == "" || g.costCenterRef == null) { CostCenters = null } else CostCenters = g.costCenterRef.qualifier
+			if (g.timezoneRef == "" || g.timezoneRef == null) { TimeZones = null } else TimeZones = g.timezoneRef.qualifier
+			if (g.currencyRef == "" || g.currencyRef == null) { Currencies = "Inherited" } else Currencies = g.currencyRef.qualifier
 
 			map =
-			{	
-				"Action":"None",
-				"Status":"None",
+			{
+				"Action": "None",
+				"Status": "None",
 				"Type": g.orgNodeTypeRef.qualifier,
-				"Full Node Path":g.parentNodeRef.qualifier + '/' + g.name,
-				"parentNode":g.parentNodeRef.qualifier,
+				"Full Node Path": g.parentNodeRef.qualifier + '/' + g.name,
+				"parentNode": g.parentNodeRef.qualifier,
 				"name": g.name,
-				"FullName":g.fullName,
+				"FullName": g.fullName,
 				"description": g.description,
-				"EffectiveDate":g.effectiveDate,
-				"ExpirationDate":g.expirationDate,
-				"LastRevision":g.lastRevision,
-				"address":g.address,
-				"Cost Center":CostCenters,
-				"directWorkPercent":g.directWorkPercent,
-				"indirectWorkPercent":g.indirectWorkPercent,
-				"timezoneRef":g.TimeZones,
+				"EffectiveDate": g.effectiveDate,
+				"ExpirationDate": g.expirationDate,
+				"LastRevision": g.lastRevision,
+				"address": g.address,
+				"Cost Center": CostCenters,
+				"directWorkPercent": g.directWorkPercent,
+				"indirectWorkPercent": g.indirectWorkPercent,
+				"timezoneRef": g.TimeZones,
 				"transferable": g.transferable,
-				"currency":Currencies,
-				"externalID":g.externalId,
+				"currency": Currencies,
+				"externalID": g.externalId,
 				"nodeID": g.nodeId,
 				"GUID": g.persistentId
 			}
@@ -570,7 +759,7 @@ function parseInputJson(data) {
 			else if (headers[i] == 'GUID') { columneditorsettings.push({ name: headers[i], data: headers[i], readOnly: true, width: '300' }) }
 			else if (headers[i] == "periods") { columneditorsettings.push({ name: headers[i], data: headers[i], readOnly: true, renderer: 'html' }) }
 			else if (headers[i] == "ExpirationDate") { columneditorsettings.push({ name: headers[i], data: headers[i], readOnly: false }) }
-			else if (headers[i] == "EffectiveDate") { columneditorsettings.push({ name: headers[i], data: headers[i], readOnly: false}) }
+			else if (headers[i] == "EffectiveDate") { columneditorsettings.push({ name: headers[i], data: headers[i], readOnly: false }) }
 			else if (headers[i] == "LastRevision") { columneditorsettings.push({ name: headers[i], data: headers[i], readOnly: false }) }
 			else { columneditorsettings.push({ name: headers[i], data: headers[i], readOnly: false }) }
 		}
@@ -595,7 +784,9 @@ function parseInputJson(data) {
 				td.style.background = '#ffcccb';
 			}
 		}
+	}
 
+	//end else
 		var hot = new Handsontable(container, {
 			data: FinalArray,
 			startRows: 30,
@@ -635,7 +826,7 @@ function parseInputJson(data) {
 
 		Handsontable.dom.addEvent(SearchField, 'keyup', function (event) {
 			var search = hot.getPlugin('search');
-			
+
 
 
 			queryResult = search.query(this.value);
@@ -647,15 +838,16 @@ function parseInputJson(data) {
 
 		CloseLoadingModal()
 
-	
-	}}
+
+	}
+}
 
 
 
-	document.getElementById("DownloadtoCSV").addEventListener('click', function() {
-		var exportPlugin = hotdata.getPlugin('exportFile');
-		exportPlugin.downloadFile('csv', {filename: RootNode, columnHeaders: true,});
-	  });
+document.getElementById("DownloadtoCSV").addEventListener('click', function () {
+	var exportPlugin = hotdata.getPlugin('exportFile');
+	exportPlugin.downloadFile('csv', { filename: RootNode, columnHeaders: true, });
+});
 
 
 
@@ -675,7 +867,7 @@ function downloadNewFile(change_data) {
 	function Access2(z) {
 		var options = {
 			'method': 'POST',
-			'url': 'https://'+SelectedConnection.url+'/api/authentication/access_token',
+			'url': 'https://' + SelectedConnection.url + '/api/authentication/access_token',
 			'headers': {
 				'Content-Type': ['application/x-www-form-urlencoded'],
 				'appkey': SelectedConnection.appKey
@@ -736,44 +928,44 @@ function downloadNewFile(change_data) {
 			if (ObjectArray[i].Action == "Update") {
 				console.log(ObjectArray[i])
 				console.log(AccessToken)
-				hot2.setCellMeta(i, 1, 'className','YellowCellBackground')
+				hot2.setCellMeta(i, 1, 'className', 'YellowCellBackground')
 				BodyCreator =
 				{
 					"lastRevision": ObjectArray[i].LastRevision,
 					"expirationDate": ObjectArray[i].ExpirationDate,
 					"effectiveDate": ObjectArray[i].EffectiveDate,
-					"fullName":ObjectArray[i].FullName,
-					"description":ObjectArray[i].description,
-					"transferable":ObjectArray[i].transferable,
-					"costCenterRef":{"qualifier":ObjectArray[i]['Cost Center']},
-					"address":ObjectArray[i].address,
-					"currencyRef":{"qualifier":ObjectArray[i].currency},
+					"fullName": ObjectArray[i].FullName,
+					"description": ObjectArray[i].description,
+					"transferable": ObjectArray[i].transferable,
+					"costCenterRef": { "qualifier": ObjectArray[i]['Cost Center'] },
+					"address": ObjectArray[i].address,
+					"currencyRef": { "qualifier": ObjectArray[i].currency },
 					"name": ObjectArray[i].name,
-					"genericJobRef": {"qualifier": ObjectArray[i].name},
-					"directWorkPercent":ObjectArray[i].directWorkPercent,
-					"indirectWorkPercent":ObjectArray[i].indirectWorkPercent,
+					"genericJobRef": { "qualifier": ObjectArray[i].name },
+					"directWorkPercent": ObjectArray[i].directWorkPercent,
+					"indirectWorkPercent": ObjectArray[i].indirectWorkPercent,
 					//"timezoneRef":{"qualifier":ObjectArray[i].timezoneRef},
-					"externalId":ObjectArray[i].externalID				
+					"externalId": ObjectArray[i].externalID
 				}
 				if (ObjectArray[i].Type != "Job") { delete BodyCreator.genericJobRef }
-				if (ObjectArray[i].currency == "Inherited"){delete BodyCreator.currencyRef}
-				if (ObjectArray[i]['Cost Center'] == "" || ObjectArray[i]['Cost Center'] == null){delete BodyCreator.costCenterRef}
-				if (ObjectArray[i].externalId == "" || ObjectArray[i].externalId == null){delete BodyCreator.externalId}
-				if (ObjectArray[i].directWorkPercent == "" || ObjectArray[i].directWorkPercent == null){delete BodyCreator.directWorkPercent}
-				if (ObjectArray[i].indirectWorkPercent == "" || ObjectArray[i].indirectWorkPercent == null){delete BodyCreator.indirectWorkPercent}
-				if (ObjectArray[i].address == "" || ObjectArray[i].address == null){delete BodyCreator.address}
+				if (ObjectArray[i].currency == "Inherited") { delete BodyCreator.currencyRef }
+				if (ObjectArray[i]['Cost Center'] == "" || ObjectArray[i]['Cost Center'] == null) { delete BodyCreator.costCenterRef }
+				if (ObjectArray[i].externalId == "" || ObjectArray[i].externalId == null) { delete BodyCreator.externalId }
+				if (ObjectArray[i].directWorkPercent == "" || ObjectArray[i].directWorkPercent == null) { delete BodyCreator.directWorkPercent }
+				if (ObjectArray[i].indirectWorkPercent == "" || ObjectArray[i].indirectWorkPercent == null) { delete BodyCreator.indirectWorkPercent }
+				if (ObjectArray[i].address == "" || ObjectArray[i].address == null) { delete BodyCreator.address }
 
 
-				
+
 				//if (ObjectArray[i].timezoneRef == "" || ObjectArray[i].timezoneRef == null || ObjectArray[i].timezoneRef == undefined){delete BodyCreator.timeZoneRef}
 
 				console.log(BodyCreator)
 
 				var options4 = {
 					'method': 'POST',
-					'url': 'https://'+SelectedConnection.url+'/api/v1/commons/locations/' + ObjectArray[i].nodeID,
+					'url': 'https://' + SelectedConnection.url + '/api/v1/commons/locations/' + ObjectArray[i].nodeID,
 					'headers': {
-						'appkey': SelectedConnection.appKey ,
+						'appkey': SelectedConnection.appKey,
 						'Authorization': AccessToken,
 						'Content-Type': ['application/json']
 					},
@@ -781,15 +973,15 @@ function downloadNewFile(change_data) {
 
 
 					body: JSON.stringify(BodyCreator)
-						
-					  
+
+
 
 				};
 				rp(options4)
 					.then(function (parsedBody) {
 						hot2.setDataAtCell(i, 1, ObjectArray[i].Action)
 						hot2.setDataAtCell(i, 0, "None");
-						hot2.setCellMeta(i, 1, 'className','GreenCellBackground')
+						hot2.setCellMeta(i, 1, 'className', 'GreenCellBackground')
 						hot2.render()
 						console.log(parsedBody)
 						//StartOffAPIS(parsedBody)
@@ -800,7 +992,7 @@ function downloadNewFile(change_data) {
 						console.log(err)
 						hot2.setDataAtCell(i, 1, "Error" + err.error);
 						hot2.setDataAtCell(i, 0, "None");
-						hot2.setCellMeta(i, 1, 'className','RedCellBackground')
+						hot2.setCellMeta(i, 1, 'className', 'RedCellBackground')
 						hot2.render()
 					});
 			}
@@ -865,17 +1057,56 @@ document.getElementById("EditConnection").addEventListener("click", (function (x
 
 //--------------------------------------------PayCode QuickAdd
 document.getElementById('AddPaycodeID').addEventListener('click', function (event) {
-	if (AddOrEdit == 'Add'){
-	CName = document.getElementById('CName').value
-	CURL = document.getElementById('URL').value
-	cappKey = document.getElementById('appKey').value
-	cauth_ID = document.getElementById('auth_ID').value
-	cauth_secret = document.getElementById('auth_secret').value
-	cusername = document.getElementById('username').value
-	cPassword = document.getElementById('Password').value
+	if (AddOrEdit == 'Add') {
+		CName = document.getElementById('CName').value
+		CURL = document.getElementById('URL').value
+		cappKey = document.getElementById('appKey').value
+		cauth_ID = document.getElementById('auth_ID').value
+		cauth_secret = document.getElementById('auth_secret').value
+		cusername = document.getElementById('username').value
+		cPassword = document.getElementById('Password').value
 
-	global_data.push(
-		{
+		global_data.push(
+			{
+				"name": CName,
+				"url": CURL,
+				"appKey": cappKey,
+				"auth_ID": cauth_ID,
+				"auth_secret": cauth_secret,
+				"username": cusername,
+				"password": cPassword
+			}
+
+		)
+		fs = require('fs')
+		fs.writeFileSync('./Settings/connections.json', JSON.stringify(global_data));
+		RefreshConnections()
+		document.getElementById("SideBarRight").style.width = "0";
+		document.getElementById('HandsOnTableValue').style.display = "block"
+
+		document.getElementById('CName').value = ''
+		document.getElementById('URL').value = ''
+		document.getElementById('appKey').value = ''
+		document.getElementById('auth_ID').value = ''
+		document.getElementById('auth_secret').value = ''
+		document.getElementById('username').value = ''
+		document.getElementById('Password').value = ''
+	}
+})
+
+//--------------------------------------------PayCode QuickEdit
+document.getElementById('AddPaycodeID').addEventListener('click', function (event) {
+	if (AddOrEdit == 'Edit') {
+		console.log(global_data)
+		CName = document.getElementById('CName').value
+		CURL = document.getElementById('URL').value
+		cappKey = document.getElementById('appKey').value
+		cauth_ID = document.getElementById('auth_ID').value
+		cauth_secret = document.getElementById('auth_secret').value
+		cusername = document.getElementById('username').value
+		cPassword = document.getElementById('Password').value
+
+		ConnectionDetails = {
 			"name": CName,
 			"url": CURL,
 			"appKey": cappKey,
@@ -885,70 +1116,31 @@ document.getElementById('AddPaycodeID').addEventListener('click', function (even
 			"password": cPassword
 		}
 
-	)
-fs = require('fs')
-fs.writeFileSync('./Settings/connections.json', JSON.stringify(global_data));
-RefreshConnections()
-	document.getElementById("SideBarRight").style.width = "0";
-	document.getElementById('HandsOnTableValue').style.display = "block"
-
-	document.getElementById('CName').value = ''
-	document.getElementById('URL').value = ''
-	document.getElementById('appKey').value = ''
-	document.getElementById('auth_ID').value = ''
-	document.getElementById('auth_secret').value = ''
-	document.getElementById('username').value = ''
-	document.getElementById('Password').value = ''
-	}
-})
-
-//--------------------------------------------PayCode QuickEdit
-document.getElementById('AddPaycodeID').addEventListener('click', function (event) {
-if (AddOrEdit == 'Edit'){
-console.log(global_data)
-	CName = document.getElementById('CName').value
-	CURL = document.getElementById('URL').value
-	cappKey = document.getElementById('appKey').value
-	cauth_ID = document.getElementById('auth_ID').value
-	cauth_secret = document.getElementById('auth_secret').value
-	cusername = document.getElementById('username').value
-	cPassword = document.getElementById('Password').value
-
-	ConnectionDetails = {
-		"name": CName,
-		"url": CURL,
-		"appKey": cappKey,
-		"auth_ID": cauth_ID,
-		"auth_secret": cauth_secret,
-		"username": cusername,
-		"password": cPassword
-	}
-
-	console.log(ConnectionDetails)
+		console.log(ConnectionDetails)
 
 
-	SelectedConnectionName = document.getElementById("Connection").options[document.getElementById("Connection").selectedIndex].value
-	SelectedConnection = {}
-	for (let i = 0, l = global_data.length; i < l; i++) {
-		if (global_data[i].name == SelectedConnectionName) {
-			Object.assign(global_data[i],ConnectionDetails)
+		SelectedConnectionName = document.getElementById("Connection").options[document.getElementById("Connection").selectedIndex].value
+		SelectedConnection = {}
+		for (let i = 0, l = global_data.length; i < l; i++) {
+			if (global_data[i].name == SelectedConnectionName) {
+				Object.assign(global_data[i], ConnectionDetails)
+			}
 		}
+
+
+
+		fs = require('fs')
+		fs.writeFileSync('./Settings/connections.json', JSON.stringify(global_data));
+		RefreshConnections()
+		document.getElementById("SideBarRight").style.width = "0";
+		document.getElementById('HandsOnTableValue').style.display = "block"
+
+		document.getElementById('CName').value = ''
+		document.getElementById('URL').value = ''
+		document.getElementById('appKey').value = ''
+		document.getElementById('auth_ID').value = ''
+		document.getElementById('auth_secret').value = ''
+		document.getElementById('username').value = ''
+		document.getElementById('Password').value = ''
 	}
-	
-
-	
-fs = require('fs')
-fs.writeFileSync('./Settings/connections.json', JSON.stringify(global_data));
-RefreshConnections()
-	document.getElementById("SideBarRight").style.width = "0";
-	document.getElementById('HandsOnTableValue').style.display = "block"
-
-	document.getElementById('CName').value = ''
-	document.getElementById('URL').value = ''
-	document.getElementById('appKey').value = ''
-	document.getElementById('auth_ID').value = ''
-	document.getElementById('auth_secret').value = ''
-	document.getElementById('username').value = ''
-	document.getElementById('Password').value = ''
-}
 })
