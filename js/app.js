@@ -171,10 +171,12 @@ function parseInputJson(data) {
 
 		zipEntries.forEach(function (zipEntry) {
 			console.log(zipEntry.entryName)
+			try {
 			var label = zip.readAsText(zipEntry)
 			console.log(JSON.parse(label).uniqueKey)
 			label = JSON.parse(label).uniqueKey
-
+			}
+			catch{}
 			if (zipEntry.entryName == "WSAPayCode\\response.json") {
 				var decompressedData = zip.readFile(zipEntry);
 				paycodesResponse = zip.readAsText(zipEntry)
