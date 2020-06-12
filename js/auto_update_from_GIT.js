@@ -5,6 +5,7 @@ const request = require('request')
 destination = './temp.zip'
 var AdmZip = require('adm-zip');
 nwgui = require('nw.gui')
+var loadingmodal = document.getElementById("load");
 cleanup()
 //Version compare---------------------------------------------------------------------
 function compareVersion(v1, v2) {
@@ -30,6 +31,7 @@ function CloseLoadingModal() {
 }
 //------------------------------------------------------------------End Closing
 //CheckVersion--------------------------------------------------------------------------
+loadingmodal = document.getElementById('load')
 loadingmodal.style.display = "block";
 loadingmodal.style.visibility= "visible";
 setTimeout(GetPackageFile,1000);
