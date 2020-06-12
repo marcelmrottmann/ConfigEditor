@@ -812,7 +812,7 @@ function parseInputJson(data) {
 				searchResultClass: 'hot_search_found'
 			},
 			trimDropdown: false,
-			//stretchH: 'all',
+			stretchH: 'all',
 			afterRender: CloseLoadingModal()
 		});
 
