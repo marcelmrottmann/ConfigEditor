@@ -192,7 +192,7 @@
 				
 				<div id="form-group-wrapper" class='form-group-wrapper' style="width: 12%;">
 					<div id="form-wrapper">
-						<label for="RootNode">Root Node</label>
+						<label for="RootNode">Root Node/LC Name</label>
 						<select id="RootNode" class="form-control" type="text" style="width: 100%; display:block" >
 						</select>
 						<input type="text" id="RootNode2" name="RootNode2" value = "" style="width: 100%; display:none" >
@@ -209,9 +209,11 @@
 				<div id="form-group-wrapper" class='form-group-wrapper' style="width: 12%;">
 					<div id="form-wrapper">
 						<label for="Status">Type</label>
-						<select id="Status" class="form-control" type="text" style="width: 100%; ">
+						<select id="Status" class="form-control" type="text" style="width: 100%;"onchange="reloadDropDown()">
 							<option value="ORG" selected>BS</option>
 							<option value="FORECAST" >Forecast Map</option>
+							<option value="LCENTRIES" >LC Entries</option>
+
 						</select>
 						
 					</div>
