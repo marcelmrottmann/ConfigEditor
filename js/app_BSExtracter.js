@@ -589,27 +589,50 @@ function parseInputJson(data) {
 		//if (JSON.parse(x) instanceof Array == true && JSON.parse(x).length == 0){window.alert('No Requests found in target system') ;CloseLoadingModal(); return}
 		FinalArray = JSON.parse(x)
 		if (SelectedMapType == 'LCENTRIES') {
-			for (let i = 0, l = FinalArray.length; i < l; i++) {
-				g = FinalArray[i]
 
-				map =
-				{
-					//"Action": "None",
-					//"Status": "None",
-					"Labor Category Type": g.laborCategory.qualifier,
-					"name": g.name,
-					"description": g.description,
-					"Inactive": g.inactive,
-					"Id": g.id
-					
-				}
-	
-				Complete.push(map)
+			if (FinalArray.length > 6000) { window.alert('You have a lot of data, this will continue to load in the background, please be patient') 
+
+			BatchedDataFinalArray = FinalArray.chunk(200)
+			for (let z = 0, a = BatchedDataFinalArray.length; z < a; z++) {
+				console.log(BatchedDataFinalArray[z])
+				setTimeout(() => {
+					for (let i = 0, l = BatchedDataFinalArray[z].length; i < l; i++) {
+						g = BatchedDataFinalArray[z][i]
+						map =
+						{
+							"Labor Category Type": g.laborCategory.qualifier,
+							"name": g.name,
+							"description": g.description,
+							"Inactive": g.inactive,
+							"Id": g.id
+						}
+						Complete.push(map)
+					}
+				}, 1000);
+
 			}
-	
-	
+		}
+		else {for (let i = 0, l = FinalArray.length; i < l; i++) {
+			g = FinalArray[i]
+
+			map =
+			{
+				//"Action": "None",
+				//"Status": "None",
+				"Labor Category Type": g.laborCategory.qualifier,
+				"name": g.name,
+				"description": g.description,
+				"Inactive": g.inactive,
+				"Id": g.id
+				
+			}
+
+			Complete.push(map)
+		}}
+
+
 			FinalArray = Complete
-			console.log(FinalArray)
+			//console.log(FinalArray)
 			try {
 				for (let y = 0, x = FinalArray.length; y < x; y++) {
 					for (let x = 0, z = FinalArray.length; x < z; x++) {
@@ -618,25 +641,25 @@ function parseInputJson(data) {
 				}
 			}
 			catch { window.alert("File is empty"); CloseLoadingModal(); return; }
-	
-	
-	
+
+
+
 			headers = Array.from(new Set(headers))
 			var container = document.getElementById('HandsOnTableValue');
 			headers = headers.filter(function (fil) { return fil != null })
 			console.log(headers)
-	
+
 			headers = [
-					//"Action": "None",
-					//"Status": "None",
+				//"Action": "None",
+				//"Status": "None",
 				"Labor Category Type",
 				"name",
 				"description",
 				"Inactive",
 				"Id"
 			]
-	
-	
+
+
 			for (let i = 0, l = headers.length; i < l; i++) {
 				if (headers[i] == 'Action') { columneditorsettings.push({ data: headers[i], type: 'dropdown', source: ['None', 'Update'] }) }
 				//else if (headers[i] == 'GUID') { columneditorsettings.push({ name: headers[i], data: headers[i], readOnly: true, width: '300' }) }
@@ -646,7 +669,7 @@ function parseInputJson(data) {
 				//else if (headers[i] == "LastRevision") { columneditorsettings.push({ name: headers[i], data: headers[i], readOnly: false }) }
 				else { columneditorsettings.push({ name: headers[i], data: headers[i], readOnly: true }) }
 			}
-	
+
 			function checkRenderer(instance, td, row, col, prop, value, cellProperties) {
 				Handsontable.renderers.CheckboxRenderer.apply(this, arguments);
 				if (value == true) {
@@ -671,122 +694,122 @@ function parseInputJson(data) {
 
 		else {
 
-		for (let i = 0, l = FinalArray.length; i < l; i++) {
-			g = FinalArray[i]
-			var CostCenters
-			var TimeZones
-			var Currencies
+			for (let i = 0, l = FinalArray.length; i < l; i++) {
+				g = FinalArray[i]
+				var CostCenters
+				var TimeZones
+				var Currencies
 
 
-			if (g.costCenterRef == "" || g.costCenterRef == null) { CostCenters = null } else CostCenters = g.costCenterRef.qualifier
-			if (g.timezoneRef == "" || g.timezoneRef == null) { TimeZones = null } else TimeZones = g.timezoneRef.qualifier
-			if (g.currencyRef == "" || g.currencyRef == null) { Currencies = "Inherited" } else Currencies = g.currencyRef.qualifier
+				if (g.costCenterRef == "" || g.costCenterRef == null) { CostCenters = null } else CostCenters = g.costCenterRef.qualifier
+				if (g.timezoneRef == "" || g.timezoneRef == null) { TimeZones = null } else TimeZones = g.timezoneRef.qualifier
+				if (g.currencyRef == "" || g.currencyRef == null) { Currencies = "Inherited" } else Currencies = g.currencyRef.qualifier
 
-			map =
-			{
-				"Action": "None",
-				"Status": "None",
-				"Type": g.orgNodeTypeRef.qualifier,
-				"Full Node Path": g.parentNodeRef.qualifier + '/' + g.name,
-				"parentNode": g.parentNodeRef.qualifier,
-				"name": g.name,
-				"FullName": g.fullName,
-				"description": g.description,
-				"EffectiveDate": g.effectiveDate,
-				"ExpirationDate": g.expirationDate,
-				"LastRevision": g.lastRevision,
-				"address": g.address,
-				"Cost Center": CostCenters,
-				"directWorkPercent": g.directWorkPercent,
-				"indirectWorkPercent": g.indirectWorkPercent,
-				"timezoneRef": g.TimeZones,
-				"transferable": g.transferable,
-				"currency": Currencies,
-				"externalID": g.externalId,
-				"nodeID": g.nodeId,
-				"GUID": g.persistentId
+				map =
+				{
+					"Action": "None",
+					"Status": "None",
+					"Type": g.orgNodeTypeRef.qualifier,
+					"Full Node Path": g.parentNodeRef.qualifier + '/' + g.name,
+					"parentNode": g.parentNodeRef.qualifier,
+					"name": g.name,
+					"FullName": g.fullName,
+					"description": g.description,
+					"EffectiveDate": g.effectiveDate,
+					"ExpirationDate": g.expirationDate,
+					"LastRevision": g.lastRevision,
+					"address": g.address,
+					"Cost Center": CostCenters,
+					"directWorkPercent": g.directWorkPercent,
+					"indirectWorkPercent": g.indirectWorkPercent,
+					"timezoneRef": g.TimeZones,
+					"transferable": g.transferable,
+					"currency": Currencies,
+					"externalID": g.externalId,
+					"nodeID": g.nodeId,
+					"GUID": g.persistentId
+				}
+
+				Complete.push(map)
 			}
 
-			Complete.push(map)
-		}
+
+			FinalArray = Complete
+			console.log(FinalArray)
+			try {
+				for (let y = 0, x = FinalArray.length; y < x; y++) {
+					for (let x = 0, z = FinalArray.length; x < z; x++) {
+						headers.push(Object.keys(FinalArray[y])[x])
+					}
+				}
+			}
+			catch { window.alert("File is empty"); CloseLoadingModal(); return; }
 
 
-		FinalArray = Complete
-		console.log(FinalArray)
-		try {
-			for (let y = 0, x = FinalArray.length; y < x; y++) {
-				for (let x = 0, z = FinalArray.length; x < z; x++) {
-					headers.push(Object.keys(FinalArray[y])[x])
+
+			headers = Array.from(new Set(headers))
+			var container = document.getElementById('HandsOnTableValue');
+			headers = headers.filter(function (fil) { return fil != null })
+			console.log(headers)
+
+			headers = [
+				"Action",
+				"Status",
+				"Type",
+				"parentNode",
+				"name",
+				"FullName",
+				"description",
+				"EffectiveDate",
+				"ExpirationDate",
+				"LastRevision",
+				"address",
+				"Cost Center",
+				"directWorkPercent",
+				"indirectWorkPercent",
+				//"timezoneRef",
+				"transferable",
+				"currency",
+				"Full Node Path",
+				"externalID",
+				"nodeID",
+				"GUID",
+			]
+
+
+			for (let i = 0, l = headers.length; i < l; i++) {
+				if (headers[i] == 'Action') { columneditorsettings.push({ data: headers[i], type: 'dropdown', source: ['None', 'Update'] }) }
+				else if (headers[i] == 'GUID') { columneditorsettings.push({ name: headers[i], data: headers[i], readOnly: true, width: '300' }) }
+				else if (headers[i] == "periods") { columneditorsettings.push({ name: headers[i], data: headers[i], readOnly: true, renderer: 'html' }) }
+				else if (headers[i] == "ExpirationDate") { columneditorsettings.push({ name: headers[i], data: headers[i], readOnly: false }) }
+				else if (headers[i] == "EffectiveDate") { columneditorsettings.push({ name: headers[i], data: headers[i], readOnly: false }) }
+				else if (headers[i] == "LastRevision") { columneditorsettings.push({ name: headers[i], data: headers[i], readOnly: false }) }
+				else { columneditorsettings.push({ name: headers[i], data: headers[i], readOnly: false }) }
+			}
+
+			function checkRenderer(instance, td, row, col, prop, value, cellProperties) {
+				Handsontable.renderers.CheckboxRenderer.apply(this, arguments);
+				if (value == true) {
+					td.style.color = 'black';
+					td.style.background = '#90ee90';
+				} else if (value == false) {
+					td.style.color = 'black';
+					td.style.background = '#ffcccb';
+				}
+			}
+			function checktextRenderer(instance, td, row, col, prop, value, cellProperties) {
+				Handsontable.renderers.TextRenderer.apply(this, arguments);
+				if (value == true) {
+					td.style.color = 'black';
+					td.style.background = '#90ee90';
+				} else if (value == false) {
+					td.style.color = 'black';
+					td.style.background = '#ffcccb';
 				}
 			}
 		}
-		catch { window.alert("File is empty"); CloseLoadingModal(); return; }
 
-
-
-		headers = Array.from(new Set(headers))
-		var container = document.getElementById('HandsOnTableValue');
-		headers = headers.filter(function (fil) { return fil != null })
-		console.log(headers)
-
-		headers = [
-			"Action",
-			"Status",
-			"Type",
-			"parentNode",
-			"name",
-			"FullName",
-			"description",
-			"EffectiveDate",
-			"ExpirationDate",
-			"LastRevision",
-			"address",
-			"Cost Center",
-			"directWorkPercent",
-			"indirectWorkPercent",
-			//"timezoneRef",
-			"transferable",
-			"currency",
-			"Full Node Path",
-			"externalID",
-			"nodeID",
-			"GUID",
-		]
-
-
-		for (let i = 0, l = headers.length; i < l; i++) {
-			if (headers[i] == 'Action') { columneditorsettings.push({ data: headers[i], type: 'dropdown', source: ['None', 'Update'] }) }
-			else if (headers[i] == 'GUID') { columneditorsettings.push({ name: headers[i], data: headers[i], readOnly: true, width: '300' }) }
-			else if (headers[i] == "periods") { columneditorsettings.push({ name: headers[i], data: headers[i], readOnly: true, renderer: 'html' }) }
-			else if (headers[i] == "ExpirationDate") { columneditorsettings.push({ name: headers[i], data: headers[i], readOnly: false }) }
-			else if (headers[i] == "EffectiveDate") { columneditorsettings.push({ name: headers[i], data: headers[i], readOnly: false }) }
-			else if (headers[i] == "LastRevision") { columneditorsettings.push({ name: headers[i], data: headers[i], readOnly: false }) }
-			else { columneditorsettings.push({ name: headers[i], data: headers[i], readOnly: false }) }
-		}
-
-		function checkRenderer(instance, td, row, col, prop, value, cellProperties) {
-			Handsontable.renderers.CheckboxRenderer.apply(this, arguments);
-			if (value == true) {
-				td.style.color = 'black';
-				td.style.background = '#90ee90';
-			} else if (value == false) {
-				td.style.color = 'black';
-				td.style.background = '#ffcccb';
-			}
-		}
-		function checktextRenderer(instance, td, row, col, prop, value, cellProperties) {
-			Handsontable.renderers.TextRenderer.apply(this, arguments);
-			if (value == true) {
-				td.style.color = 'black';
-				td.style.background = '#90ee90';
-			} else if (value == false) {
-				td.style.color = 'black';
-				td.style.background = '#ffcccb';
-			}
-		}
-	}
-
-	//end else
+		//end else
 		var hot = new Handsontable(container, {
 			data: FinalArray,
 			startRows: 30,
@@ -1144,3 +1167,15 @@ document.getElementById('AddPaycodeID').addEventListener('click', function (even
 		document.getElementById('Password').value = ''
 	}
 })
+
+Object.defineProperty(Array.prototype, 'chunk', {
+	value: function (chunkSize) {
+		var temporal = [];
+
+		for (var i = 0; i < this.length; i += chunkSize) {
+			temporal.push(this.slice(i, i + chunkSize));
+		}
+
+		return temporal;
+	}
+});
