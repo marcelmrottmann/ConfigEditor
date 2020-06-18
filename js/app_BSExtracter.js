@@ -590,45 +590,50 @@ function parseInputJson(data) {
 		FinalArray = JSON.parse(x)
 		if (SelectedMapType == 'LCENTRIES') {
 
-			if (FinalArray.length > 6000) { window.alert('You have a lot of data, this will continue to load in the background, please be patient') 
+			if (FinalArray.length > 6000) {
+				window.alert('You have a lot of data, this will continue to load in the background, please be patient')
 
-			BatchedDataFinalArray = FinalArray.chunk(200)
-			for (let z = 0, a = BatchedDataFinalArray.length; z < a; z++) {
-				console.log(BatchedDataFinalArray[z])
-				setTimeout(() => {
-					for (let i = 0, l = BatchedDataFinalArray[z].length; i < l; i++) {
-						g = BatchedDataFinalArray[z][i]
-						map =
-						{
-							"Labor Category Type": g.laborCategory.qualifier,
-							"name": g.name,
-							"description": g.description,
-							"Inactive": g.inactive,
-							"Id": g.id
+				BatchedDataFinalArray = FinalArray.chunk(200)
+				for (let z = 0, a = BatchedDataFinalArray.length; z < a; z++) {
+					console.log(BatchedDataFinalArray[z])
+					setTimeout(() => {
+						for (let i = 0, l = BatchedDataFinalArray[z].length; i < l; i++) {
+							g = BatchedDataFinalArray[z][i]
+							map =
+							{
+								"Action": "None",
+								"Status": "None",
+								"Labor Category Type": g.laborCategory.qualifier,
+								"name": g.name,
+								"description": g.description,
+								"Inactive": g.inactive,
+								"Id": g.id
+							}
+							Complete.push(map)
 						}
-						Complete.push(map)
+					}, 1000);
+
+				}
+			}
+			else {
+				for (let i = 0, l = FinalArray.length; i < l; i++) {
+					g = FinalArray[i]
+
+					map =
+					{
+						"Action": "None",
+						"Status": "None",
+						"Labor Category Type": g.laborCategory.qualifier,
+						"name": g.name,
+						"description": g.description,
+						"Inactive": g.inactive,
+						"Id": g.id
+
 					}
-				}, 1000);
 
+					Complete.push(map)
+				}
 			}
-		}
-		else {for (let i = 0, l = FinalArray.length; i < l; i++) {
-			g = FinalArray[i]
-
-			map =
-			{
-				//"Action": "None",
-				//"Status": "None",
-				"Labor Category Type": g.laborCategory.qualifier,
-				"name": g.name,
-				"description": g.description,
-				"Inactive": g.inactive,
-				"Id": g.id
-				
-			}
-
-			Complete.push(map)
-		}}
 
 
 			FinalArray = Complete
@@ -650,8 +655,8 @@ function parseInputJson(data) {
 			console.log(headers)
 
 			headers = [
-				//"Action": "None",
-				//"Status": "None",
+				"Action",
+				"Status",
 				"Labor Category Type",
 				"name",
 				"description",
@@ -661,7 +666,7 @@ function parseInputJson(data) {
 
 
 			for (let i = 0, l = headers.length; i < l; i++) {
-				if (headers[i] == 'Action') { columneditorsettings.push({ data: headers[i], type: 'dropdown', source: ['None', 'Update'] }) }
+				if (headers[i] == 'Action') { columneditorsettings.push({ data: headers[i], type: 'dropdown', source: ['None', 'Delete'] }) }
 				//else if (headers[i] == 'GUID') { columneditorsettings.push({ name: headers[i], data: headers[i], readOnly: true, width: '300' }) }
 				//else if (headers[i] == "periods") { columneditorsettings.push({ name: headers[i], data: headers[i], readOnly: true, renderer: 'html' }) }
 				//else if (headers[i] == "ExpirationDate") { columneditorsettings.push({ name: headers[i], data: headers[i], readOnly: false }) }
@@ -946,80 +951,164 @@ function downloadNewFile(change_data) {
 		console.log('12')
 		console.log(ObjectArray)
 
+		IDsforCompletionTracking = []
 
 		for (let i = 0, l = ObjectArray.length; i < l; i++) {
-			if (ObjectArray[i].Action == "Update") {
-				console.log(ObjectArray[i])
-				console.log(AccessToken)
-				hot2.setCellMeta(i, 1, 'className', 'YellowCellBackground')
-				BodyCreator =
-				{
-					"lastRevision": ObjectArray[i].LastRevision,
-					"expirationDate": ObjectArray[i].ExpirationDate,
-					"effectiveDate": ObjectArray[i].EffectiveDate,
-					"fullName": ObjectArray[i].FullName,
-					"description": ObjectArray[i].description,
-					"transferable": ObjectArray[i].transferable,
-					"costCenterRef": { "qualifier": ObjectArray[i]['Cost Center'] },
-					"address": ObjectArray[i].address,
-					"currencyRef": { "qualifier": ObjectArray[i].currency },
-					"name": ObjectArray[i].name,
-					"genericJobRef": { "qualifier": ObjectArray[i].name },
-					"directWorkPercent": ObjectArray[i].directWorkPercent,
-					"indirectWorkPercent": ObjectArray[i].indirectWorkPercent,
-					//"timezoneRef":{"qualifier":ObjectArray[i].timezoneRef},
-					"externalId": ObjectArray[i].externalID
+
+			if (!ObjectArray[i]['Labor Category Type']) {
+				if (ObjectArray[i].Action == "Update") {
+					console.log(ObjectArray[i])
+					console.log(AccessToken)
+					hot2.setCellMeta(i, 1, 'className', 'YellowCellBackground')
+					BodyCreator =
+					{
+						"lastRevision": ObjectArray[i].LastRevision,
+						"expirationDate": ObjectArray[i].ExpirationDate,
+						"effectiveDate": ObjectArray[i].EffectiveDate,
+						"fullName": ObjectArray[i].FullName,
+						"description": ObjectArray[i].description,
+						"transferable": ObjectArray[i].transferable,
+						"costCenterRef": { "qualifier": ObjectArray[i]['Cost Center'] },
+						"address": ObjectArray[i].address,
+						"currencyRef": { "qualifier": ObjectArray[i].currency },
+						"name": ObjectArray[i].name,
+						"genericJobRef": { "qualifier": ObjectArray[i].name },
+						"directWorkPercent": ObjectArray[i].directWorkPercent,
+						"indirectWorkPercent": ObjectArray[i].indirectWorkPercent,
+						//"timezoneRef":{"qualifier":ObjectArray[i].timezoneRef},
+						"externalId": ObjectArray[i].externalID
+					}
+					if (ObjectArray[i].Type != "Job") { delete BodyCreator.genericJobRef }
+					if (ObjectArray[i].currency == "Inherited") { delete BodyCreator.currencyRef }
+					if (ObjectArray[i]['Cost Center'] == "" || ObjectArray[i]['Cost Center'] == null) { delete BodyCreator.costCenterRef }
+					if (ObjectArray[i].externalId == "" || ObjectArray[i].externalId == null) { delete BodyCreator.externalId }
+					if (ObjectArray[i].directWorkPercent == "" || ObjectArray[i].directWorkPercent == null) { delete BodyCreator.directWorkPercent }
+					if (ObjectArray[i].indirectWorkPercent == "" || ObjectArray[i].indirectWorkPercent == null) { delete BodyCreator.indirectWorkPercent }
+					if (ObjectArray[i].address == "" || ObjectArray[i].address == null) { delete BodyCreator.address }
+
+
+
+					//if (ObjectArray[i].timezoneRef == "" || ObjectArray[i].timezoneRef == null || ObjectArray[i].timezoneRef == undefined){delete BodyCreator.timeZoneRef}
+
+					console.log(BodyCreator)
+
+					var options4 = {
+						'method': 'POST',
+						'url': 'https://' + SelectedConnection.url + '/api/v1/commons/locations/' + ObjectArray[i].nodeID,
+						'headers': {
+							'appkey': SelectedConnection.appKey,
+							'Authorization': AccessToken,
+							'Content-Type': ['application/json']
+						},
+
+
+
+						body: JSON.stringify(BodyCreator)
+
+
+
+					};
+					rp(options4)
+						.then(function (parsedBody) {
+							hot2.setDataAtCell(i, 1, ObjectArray[i].Action)
+							hot2.setDataAtCell(i, 0, "None");
+							hot2.setCellMeta(i, 1, 'className', 'GreenCellBackground')
+							hot2.render()
+							console.log(parsedBody)
+							//StartOffAPIS(parsedBody)
+
+						})
+						.catch(function (err) {
+							console.log('fail')
+							console.log(err)
+							hot2.setDataAtCell(i, 1, "Error" + err.error);
+							hot2.setDataAtCell(i, 0, "None");
+							hot2.setCellMeta(i, 1, 'className', 'RedCellBackground')
+							hot2.render()
+						});
 				}
-				if (ObjectArray[i].Type != "Job") { delete BodyCreator.genericJobRef }
-				if (ObjectArray[i].currency == "Inherited") { delete BodyCreator.currencyRef }
-				if (ObjectArray[i]['Cost Center'] == "" || ObjectArray[i]['Cost Center'] == null) { delete BodyCreator.costCenterRef }
-				if (ObjectArray[i].externalId == "" || ObjectArray[i].externalId == null) { delete BodyCreator.externalId }
-				if (ObjectArray[i].directWorkPercent == "" || ObjectArray[i].directWorkPercent == null) { delete BodyCreator.directWorkPercent }
-				if (ObjectArray[i].indirectWorkPercent == "" || ObjectArray[i].indirectWorkPercent == null) { delete BodyCreator.indirectWorkPercent }
-				if (ObjectArray[i].address == "" || ObjectArray[i].address == null) { delete BodyCreator.address }
+			}
+			else if (ObjectArray[i]['Labor Category Type']) {
+				if (ObjectArray[i].Action == "Delete") {
+					IDsforCompletionTracking.push(ObjectArray[i].Id)
+
+
+					console.log(ObjectArray[i])
+					console.log(AccessToken)
+					hot2.setCellMeta(i, 1, 'className', 'YellowCellBackground')
+					BodyCreator =
+						[
+							{
+								"id": ObjectArray[i].Id,
+							}
+						]
+
+					//if (ObjectArray[i].timezoneRef == "" || ObjectArray[i].timezoneRef == null || ObjectArray[i].timezoneRef == undefined){delete BodyCreator.timeZoneRef}
+
+					console.log(BodyCreator)
+
+					var options4 = {
+						'method': 'DELETE',
+						'url': 'https://' + SelectedConnection.url + '/api/v1/commons/labor_entries/' + ObjectArray[i].Id,
+						'resolveWithFullResponse': true,
+						'headers': {
+							'appkey': SelectedConnection.appKey,
+							'Authorization': AccessToken,
+							'Content-Type': ['application/json']
+											
+						},
 
 
 
-				//if (ObjectArray[i].timezoneRef == "" || ObjectArray[i].timezoneRef == null || ObjectArray[i].timezoneRef == undefined){delete BodyCreator.timeZoneRef}
-
-				console.log(BodyCreator)
-
-				var options4 = {
-					'method': 'POST',
-					'url': 'https://' + SelectedConnection.url + '/api/v1/commons/locations/' + ObjectArray[i].nodeID,
-					'headers': {
-						'appkey': SelectedConnection.appKey,
-						'Authorization': AccessToken,
-						'Content-Type': ['application/json']
-					},
+						//body: JSON.stringify(BodyCreator)
 
 
 
-					body: JSON.stringify(BodyCreator)
+					};
+					rp(options4)
+						.then(function (parsedBody) {
+							console.log(parsedBody)
+							console.log(parsedBody.request.path)
+							ID = parsedBody.request.path.split('/labor_entries/')[1]
+							StatusResponse = "Successfully Deleted"
+							for (let iz = 0, lz = ObjectArray.length; iz < lz; iz++) {
+								console.log(ID,ObjectArray[i].Id)
+								if (ObjectArray[iz].Id == ID){
+							hot2.setDataAtCell(iz, 1, StatusResponse)
+							hot2.setDataAtCell(iz, 0, "None");
+							hot2.setCellMeta(iz, 1, 'className', 'GreenCellBackground')
+							hot2.render()
+								}}
 
 
+/*
+							hot2.setDataAtCell(i, 1, ObjectArray[i].Action)
+							hot2.setDataAtCell(i, 0, "None");
+							hot2.setCellMeta(i, 1, 'className', 'GreenCellBackground')
+							hot2.render()
+*/							
+							//StartOffAPIS(parsedBody)
 
-				};
-				rp(options4)
-					.then(function (parsedBody) {
-						hot2.setDataAtCell(i, 1, ObjectArray[i].Action)
-						hot2.setDataAtCell(i, 0, "None");
-						hot2.setCellMeta(i, 1, 'className', 'GreenCellBackground')
-						hot2.render()
-						console.log(parsedBody)
-						//StartOffAPIS(parsedBody)
+						})
+						.catch(function (err) {
+							console.log('fail')
+							console.log(err)
 
-					})
-					.catch(function (err) {
-						console.log('fail')
-						console.log(err)
-						hot2.setDataAtCell(i, 1, "Error" + err.error);
-						hot2.setDataAtCell(i, 0, "None");
-						hot2.setCellMeta(i, 1, 'className', 'RedCellBackground')
-						hot2.render()
-					});
+							ID = err.options.url.split('/labor_entries/')[1]
+							for (let iz = 0, lz = ObjectArray.length; iz < lz; iz++) {
+								if (ObjectArray[iz].Id == ID){
+									hot2.setDataAtCell(iz, 1, "Error" + err.error);
+									hot2.setDataAtCell(iz, 0, "None");
+									hot2.setCellMeta(iz, 1, 'className', 'RedCellBackground')
+									hot2.render()
+								}
+							}
+						});
+				}
 			}
 		}
+
+
 
 		CloseLoadingModal()
 	}
