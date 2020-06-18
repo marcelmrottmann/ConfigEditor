@@ -652,6 +652,10 @@ function parseInputJson(data) {
 					}
 					else EmpGroup = ""
 					if (g.allExtension.schedulingExtension.jobTransferForSnapshotDate instanceof Array == true) {
+						HomeHyperfind = g.allExtension.schedulingExtension.jobTransferForSnapshotDate[0].homeHyperFindQueryName
+					}
+					else HomeHyperfind = ""
+					if (g.allExtension.schedulingExtension.jobTransferForSnapshotDate instanceof Array == true) {
 						OrgSet = g.allExtension.schedulingExtension.jobTransferForSnapshotDate[0].managerTransferOrganizationSet
 					}
 					else OrgSet = ""
@@ -811,6 +815,7 @@ function parseInputJson(data) {
 					
 					
 					"Emp Group": EmpGroup,
+					"Home Hyperfind":HomeHyperfind,
 					"Org Set": OrgSet,
 					"JTS": JTS,
 					"Default Activity": defaultActivityName,
