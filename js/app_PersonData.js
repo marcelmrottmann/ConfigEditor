@@ -271,13 +271,14 @@ function parseInputJson(data) {
 
 			})
 			.catch(function (err) {
+				console.log(err)
 				console.log(JSON.parse(err.error).errorCode)
-			if (JSON.parse(err.error).errorCode != "WCO-101271"){
-				window.alert('Parsing Hyperfind Failed ' + err.error)
-			}
+				if (JSON.parse(err.error).errorCode != "WCO-101271") {
+					window.alert('Parsing Hyperfind Failed ' + err.error)
+				}
 				CloseLoadingModal()
 				return
-				
+
 			});
 	}
 	function GETBASEPERSON(x) {
@@ -334,7 +335,7 @@ function parseInputJson(data) {
 
 				window.alert('Could not retrieve employee requests ' + err.error)
 				CloseLoadingModal()
-				
+
 				return
 			});
 	}
@@ -415,7 +416,7 @@ function parseInputJson(data) {
 					console.log(parsedBody)
 					//[variable].push(JSON.parse(parsedBody))
 					//RenderHandsOnTable(parsedBody)
-					
+
 					console.log(variable)
 					console.log(JSON.parse(parsedBody))
 					if (JSON.parse(parsedBody).errorCode) { parsedBody = JSON.stringify(JSON.parse(parsedBody).details.results) }
@@ -427,7 +428,7 @@ function parseInputJson(data) {
 					console.log(JSON.parse(err.error).errorCode)
 					//if (JSON.parse(err.error).errorCode != "WCO-101271"){
 					//window.alert('Could not retrieve ' + vname + ': ' + err.error)
-					
+
 					//}
 					UNAVAILABLEITEMS.push(vname + "with error: " + JSON.parse(err.error).errorCode + " : " + JSON.parse(err.error).message)
 					//CloseLoadingModal()
@@ -468,7 +469,7 @@ function parseInputJson(data) {
 	Access()
 	function RenderHandsOnTable(x) {
 		console.log(UNAVAILABLEITEMS)
-		if (UNAVAILABLEITEMS.length > 0){window.alert("These items may not have loaded correctly due to errors\n" + UNAVAILABLEITEMS.join(',\n'))}
+		if (UNAVAILABLEITEMS.length > 0) { window.alert("These items may not have loaded correctly due to errors\n" + UNAVAILABLEITEMS.join(',\n')) }
 
 		Types = document.getElementById('REQUESTTYPE').value
 		if (Types == "Base Person") {
@@ -484,7 +485,7 @@ function parseInputJson(data) {
 			FinalArray = []
 			Periods = []
 
-			
+
 			//console.log(x)
 			//if (JSON.parse(x) instanceof Array == true && JSON.parse(x).length == 0) { window.alert('No Requests found in target system'); CloseLoadingModal(); return }
 			console.log(VARIABLESTORAGE)
@@ -510,7 +511,25 @@ function parseInputJson(data) {
 
 			console.log(ATKProfileFinalArray)
 
+
+
+			if (FinalArray.errorCode) {
+				FinalArray = FinalArray.details.results
+				for (let i = 0, l = FinalArray.length; i < l; i++) {
+					if (FinalArray[i].success) {
+						FinalArray[i] = FinalArray[i].success
+					}
+					else { delete FinalArray[i] }
+
+				}
+				FinalArray = FinalArray.filter(function (fil) { return fil })
+			}
+
 			console.log(FinalArray)
+
+
+
+
 
 			for (let i = 0, l = FinalArray.length; i < l; i++) {
 				g = FinalArray[i]
@@ -525,29 +544,38 @@ function parseInputJson(data) {
 
 				AdjustmentRule = ""
 				for (let y = 0, f = AdjustmentRuleFinalArray.length; y < f; y++) {
-					if (AdjustmentRuleFinalArray[y].personIdentity.personNumber == g.allExtension.employeeExtension.personNumber) {
-						AdjustmentRule = AdjustmentRuleFinalArray[y].processor
+					if (AdjustmentRuleFinalArray[y].personIdentity){
+						if (AdjustmentRuleFinalArray[y].personIdentity.personNumber == g.allExtension.employeeExtension.personNumber) {
+
+							AdjustmentRule = AdjustmentRuleFinalArray[y].processor
+						}
 					}
+
 				}
 				PercentAllocationRule = ""
 				for (let y = 0, f = PercentAllocationRuleFinalArray.length; y < f; y++) {
-					if (PercentAllocationRuleFinalArray[y].personIdentity.personNumber == g.allExtension.employeeExtension.personNumber) {
-						if (PercentAllocationRuleFinalArray[y].processor){
-						PercentAllocationRule = PercentAllocationRuleFinalArray[y].processor.qualifier
+					if (PercentAllocationRuleFinalArray[y].personIdentity){
+						if (PercentAllocationRuleFinalArray[y].personIdentity.personNumber == g.allExtension.employeeExtension.personNumber) {
+							if (PercentAllocationRuleFinalArray[y].processor) {
+								PercentAllocationRule = PercentAllocationRuleFinalArray[y].processor.qualifier
+							}
 						}
 					}
+		
 				}
-				
+
 				CascadeProfile = ""
 				for (let y = 0, f = CascadeProfileFinalArray.length; y < f; y++) {
+					if (CascadeProfileFinalArray[y].personIdentity){
 					if (CascadeProfileFinalArray[y].personIdentity.personNumber == g.allExtension.employeeExtension.personNumber) {
 						CascadeProfile = CascadeProfileFinalArray[y].assignmentProfile
 					}
 				}
+				}
 
 				PCVP = ""
 				for (let y = 0, f = PCVPFinalArray.length; y < f; y++) {
-					if (PCVPFinalArray[y].errorCode)
+					if (!PCVPFinalArray[y].errorCode)
 						if (PCVPFinalArray[y].personIdentity.personNumber == g.allExtension.employeeExtension.personNumber) {
 							if (PCVPFinalArray[y].payCodeValueProfile) {
 								PCVP = PCVPFinalArray[y].payCodeValueProfile.qualifier
@@ -586,7 +614,7 @@ function parseInputJson(data) {
 				for (let y = 0, f = SkillsFinalArray.length; y < f; y++) {
 					if (SkillsFinalArray[y].personIdentity.personNumber == g.allExtension.employeeExtension.personNumber) {
 						skills = SkillsFinalArray[y].assignments
-							.map(function (cert) { return cert.skill.qualifier + "-&-" + cert.proficiencyLevel.qualifier})
+							.map(function (cert) { return cert.skill.qualifier + "-&-" + cert.proficiencyLevel.qualifier })
 							.join('|')
 					}
 				}
@@ -743,9 +771,9 @@ function parseInputJson(data) {
 				if (!g.allExtension.employeeExtension.dataAccessGroupsForSnapshotDate) { GDAP = '' }
 				else { GDAP = g.allExtension.employeeExtension.dataAccessGroupsForSnapshotDate[0].dataAccessGroup }
 
-				if (g.allExtension.employeeExtension.telContactDataEntries){
-					g.allExtension.employeeExtension.telContactDataEntries.map(function(contact){
-						return "Type:" +contact.contactType + " Value " + contact.contactData + "SMS?: "+contact.smsswitch 
+				if (g.allExtension.employeeExtension.telContactDataEntries) {
+					g.allExtension.employeeExtension.telContactDataEntries.map(function (contact) {
+						return "Type:" + contact.contactType + " Value " + contact.contactData + "SMS?: " + contact.smsswitch
 
 					})
 				}
@@ -781,23 +809,23 @@ function parseInputJson(data) {
 					"MFA Required": g.allExtension.employeeExtension.mfaRequired,
 
 					"Birth Date": g.allExtension.employeeExtension.birthDate,
-					
+
 					"Certifications": Certifications,
-					"Skills":skills,
+					"Skills": skills,
 					"PCVP": PCVP,
-					
-					
-					
-					
+
+
+
+
 					"Display Profile": DisplayProfile,
 					"FAP": g.allExtension.employeeExtension.accessProfile,
 					"Delegate Profile": g.allExtension.employeeExtension.delegateProfile,
 					"Auth Type": g.allExtension.employeeExtension.authenticationType,
 					"Locale": g.allExtension.employeeExtension.localeProfile,
-					
+
 					"Notification Profile": g.allExtension.employeeExtension.notificationProfile,
-					
-					
+
+
 					"TimeZone": g.allExtension.employeeExtension.timeZone,
 					"Licenses": LicensesCSV,
 					"CustomData": CDATACSV,
@@ -806,16 +834,16 @@ function parseInputJson(data) {
 					"State": state,
 					"ZipCode": zipCode,
 					"Street": street,
-					
+
 					"Employee Schedule Group": ScheduleGroupEmp,
 					"ManagerID": g.allExtension.employeeExtension.supervisorPersonNumber,
-					
-					
+
+
 					"WorkerType": g.allExtension.timekeepingExtension.workerType,
-					
-					
+
+
 					"Emp Group": EmpGroup,
-					"Home Hyperfind":HomeHyperfind,
+					"Home Hyperfind": HomeHyperfind,
 					"Org Set": OrgSet,
 					"JTS": JTS,
 					"Default Activity": defaultActivityName,
