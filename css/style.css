@@ -722,7 +722,10 @@ font-size: max(1vh, 14px)
   background: rgb(255,0,0);
 }
 
-
+.htCore td.YellowCellBackground {
+  color: #000000;
+  background: rgb(255,255,0);
+}
 
 
 #hot_search_panel {
