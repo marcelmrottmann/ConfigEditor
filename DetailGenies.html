@@ -36,6 +36,28 @@
 
 <body style="background-image: url(../img/RequestManager.png);">
 
+<div id="PopUpLoader" style="
+z-index: 999999999;
+position: absolute;
+top: 5%;left:5%;
+width: 90%;height: 90%;
+border-color: black;
+border:3pt solid rgba(236,86 , 34, 1);
+background-color: white;">
+<span class="close" style="z-index: 9999999999;margin-right: 1%;" onclick="LoadingScreenModal('none')">&times;</span>
+<div style="overflow: hidden;
+z-index: 9999999999;
+height: 95%;
+width: 97.5%;
+top: 4%;
+position: absolute;
+left: 1.25%;">
+	<div id = "LoadingHandsOnTable"></div>
+
+</div>
+
+</div>
+
 	<div id="SideBar" class="sidenav">
 		<a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
 		<a href="#">
@@ -154,8 +176,8 @@
 			</div>
 			<div id="form-group-wrapper" class='form-group-wrapper'style = "width: 8%;">
 				<div id="form-wrapper">
-					<label for="DownloadNewFile">Save Changes</label>
-					<input id="DownloadNewFile" type="button" value="Save" />
+					<label for="DownloadNewFile">Upload</label>
+					<input id="DownloadNewFile" type="button" value="Upload" />
 				</div>
 			</div>
 			<div id="form-group-wrapper" class='form-group-wrapper' style="width: 20%;">
@@ -187,15 +209,16 @@
 						<input type="text" id="search_field" name="search_field">
 					</div>
 				</div>
+				<!--
 				<div id="form-group-wrapper" class='form-group-wrapper' style="width: 12%;">
 					<div id="form-wrapper">
 						<label for="REQUESTTYPE">Type</label>
 						<select id="REQUESTTYPE" class="form-control" type="text" style="width: 100%;">
 							<option value="Availability Requests"> Availability</option>
 							<option value="Open Shift Requests" >Open Shifts</option>
-							<!--
+							
 							<option value="Self Schedule Requests" >Self Schedule</option>
-						-->
+						
 							<option value="Shift Swap Requests" >Shift Swaps</option>
 							<option value="Time Off Requests" selected>Time Off</option>
 						</select>
