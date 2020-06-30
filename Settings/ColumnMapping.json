@@ -1,0 +1,467 @@
+[
+ {
+   "WFCNAME": "ABSENCE_EXCUSED",
+   "WFDNAME": "UNMAPPED",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "ABSENCE_UNEXCUSED",
+   "WFDNAME": "UNMAPPED",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "ACTIVE_BADGE_NUMBER",
+   "WFDNAME": "PEOPLE_BADGE_NUMBER",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "All_Accounts_Approved",
+   "WFDNAME": "UNMAPPED",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "ASSIGNED_MANAGER",
+   "WFDNAME": "PEOPLE_MANAGER_NAME",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "BRC_DEVICE_GROUP",
+   "WFDNAME": "UNMAPPED",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "CUSTOM_STRINGS",
+   "WFDNAME": "PEOPLE_CUSTOM",
+   "Property": "Response__WSADetailColumnSet__ColumnDetail__WSAColumnDetail__CustomData"
+ },
+ {
+   "WFCNAME": "EMAIL_ADDRESS",
+   "WFDNAME": "PEOPLE_EMAIL",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "EMPLOYEE_APPROVAL",
+   "WFDNAME": "TK_APPROVAL_STATUS_EMP",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "EMPLOYEE_CURRENCY_LOCALE",
+   "WFDNAME": "PEOPLE_USER_PREFERRED_CURRENCY",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "EMPLOYEE_ID",
+   "WFDNAME": "PEOPLE_PERSON_NUMBER",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "EMPLOYEE_JOB_TRANSFER_SET",
+   "WFDNAME": "PEOPLE_EMPLOYEE_JOB_TRANSFER_SET",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "EMPLOYEE_LABOR_LEVEL_TRANSFER_SET",
+   "WFDNAME": "PEOPLE_EMPLOYEE_LABOR_CATEGORY",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "EMPLOYEE_NAME",
+   "WFDNAME": "EMP_COMMON_FULL_NAME",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "EMPLOYEE_SCHEDULE_GROUP_NAME",
+   "WFDNAME": "PEOPLE_SCHEDULE_GROUP_ASSIGNMENT_NAME",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "EMPLOYEE_TERM",
+   "WFDNAME": "PEOPLE_EMP_TERM",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "EMPLOYEE_TERM_END_DATE",
+   "WFDNAME": "PEOPLE_EMP_TERM_END_DATE",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "EMPLOYEE_TERM_START_DATE",
+   "WFDNAME": "UNMAPPED",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "EXCEPTION",
+   "WFDNAME": "UNMAPPED",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "EXCEPTION_COUNTER",
+   "WFDNAME": "UNMAPPED",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "EXECUSED_ABSENCE_COUNTER",
+   "WFDNAME": "TK_EXCEPTIONCOUNT",
+   "Property": "EXCUSED_ABSENCE"
+ },
+ {
+   "WFCNAME": "EXPECTED_DAILY_HOURS",
+   "WFDNAME": "PEOPLE_EXPECTED_DAILY_HOURS",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "EXPECTED_PAY_PERIOD_HOURS",
+   "WFDNAME": "PEOPLE_EXPECTED_PAYPERIOD_HOURS",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "EXPECTED_WEEKLY_HOURS",
+   "WFDNAME": "PEOPLE_EXPECTED_WEEKLY_HOURS",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "FINGERSCAN_ENROLLED",
+   "WFDNAME": "PEOPLE_FINGERSCAN_ENROLLED",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "FINGERSCAN_IDENTIFICATION_ENROLLED",
+   "WFDNAME": "PEOPLE_FINGERSCAN_IDENTIFICATION_ENROLLED",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "FINGERSCAN_REQUIRED",
+   "WFDNAME": "PEOPLE_FINGERSCAN_REQUIRED",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "FURTHEST_PROJECTED_TAKING_DATE",
+   "WFDNAME": "UNMAPPED",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "GENERAL_EXCEPTION",
+   "WFDNAME": "UNMAPPED",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "GENERAL_UNMARKED_EXCEPTION",
+   "WFDNAME": "UNMAPPED",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "HIRE_DATE",
+   "WFDNAME": "PEOPLE_HIRE_DATE",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "HOME_ACCOUNT_DESCRIPTION",
+   "WFDNAME": "PEOPLE_HOME_LABOR_CATEGORY",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "HOME_ACCOUNT_NAME",
+   "WFDNAME": "PEOPLE_HOME_LABOR_CATEGORY",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "INDIVIDUAL_LABOR_LEVEL_DESCRIPTION",
+   "WFDNAME": "UNMAPPED",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "INDIVIDUAL_LABOR_LEVEL_NAME",
+   "WFDNAME": "UNMAPPED",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "INDIVIDUAL_PRIMARY_ORG_JOB_DESCRIPTION",
+   "WFDNAME": "UNMAPPED",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "INDIVIDUAL_PRIMARY_ORG_JOB_NAME",
+   "WFDNAME": "UNMAPPED",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "KSS_APPLYDATE",
+   "WFDNAME": "UNMAPPED",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "KSS_EMPLOYEE_RESPONSE",
+   "WFDNAME": "UNMAPPED",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "KSS_MANAGER_RESPONSE",
+   "WFDNAME": "UNMAPPED",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "KSS_REQUEST_STATUS",
+   "WFDNAME": "UNMAPPED",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "KSS_REQUEST_TYPE",
+   "WFDNAME": "UNMAPPED",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "KSSCOMMENTCOUNT_1",
+   "WFDNAME": "UNMAPPED",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "LABOR_ACCT_PROFILE",
+   "WFDNAME": "PEOPLE_MANAGER_LABOR_CATEGORY",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "LAST_TOTALIZATION_DATE",
+   "WFDNAME": "TK_LAST_TOTAL_CHANGE_TIME",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "MANAGER_APPROVAL",
+   "WFDNAME": "TK_APPROVAL_STATUS_MAN",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "MANAGER_JOB_TRANSFER_SET",
+   "WFDNAME": "PEOPLE_MANAGER_ACCESS_ORG_GROUP",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "MANAGER_LABOR_LEVEL_TRANSFER_SET",
+   "WFDNAME": "PEOPLE_MANAGER_LABOR_CATEGORY",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "ON_PREMISES",
+   "WFDNAME": "TK_ON_PREMISE",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "ORGANIZATIONAL_GROUP",
+   "WFDNAME": "PEOPLE_MANAGER_JOB_TRANSFER_SET",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "PAY_CODE_TOTAL_HOUR",
+   "WFDNAME": "TK_GENIE_ACTUAL_TOTAL_HOURS_EXCLUDE_CORRECTIONS",
+   "Property": "Response__WSADetailColumnSet__ColumnDetail__WSAColumnDetail__PayCode__WSADPPayCode__Name"
+ },
+ {
+   "WFCNAME": "PAY_CODE_TOTAL_DAY",
+   "WFDNAME": "TK_GENIE_ACTUAL_TOTAL_DAYS_EXCLUDE_CORRECTIONS",
+   "Property": "Response__WSADetailColumnSet__ColumnDetail__WSAColumnDetail__PayCode__WSADPPayCode__Name"
+ },
+ {
+   "WFCNAME": "PAY_CODE_TOTAL_MONEY",
+   "WFDNAME": "TK_GENIE_ACTUAL_TOTAL_MONEY_AMT_EXCLUDE_CORRECTIONS",
+   "Property": "Response__WSADetailColumnSet__ColumnDetail__WSAColumnDetail__PayCode__WSADPPayCode__Name"
+ },
+ {
+   "WFCNAME": "PAY_CODE_TOTAL_WITH_CORRECTIONS_HOUR",
+   "WFDNAME": "TK_GENIE_ACTUAL_TOTAL_HOURS",
+   "Property": "Response__WSADetailColumnSet__ColumnDetail__WSAColumnDetail__PayCode__WSADPPayCode__Name"
+ },
+ {
+   "WFCNAME": "PAY_CODE_TOTAL_WITH_CORRECTIONS_DAY",
+   "WFDNAME": "TK_GENIE_ACTUAL_TOTAL_DAYS",
+   "Property": "Response__WSADetailColumnSet__ColumnDetail__WSAColumnDetail__PayCode__WSADPPayCode__Name"
+ },
+ {
+   "WFCNAME": "PAY_CODE_TOTAL_WITH_CORRECTIONS_MONEY",
+   "WFDNAME": "TK_GENIE_ACTUAL_TOTAL_WAGES",
+   "Property": "Response__WSADetailColumnSet__ColumnDetail__WSAColumnDetail__PayCode__WSADPPayCode__Name"
+ },
+ {
+   "WFCNAME": "PAY_PERIOD_LOCKED",
+   "WFDNAME": "TK_APPROVAL_SUMMARY_PAY_PERIOD_LOCKED",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "PAY_RULE",
+   "WFDNAME": "PEOPLE_PAYRULE",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "PENDING_HISTORICAL_AMOUNT",
+   "WFDNAME": "UNMAPPED",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "PERIOD_ENDING_BALANCE_HOUR",
+   "WFDNAME": "TK_AS_DLY_SMRY_AVBL_BLNC_HOURS",
+   "Property": "Response__WSADetailColumnSet__ColumnDetail__WSAColumnDetail__AccrualCode__WSAAccrualCode__Name"
+ },
+ {
+   "WFCNAME": "PERIOD_ENDING_BALANCE_DAY",
+   "WFDNAME": "TK_AS_DLY_SMRY_AVBL_BLNC_DAYS",
+   "Property": "Response__WSADetailColumnSet__ColumnDetail__WSAColumnDetail__AccrualCode__WSAAccrualCode__Name"
+ },
+ {
+   "WFCNAME": "PERIOD_ENDING_BALANCE_MONEY",
+   "WFDNAME": "TK_AS_DLY_SMRY_AVBL_BLNC_MONEY_AMT",
+   "Property": "Response__WSADetailColumnSet__ColumnDetail__WSAColumnDetail__AccrualCode__WSAAccrualCode__Name"
+ },
+ {
+   "WFCNAME": "PHONE_NUMBER",
+   "WFDNAME": "PEOPLE_PHONE_NUMBER",
+   "Property": "Phone�1"
+ },
+ {
+   "WFCNAME": "PHONETIC_EMPLOYEE_NAME",
+   "WFDNAME": "UNMAPPED",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "PRIMARY_FINGER_THRESHOLD",
+   "WFDNAME": "PEOPLE_PRIMARY_FINGERSCAN_THRESHOLD",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "PRIMARY_FINGERSCAN_ENROLL_LOCATION",
+   "WFDNAME": "PEOPLE_PRIMARY_FINGERSCAN_ENROLL_LOCATION",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "PRIMARY_JOB",
+   "WFDNAME": "EMP_COMMON_PRIMARY_JOB",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "PRIMARY_JOB_DESCRIPTION",
+   "WFDNAME": "EMP_COMMON_PRIMARY_JOB_DESCRIPTION",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "PRIMARY_ORG",
+   "WFDNAME": "EMP_COMMON_PRIMARY_ORG",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "PRIMARY_ORG_DESCRIPTION",
+   "WFDNAME": "EMP_COMMON_PRIMARY_ORG_DESCRIPTION",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "PRIMARY_ORG_JOB",
+   "WFDNAME": "EMP_COMMON_PRIMARY_JOB",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "PRIMARY_ORG_JOB_DESCRIPTION",
+   "WFDNAME": "EMP_COMMON_PRIMARY_JOB_DESCRIPTION",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "PROCESS_TYPE",
+   "WFDNAME": "UNMAPPED",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "PROJECTED_CREDITS",
+   "WFDNAME": "UNMAPPED",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "PROJECTED_DEBITS",
+   "WFDNAME": "UNMAPPED",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "ROMAN_EMPLOYEE_NAME",
+   "WFDNAME": "UNMAPPED",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "SCHEDULES_UP_TO_DATE",
+   "WFDNAME": "UNMAPPED",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "SENIORITY_DATE",
+   "WFDNAME": "PEOPLE_SENIORITY_DATE",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "SHORT_NAME",
+   "WFDNAME": "PEOPLE_SHORT_NAME",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "SIGNED_OFF",
+   "WFDNAME": "TK_PREV_PAYPERIOD_SIGNEDOFF",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "TOKE_HRS_AFTER_FINAL",
+   "WFDNAME": "UNMAPPED",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "TOTALS_UP_TO_DATE",
+   "WFDNAME": "TK_APPROVAL_SUMMARY_TOTALS_UPDATED",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "TRANSFER_EMPLOYEE",
+   "WFDNAME": "UNMAPPED",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "UNAPPROVED_OVER_TIME",
+   "WFDNAME": "OTA_IS_PENDING",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "UNEXECUSED_ABSENCE_COUNTER",
+   "WFDNAME": "TK_EXCEPTIONCOUNT",
+   "Property": "UNEXCUSED_ABSENCE"
+ },
+ {
+   "WFCNAME": "UNRESOLVED_EXCEPTIONS_COUNTER",
+   "WFDNAME": "UNMAPPED",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "USER_NAME",
+   "WFDNAME": "PEOPLE_USER_ACCOUNT_NAME",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "WAGE_RATE",
+   "WFDNAME": "PEOPLE_HOURLY_WAGE_RATE",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "WFCNAME",
+   "WFDNAME": "WFDNAME",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "WORKER_TYPE",
+   "WFDNAME": "PEOPLE_WORKER_TYPE",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "WORKFLOW_MANAGER_PROFILE",
+   "WFDNAME": "PEOPLE_WORKFLOW_MANAGER_PROFILE",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "WORKFLOW_PROFESSIONAL_PROFILE",
+   "WFDNAME": "PEOPLE_WORKFLOW_EMPLOYEE_PROFILE",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "WORKFLOW_SUPERVISOR",
+   "WFDNAME": "UNMAPPED",
+   "Property": ""
+ }
+]
