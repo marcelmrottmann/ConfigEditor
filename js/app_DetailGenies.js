@@ -377,6 +377,7 @@ function parseInputJson(data) {
 				"Name": x.Response[1].WSADetail._attributes.Name,
 				"Description": x.Response[1].WSADetail._attributes.Description,
 				"DisplayName": x.Response[1].WSADetail._attributes.DisplayName,
+				"Category": "OTHER",
 				"Hyperfind": x.Response[1].WSADetail.DefaultHyperfindQuery.WSAHyperfindQuery._attributes.Name,
 				"TimePeriod": x.Response[1].WSADetail.DefaultTimePeriod.WSADPTimePeriod._attributes.Name,
 				"ColumnSetName": x.Response[1].WSADetail.ColumnSet.WSAWfgColumnSet._attributes.Name
@@ -387,13 +388,17 @@ function parseInputJson(data) {
 	for (let i = 0, l = DetailColumnSetData.root.Kronos_WFC.length; i < l; i++) {
 		x = DetailColumnSetData.root.Kronos_WFC[i]
 		for (let y = 0, z = x.Response[1].WSADetailColumnSet.ColumnDetail.WSAColumnDetail.length; y < z; y++) {
-			PayCodeName = ""
+			PayCodeName = null
 			if (x.Response[1].WSADetailColumnSet.ColumnDetail.WSAColumnDetail[y].PayCode) {
 				PayCodeName = x.Response[1].WSADetailColumnSet.ColumnDetail.WSAColumnDetail[y].PayCode.WSADPPayCode._attributes.Name
 			}
-			AccrualCodeName = ""
+			AccrualCodeName = null
 			if (x.Response[1].WSADetailColumnSet.ColumnDetail.WSAColumnDetail[y].AccrualCode) {
 				AccrualCodeName = x.Response[1].WSADetailColumnSet.ColumnDetail.WSAColumnDetail[y].AccrualCode.WSAAccrualCode._attributes.Name
+			}
+			Calculate = null
+			if (PayCodeName != null || AccrualCodeName != null) {
+				Calculate = "SUM"
 			}
 			ColumnSetList.push(
 				{
@@ -405,7 +410,9 @@ function parseInputJson(data) {
 					"ColumnLUID": x.Response[1].WSADetailColumnSet.ColumnDetail.WSAColumnDetail[y].ColumnDefinition.WSAColumnDefinition._attributes.Name,
 					"ColumnNumber": x.Response[1].WSADetailColumnSet.ColumnDetail.WSAColumnDetail[y]._attributes.VisualIndexNumber,
 					"PayCode": PayCodeName,
-					"AccrualCode": AccrualCodeName
+					"AccrualCode": AccrualCodeName,
+					"Parameter": PayCodeName || AccrualCodeName || "",
+					"Calculate": Calculate
 				})
 		}
 	}
@@ -495,11 +502,11 @@ function parseInputJson(data) {
 
 	for (let i = 0, l = global_data.Genies.length; i < l; i++) {
 		for (let y = 0, z = global_data.ColumnSets.length; y < z; y++) {
-			if (global_data.Genies[i].ColumnSetName == global_data.ColumnSets[y].ColumnSetName){
-				Object.assign(global_data.ColumnSets[y],global_data.Genies[i])
+			if (global_data.Genies[i].ColumnSetName == global_data.ColumnSets[y].ColumnSetName) {
+				Object.assign(global_data.ColumnSets[y], global_data.Genies[i])
 				complete.push(global_data.ColumnSets[y])
 			}
-			
+
 		}
 	}
 
@@ -536,19 +543,22 @@ function parseInputJson(data) {
 		"Name",
 		"DisplayName",
 		"Description",
+		"Category",
 		"Hyperfind",
 		"TimePeriod",
 		"ColumnSetName",
 		"ColumnSetDisplayName",
-		"ColumnSetDescription",		
+		"ColumnSetDescription",
 		"ColumnNumber",
 		"ColumnLabel",
 		"ColumnWidth",
 		"ColumnLUID",
-		"PayCode",
-		"AccrualCode"
-
+		//"PayCode",
+		//"AccrualCode",
+		"Calculate",
+		"Parameter"
 	]
+
 
 
 	console.log(FinalArray)
@@ -586,13 +596,13 @@ function parseInputJson(data) {
 	columneditorsettings = []
 	for (let i = 0, l = headers.length; i < l; i++) {
 		if (headers[i] == 'Description') { columneditorsettings.push({ data: headers[i], editor: 'text', width: 300 }) }
-		else if (headers[i] == 'ColumnSetDescription') { columneditorsettings.push({ data: headers[i], editor: 'text', width: 300 }) }
-		else if (headers[i] == 'jobCodeType') { columneditorsettings.push({ data: headers[i], type: 'dropdown', source: ['Worked', 'Primary', 'Specify'] }) }
-		else if (headers[i] == 'type') { columneditorsettings.push({ data: headers[i], type: 'dropdown', source: ['Addition', 'Flat Rate', 'Multiplier'] }) }
+		else if (headers[i] == 'ColumnSetDescription') { columneditorsettings.push({ data: headers[i], editor: 'text', width: 300, readOnly: true }) }
+		else if (headers[i] == 'Category') { columneditorsettings.push({ data: headers[i], type: 'dropdown', source: ["OTHER", "TIMEKEEPING", "SCHEDULING", "ATTENDANCE", "ANALYTICS", "LEAVE", "AUDIT", "WORK", "EMPLOYEE_SUMMARY"] }) }
+		else if (headers[i] == 'Calculate') { columneditorsettings.push({ data: headers[i], type: 'dropdown', source: ['SUM', 'AVG'] }) }
 		else if (headers[i] == 'adjustmentType') { columneditorsettings.push({ data: headers[i], type: 'dropdown', source: ['Bonus', 'Wage'] }) }
 		else if (headers[i] == 'oncePerDay' || headers[i] == 'overrideIfPrimaryJobSwitch' || headers[i] == 'useHighestWageSwitch' || headers[i] == 'matchAnywhere') { columneditorsettings.push({ data: headers[i], type: 'dropdown', source: ['true', 'false'] }) }
 
-		else { columneditorsettings.push({ data: headers[i], editor: 'text' }) }
+		else { columneditorsettings.push({ data: headers[i], editor: 'text', readOnly: true }) }
 		//else if (i == 4) { columneditorsettings.push({ data: headers[i], editor: CustomTextEditor }) }
 		//else if (i >= 5) { columneditorsettings.push({ data: headers[i], editor: 'text' }) }
 	}
@@ -635,8 +645,8 @@ function parseInputJson(data) {
 		rowHeaders: true,
 		colHeaders: headers,
 		columns: columneditorsettings,
-		contextMenu: ['cut', 'copy', 'row_above', 'row_below', 'remove_row', 'undo', 'redo'],
-		columnSorting: { sortEmptyCells: true },
+		contextMenu: ['cut', 'copy', 'undo', 'redo'],
+		columnSorting: false,
 		filters: true,
 		dropdownMenu: ['---------', 'filter_by_condition', 'filter_by_value', 'filter_action_bar'],
 		autocolumnsize: true,
@@ -828,15 +838,31 @@ document.getElementById("DownloadNewFile").addEventListener("click", function (c
 	loadingmodal.style.visibility = "visible";
 	setTimeout(downloadNewFile, 1000, change_data);
 })
+/*
 document.getElementById("DownloadFinalFile").addEventListener("click", function (change_data) {
 	loadingmodal.style.display = "block";
 	loadingmodal.style.visibility = "visible";
 	setTimeout(downloadNewFile, 1000, change_data);
 })
-
+*/
 //-------------------------------------------------------Save Changes to file-----------------------------------
 function downloadNewFile(change_data) {
 	//changedata.itemsRetrieveResponses = []
+	LoadingScreenModal('block')
+
+	var request = require('request');
+	var rp = require('request-promise')
+	AccessToken=""
+
+	LoadingHandsOnTable = document.getElementById('LoadingHandsOnTable')
+
+	Columns = [
+		{ data: headers[i], editor: 'text', readOnly: true }
+
+	]
+
+
+
 	console.log(changedata)
 	const fs = require('fs')
 	console.log(changedata)
@@ -844,15 +870,15 @@ function downloadNewFile(change_data) {
 	//var resultdata = hotdata.getData()
 	var ObjectArray = []
 
-	var OnlySaveFiltered = document.getElementById("OnlySaveFiltered").checked
+	//var OnlySaveFiltered = document.getElementById("OnlySaveFiltered").checked
 	hot2 = hotdata
 	console.log(hot)
 
-	if (OnlySaveFiltered == true) {
+	/*if (OnlySaveFiltered == true) {
 		hot2.getPlugin('Filters').clearConditions();
 		hot2.getPlugin('Filters').filter();
 	}
-
+	*/
 	resultdata = hot2.getData();
 	headers = hot2.getColHeader();
 
@@ -860,7 +886,7 @@ function downloadNewFile(change_data) {
 
 	console.log(resultdata)
 	console.log(headers)
-
+	ListOfDVs = []
 	for (let y = 0, x = resultdata.length; y < x; y++) {
 		for (let i = 0, l = headers.length; i < l; i++) {
 			if (i === 0) {
@@ -875,151 +901,234 @@ function downloadNewFile(change_data) {
 	}
 	console.log(ObjectArray)
 
-	//console.log(JSON.stringify(resultdata))
-	var ConvertedArray = []
-	var dataconvert = ObjectArray.map(function (x) {
-		name = encodeURI(x['@Name'])
 
-		/*
-			[
-			"adjustmentAllocation.adjustmentAllocation.bonusRateAmount",//
-			"adjustmentAllocation.adjustmentAllocation.adjustmentType",//
-			"adjustmentAllocation.adjustmentAllocation.oncePerDay",//
-			"adjustmentAllocation.adjustmentAllocation.payCode.qualifier",//
-			"adjustmentAllocation.adjustmentAllocation.payCode.name",//
-			"adjustmentAllocation.adjustmentAllocation.timePeriod",//
-			"adjustmentAllocation.adjustmentAllocation.jobCodeType",//
-			"jobOrLocation.qualifier",//
-			"jobOrLocation.name",//
-			"jobOrLocationEffectiveDate",//
-			"laborCategoryEntries",//
-			"versionNum",//
-			"matchAnywhere",//
-			"adjustmentAllocation.adjustmentAllocation.timeAmountMaximumTime",//
-			"adjustmentAllocation.adjustmentAllocation.bonusRateHourlyRate",//
-			"adjustmentAllocation.adjustmentAllocation.timeAmountMinimumTime",//
-			"adjustmentAllocation.adjustmentAllocation.amount",//
-			"adjustmentAllocation.adjustmentAllocation.overrideIfPrimaryJobSwitch",//
-			"adjustmentAllocation.adjustmentAllocation.type",//
-			"adjustmentAllocation.adjustmentAllocation.useHighestWageSwitch",//
-			"adjustmentAllocation.adjustmentAllocation.weekStart",//
-			"costCenter",//
-			"adjustmentAllocation.adjustmentAllocation.timeAmountMaximumAmount",//
-			"adjustmentAllocation.adjustmentAllocation.jobOrLocation.id",//
-			"adjustmentAllocation.adjustmentAllocation.jobOrLocation.qualifier",//
-			"adjustmentAllocation.adjustmentAllocation.jobOrLocation.name"//
-			]
-		*/
-
-		payCodesArray = 'Empty'
-		if (x.payCodes && (x.payCodes != null || x.payCodes != '')) {
-			payCodesArray = x.payCodes.split(',').map(function (x) {
-				y = {
-					"qualifier": x,
-					"name": x
-				}
-				return y
-			})
-		}
-
-		map =
+	ListOfDVs = []
+	for (let i = 0, l = ObjectArray.length; i < l; i++) {
+		DetailGenie =
 		{
-			"adjustmentAllocation": {
-				"adjustmentAllocation": {
-					"adjustmentType": x.adjustmentType,
-					//----------------------------------------------------------Bonus
-					"bonusRateAmount": x.bonusRateAmount,
-					"bonusRateHourlyRate": x.bonusRateHourlyRate,
-					"oncePerDay": x.oncePerDay,
-					"payCode": {
-						"qualifier": x.BonusPayCode,
-						"name": x.BonusPayCode
-					},
-					"timePeriod": x.timePeriod,
-					"weekStart": x.weekStart,
-					"jobCodeType": x.jobCodeType,
-					"jobOrLocation": {
-						"qualifier": x.SpecifiedJobOrLocation,
-						"name": x.SpecifiedJobOrLocation
-					},
-					"timeAmountMinimumTime": x.timeAmountMinimumTime,
-					"timeAmountMaximumAmount": x.timeAmountMaximumAmount,
-					"timeAmountMaximumTime": x.timeAmountMaximumTime,
-					//----------------------------------------------------------Wage
-					"amount": x.amount,
-					"type": x.type,
-					"overrideIfPrimaryJobSwitch": x.overrideIfPrimaryJobSwitch,
-					"useHighestWageSwitch": x.useHighestWageSwitch
-					//----------------------------------------------------------VersionNum
+			"Name": ObjectArray[i].DisplayName,
+			"Status": "None",
+			"Hyperfind": ObjectArray[i].Hyperfind,
+			"TimePeriod": ObjectArray[i].TimePeriod,
+			"Description": ObjectArray[i].Description,
+			"Category": ObjectArray[i].Category
 
-				}
-			},
-			"jobOrLocation": {
-				"qualifier": x.jobOrLocation,
-				"name": x.jobOrLocation
-			},
-			"jobOrLocationEffectiveDate": x.jobOrLocationEffectiveDate,
-			"laborCategoryEntries": x.laborCategoryEntries,
-			"matchAnywhere": x.matchAnywhere,
-			"costCenter": x.costCenter,
-			"payCodes": payCodesArray,
-			"versionNum": x.OrderNum
 		}
-		console.log(map.payCodes)
-		if (map.payCodes == 'Empty') {
-			delete map.payCodes
+		if (i == 0) {
+			ListOfDVs.push(DetailGenie)
 		}
+		else if (ObjectArray[i].DisplayName != ObjectArray[i - 1].DisplayName) {
+			ListOfDVs.push(DetailGenie)
+		}
+	}
+	ListOfDVs = Array.from(new Set(ListOfDVs))
+	console.log(ListOfDVs)
 
-		if (x.adjustmentType == "Bonus") {
-			delete map.adjustmentAllocation.adjustmentAllocation.amount
-			delete map.adjustmentAllocation.adjustmentAllocation.type
-			delete map.adjustmentAllocation.adjustmentAllocation.overrideIfPrimaryJobSwitch
-			delete map.adjustmentAllocation.adjustmentAllocation.useHighestWageSwitch
-			if (x.timeAmountMinimumTime == '' || x.timeAmountMinimumTime == null) { delete map.adjustmentAllocation.adjustmentAllocation.timeAmountMinimumTime }
-			if (x.timeAmountMaximumAmount == '' || x.timeAmountMaximumAmount == null) { delete map.adjustmentAllocation.adjustmentAllocation.timeAmountMaximumAmount }
-			if (x.timeAmountMaximumTime == '' || x.timeAmountMaximumTime == null) { delete map.adjustmentAllocation.adjustmentAllocation.timeAmountMaximumTime }
-			if (x.SpecifiedJobOrLocation == '' || x.SpecifiedJobOrLocation == null) { delete map.adjustmentAllocation.adjustmentAllocation.jobOrLocation }
-			if (x.weekStart == '' || x.weekStart == null) { delete map.adjustmentAllocation.adjustmentAllocation.weekStart }
-		}
-		if (x.adjustmentType == "Wage") {
-			delete map.adjustmentAllocation.adjustmentAllocation.bonusRateAmount
-			delete map.adjustmentAllocation.adjustmentAllocation.bonusRateHourlyRate
-			delete map.adjustmentAllocation.adjustmentAllocation.oncePerDay
-			delete map.adjustmentAllocation.adjustmentAllocation.payCode
-			delete map.adjustmentAllocation.adjustmentAllocation.timePeriod
-			delete map.adjustmentAllocation.adjustmentAllocation.weekStart
-			delete map.adjustmentAllocation.adjustmentAllocation.jobCodeType
-			delete map.adjustmentAllocation.adjustmentAllocation.jobOrLocation
-			delete map.adjustmentAllocation.adjustmentAllocation.timeAmountMinimumTime
-			delete map.adjustmentAllocation.adjustmentAllocation.timeAmountMaximumAmount
-			delete map.adjustmentAllocation.adjustmentAllocation.timeAmountMaximumTime
-		}
-		if (x.costCenter == '' || x.costCenter == null) {
-			delete map.costCenter
-		}
-		if (x.jobOrLocation == '' || x.jobOrLocation == null) {
-			map.jobOrLocation = {}
-		}
-		console.log(changedata)
-		console.log(SelectedRuleIndex)
-		console.log(SelectedVersionIndex)
 
-		if (typeof map != "undefined") {
-			console.log(JSON.stringify(map))
-			console.log(JSON.stringify(changedata))
-			changedata.itemsRetrieveResponses[SelectedRuleIndex].responseObjectNode.ruleVersions.adjustmentRuleVersion[SelectedVersionIndex].triggers.adjustmentTriggerForRule.push(map)
-			return map
-		}
 
+	Columns = [
+		{ data: "Status", editor: 'text', readOnly: true },
+		{ data: "Name", editor: 'text', readOnly: true }
+	]
+
+	ColumnHeaders = [
+		"Status", "Name"
+	]
+	var LoaderHOT = new Handsontable(LoadingHandsOnTable, {
+		data: ListOfDVs,
+		colHeaders: ColumnHeaders,
+		contextMenu: ['copy'],
+		columnSorting: false,
+		columns: Columns,
+		filters: true,
+		dropdownMenu: ['---------', 'filter_by_condition', 'filter_by_value', 'filter_action_bar'],
+		autocolumnsize: true,
+		autoRowSize: true,
+		manualRowResize: true,
+		manualColumnResize: true,
+		trimDropdown: true,
+		//fixedColumnsLeft: fixcolumns,
+		outsideClickDeselects: false,
+		wordWrap: false,
+		//hiddenColumns: hiddencolumn,
+		undo: true,
+		licenseKey: 'non-commercial-and-evaluation',
+		stretchH: 'all',
+		afterRender: CloseLoadingModal()
 	}
 	)
-	//Save Locally.
-	console.log(JSON.stringify(changedata))
-	console.log(changedata.itemsRetrieveResponses.length)
+
+	function Access2(z) {
+		var options = {
+			'method': 'POST',
+			'url': 'https://' + SelectedConnection.url + '/api/authentication/access_token',
+			'headers': {
+				'Content-Type': ['application/x-www-form-urlencoded'],
+				'appkey': SelectedConnection.appKey
+			},
+			form: {
+				'username': SelectedConnection.username,
+				'password': SelectedConnection.password,
+				'client_id': SelectedConnection.auth_ID,
+				'client_secret': SelectedConnection.auth_secret,
+				'grant_type': 'password',
+				'auth_chain': 'OAuthLdapService'
+			}
+		};
+		rp(options)
+			.then(function (parsedBody) {
+				console.log(parsedBody)
+				AccessToken = JSON.parse(parsedBody).access_token
+
+			})
+			.catch(function (err) {
+				window.alert('Login Failed ' + err.error)
+			});
+	}
+
+	Access2()
+
+
+	ListOfColumns = []
+	for (let i = 0, l = ObjectArray.length; i < l; i++) {
+
+
+		Column =
+		{
+			"GenieName": ObjectArray[i].DisplayName,
+			"Operation": ObjectArray[i].Calculate,
+			"ColumnData": {
+				"key": ObjectArray[i].ColumnLUID,
+				"alias": ObjectArray[i].ColumnLUID + "_" + ObjectArray[i].ColumnNumber,
+				"properties": [
+					{
+						"value": ObjectArray[i].Parameter
+					}
+				],
+				"label": ObjectArray[i].ColumnLabel,
+				"width": ObjectArray[i].ColumnWidth,
+				"selected": true
+			}
+		}
+		if (Column.ColumnData.properties[0].value == "" || Column.ColumnData.properties[0].value == null) { delete Column.ColumnData.properties }
+		ListOfColumns.push(Column)
+
+
+	}
+	FinalStuff = []
+	for (let i = 0, l = ListOfDVs.length; i < l; i++) {
+		//KVP = ListOfDVs[i].split('&--&')
+		map = {
+			"name": ListOfDVs[i].Name,
+			"consumer": "SPRING",
+			"content": {
+				"metadata": {
+					"label": ListOfDVs[i].Name,
+					"description": ListOfDVs[i].Description,
+					"uiView": "grid",
+					"groupedByColumnWidth": 150,
+					"applyRules": true
+				},
+				"from": {
+					"view": 0,
+					"employeeSet": {
+						"hyperfind": {
+							"id": 1
+						},
+						"dateRange": {
+							"symbolicPeriod": {
+								"id": 1
+							}
+						}
+					},
+					"viewPresentation": "People"
+				},
+				"select": [],
+				"reduce": [],
+				"options": {
+					"currencyType": "PREFERRED_CURRENCY",
+					"dataViewCategory": ListOfDVs[i].Category
+				}
+			}
+		}
+		console.log(map)
+
+		for (let y = 0, z = ListOfColumns.length; y < z; y++) {
+			if (ListOfDVs[i].Name == ListOfColumns[y].GenieName) {
+				if (ListOfColumns[y].ColumnData.key != "UNMAPPED" && ListOfColumns[y].ColumnData.key != "" && ListOfColumns[y].ColumnData.key != null) {
+					map.content.select.push(ListOfColumns[y].ColumnData)
+					if (ListOfColumns[y].ColumnData.properties) {
+						map.content.reduce.push(
+							{
+								"key": ListOfColumns[y].ColumnData.key,
+								"alias": ListOfColumns[y].ColumnData.alias,
+								"operation": ListOfColumns[y].Operation
+							}
+						)
+					}
+				}
+			}
+
+		}
+
+		FinalStuff.push(map)
+
+		LoadingData = LoaderHOT.getData()
+
+		for (let y = 0, z = LoadingData.length; y < z; y++) {
+			console.log()
+				if (LoadingData[y][1] ==  map.name){
+					LoaderHOT.setDataAtCell(y,0,"Pending")
+					LoaderHOT.setCellMeta(y,0,'className', 'YellowCellBackground')
+				}
+		}
+		console.log(AccessToken)
+		var options4 = {
+			'method': 'POST',
+			'url': 'https://' + SelectedConnection.url + "/api/v1/commons/dataviews",
+			'headers': {
+				'appkey': SelectedConnection.appKey,
+				'Authorization': AccessToken,
+				'Content-Type': ['application/json']
+			},
+			body: JSON.stringify(map)
+
+		};
+		rp(options4)
+						.then(function (parsedBody) {
+							console.log(parsedBody)
+							console.log(parsedBody.request.body)
+							for (let y = 0, z = LoadingData.length; y < z; y++) {
+								if (LoadingData[y][1] ==  JSON.parse(parsedBody.request.body).name){
+									LoaderHOT.setDataAtCell(y,0,parsedBody.request.body)
+									LoaderHOT.setCellMeta(y,0,'className', 'GreenCellBackground')
+									LoaderHOT.render()
+								}
+								
+						}
+						
+						})
+						.catch(function (err) {
+							console.log('fail')
+							console.log(err)
+							for (let y = 0, z = LoadingData.length; y < z; y++) {
+									if (LoadingData[y][1] ==  JSON.parse(err.options.body).name){
+										LoaderHOT.setDataAtCell(y,0,err.error)
+										LoaderHOT.setCellMeta(y,0,'className', 'RedCellBackground')
+										LoaderHOT.render()
+									}
+							}
+
+						});
+
+	}
+
+
+
+	console.log(FinalStuff)
+
 	fs.renameSync('./RESPONSEJSON/DVresponse.json', './RESPONSEJSON/DVresponse_old.json')
-	changedata.itemsRetrieveResponses =
-		Array.from(new Set(changedata.itemsRetrieveResponses))
-	fs.writeFileSync('./RESPONSEJSON/DVresponse.json', JSON.stringify(changedata));
+	fs.writeFileSync('./RESPONSEJSON/DVresponse.json', JSON.stringify(FinalStuff));
 	//End Save
 
 	//---------------------------------------------------New Zip Stuff---------------------------------------------------
@@ -1082,6 +1191,7 @@ document.getElementById("EditConnection").addEventListener("click", (function (x
 	document.getElementById("SideBarRight").style.width = "30%"
 
 	SelectedConnectionName = document.getElementById("Connection").options[document.getElementById("Connection").selectedIndex].value
+	console.log(SelectedConnectionName)
 	SelectedConnection = {}
 	for (let i = 0, l = global_data.length; i < l; i++) {
 		if (global_data[i].name == SelectedConnectionName) {
@@ -1187,3 +1297,11 @@ document.getElementById('AddPaycodeID').addEventListener('click', function (even
 		document.getElementById('Password').value = ''
 	}
 })
+
+
+function LoadingScreenModal(YN) {
+	document.getElementById('PopUpLoader').style.display = YN
+
+}
+
+LoadingScreenModal('none')
