@@ -3,6 +3,8 @@
 var hotdata;
 var changedata;
 var global_data;
+var change_data
+var connectionData
 var SDMZipFileName;
 var hot;
 var SelectedRuleIndex;
@@ -11,6 +13,8 @@ var currentFile;
 var paycodesResponse;
 var ExportConfig;
 const fs = require('fs')
+var request = require('request');
+var rp = require('request-promise')
 //-----------------------------------------Read Properties file function
 function readLines(input, func) {
 	var remaining = '';
@@ -47,17 +51,17 @@ function RefreshConnections(x) {
 	}
 	const fs = require('fs')
 	const config = require('./Settings/connections.json')
-	global_data = fs.readFileSync("./Settings/connections.json");
-	global_data = JSON.parse(global_data)
-	console.log(global_data)
-	for (let i = 0, l = global_data.length; i < l; i++) {
-		value = global_data[i].name
+	connectionData = fs.readFileSync("./Settings/connections.json");
+	connectionData = JSON.parse(connectionData)
+	console.log(connectionData)
+	for (let i = 0, l = connectionData.length; i < l; i++) {
+		value = connectionData[i].name
 		var x = document.getElementById("Connection");
 		var option = document.createElement("option");
 		option.text = value;
 		x.add(option);
 	}
-	if (SelectedRuleIndex == '' || SelectedRuleIndex == null || SelectedRuleIndex == 'Connection') { SelectedRuleIndex = global_data[0].name }
+	if (SelectedRuleIndex == '' || SelectedRuleIndex == null || SelectedRuleIndex == 'Connection') { SelectedRuleIndex = connectionData[0].name }
 	console.log(SelectedRuleIndex)
 	console.log(document.getElementById("Connection").value)
 	document.getElementById("Connection").value = SelectedRuleIndex
@@ -66,7 +70,7 @@ function RefreshConnections(x) {
 		SelectedConnectionName = document.getElementById("Connection").options[document.getElementById("Connection").selectedIndex].value
 	}
 	catch {
-		SelectedRuleIndex = global_data[0].name
+		SelectedRuleIndex = connectionData[0].name
 		document.getElementById("Connection").value = SelectedRuleIndex;
 		SelectedConnectionName = document.getElementById("Connection").options[document.getElementById("Connection").selectedIndex].value
 	}
@@ -74,9 +78,9 @@ function RefreshConnections(x) {
 
 
 	SelectedConnection = {}
-	for (let i = 0, l = global_data.length; i < l; i++) {
-		if (global_data[i].name == SelectedConnectionName) {
-			SelectedConnection = global_data[i]
+	for (let i = 0, l = connectionData.length; i < l; i++) {
+		if (connectionData[i].name == SelectedConnectionName) {
+			SelectedConnection = connectionData[i]
 		}
 	}
 
@@ -223,7 +227,7 @@ function parseInputJson(data) {
 
 
 
-
+/*
 	//var Handsontable = require('handsontable')
 	try {
 		var zip = new AdmZip(SDMZipFileName)
@@ -268,7 +272,7 @@ function parseInputJson(data) {
 
 
 	});
-
+*/
 
 	//-----------------------------------------------New XML STUFF---------------
 
@@ -697,110 +701,7 @@ function parseInputJson(data) {
 		hot.render();
 	});
 
-	//-------------------------------------------------Register Renderer
-	//Handsontable.renderers.registerRenderer('negativeValueRenderer', negativeValueRenderer);
 
-
-	//--------------------------------------------------Add paycode feature
-
-	document.getElementById('AddPaycode2').addEventListener('click', function (event) {
-		loadingmodal.style.display = "block";
-		loadingmodal.style.visibility = "visible";
-		setTimeout(AddPaycode, 1000, event);
-	})
-	function AddPaycode() {
-		//-------------Paycode Field Check
-		var AddPaycodeField = document.getElementById('paycode_name')
-		console.log(AddPaycodeField.value)
-		if (typeof AddPaycodeField.value == 'undefined' || AddPaycodeField.value == '' || AddPaycodeField.value == null) { window.alert('The Paycode field is empty'); CloseLoadingModal(); return }
-		//-------------Loader
-
-
-		var selected = hot.getSelected();
-
-		for (var index = 0; index < selected.length; index += 1) {
-			var item = selected[index];
-			var startRow = Math.min(item[0], item[2]);
-			var endRow = Math.max(item[0], item[2]);
-			var startCol = Math.min(item[1], item[3]);
-			var endCol = Math.max(item[1], item[3]);
-
-			for (var rowIndex = startRow; rowIndex <= endRow; rowIndex += 1) {
-				for (var columnIndex = startCol; columnIndex <= endCol; columnIndex += 1) {
-
-
-					currentValue = hot.getDataAtCell(rowIndex, columnIndex)
-					if (currentValue == '' || currentValue == null) {
-						FinalValue = AddPaycodeField.value
-					}
-					else {
-						FinalValue = currentValue + ',' + AddPaycodeField.value
-					}
-					FinalValue = FinalValue.split(',')
-					FinalValue = Array.from(new Set(FinalValue)).join(',')
-					FinalValue = FinalValue.replace(/(^[,\s]+)|([,\s]+$)/g, '')
-					FinalValue = FinalValue.replace(',,', ',')
-					hot.setDataAtCell(rowIndex, columnIndex, FinalValue);
-
-				}
-			}
-		}
-
-		hot.render();
-		CloseLoadingModal()
-	}
-
-	//----------------------------------------delete paycode feature---------------------------------------
-
-	document.getElementById('DeletePaycode').addEventListener('click', function (event) {
-		loadingmodal.style.display = "block";
-		loadingmodal.style.visibility = "visible";
-		setTimeout(DeletePayCode, 1000, event);
-	})
-	function DeletePayCode() {
-		//-------------Paycode Field Check
-		var AddPaycodeField = document.getElementById('paycode_name')
-		console.log(AddPaycodeField.value)
-		if (typeof AddPaycodeField.value == 'undefined' || AddPaycodeField.value == '' || AddPaycodeField.value == null) { window.alert('The Paycode field is empty'); CloseLoadingModal(); return }
-		//-------------Loader
-		var selected = hot.getSelected();
-		console.log(AddPaycodeField.value)
-
-		function DeleteData() {
-			AddPaycodeField = AddPaycodeField.value.toString()
-			for (var index = 0; index < selected.length; index += 1) {
-				var item = selected[index];
-				var startRow = Math.min(item[0], item[2]);
-				var endRow = Math.max(item[0], item[2]);
-				var startCol = Math.min(item[1], item[3]);
-				var endCol = Math.max(item[1], item[3]);
-
-				for (var rowIndex = startRow; rowIndex <= endRow; rowIndex += 1) {
-					for (var columnIndex = startCol; columnIndex <= endCol; columnIndex += 1) {
-						currentValue = hot.getDataAtCell(rowIndex, columnIndex)
-						console.log(rowIndex + '-' + columnIndex)
-						document.getElementById("myModalcontenttext").value = rowIndex + '-' + rowIndex
-						FinalValue = currentValue.replace(AddPaycodeField, '')
-						FinalValue = FinalValue.split(',')
-						FinalValue = Array.from(new Set(FinalValue)).join(',')
-						FinalValue = FinalValue.replace(/(^[,\s]+)|([,\s]+$)/g, '')
-						FinalValue = FinalValue.replace(',,', ',')
-
-						hot.setDataAtCell(rowIndex, columnIndex, FinalValue);
-
-
-					}
-				}
-			}
-		}
-
-		DeleteData()
-		hot.render()
-		CloseLoadingModal()
-	}
-
-
-	//Handsontable.hooks.add('afterRender', CloseLoadingModal());
 
 	//-------------------------------------------put data table into a global variable-----------------------------
 	console.log('got this far')
@@ -819,16 +720,6 @@ function parseInputJson(data) {
 	//console.log(changedata.itemsRetrieveResponses[SelectedRuleIndex].responseObjectNode.WSACFGPaycodeDistribution.DistributionAssignments.WSACFGDistributionAssignment.length)
 	console.log(changedata)
 
-	console.log(
-		changedata.itemsRetrieveResponses[SelectedRuleIndex].responseObjectNode.ruleVersions.adjustmentRuleVersion[SelectedVersionIndex].triggers.adjustmentTriggerForRule
-	)
-
-
-	changedata.itemsRetrieveResponses[SelectedRuleIndex].responseObjectNode.ruleVersions.adjustmentRuleVersion[SelectedVersionIndex].triggers.adjustmentTriggerForRule = []
-
-	console.log(changedata)
-	console.log(JSON.stringify(changedata))
-
 
 }
 //console.log(document.getElementById("example").Handsontable)
@@ -836,7 +727,7 @@ function parseInputJson(data) {
 document.getElementById("DownloadNewFile").addEventListener("click", function (change_data) {
 	loadingmodal.style.display = "block";
 	loadingmodal.style.visibility = "visible";
-	setTimeout(downloadNewFile, 1000, change_data);
+	setTimeout(Access2, 1000);
 })
 /*
 document.getElementById("DownloadFinalFile").addEventListener("click", function (change_data) {
@@ -846,8 +737,44 @@ document.getElementById("DownloadFinalFile").addEventListener("click", function 
 })
 */
 //-------------------------------------------------------Save Changes to file-----------------------------------
+
+function Access2(z) {
+	var options = {
+		'method': 'POST',
+		'url': 'https://' + SelectedConnection.url + '/api/authentication/access_token',
+		'headers': {
+			'Content-Type': ['application/x-www-form-urlencoded'],
+			'appkey': SelectedConnection.appKey
+		},
+		form: {
+			'username': SelectedConnection.username,
+			'password': SelectedConnection.password,
+			'client_id': SelectedConnection.auth_ID,
+			'client_secret': SelectedConnection.auth_secret,
+			'grant_type': 'password',
+			'auth_chain': 'OAuthLdapService'
+		}
+	};
+	rp(options)
+		.then(function (parsedBody) {
+			console.log(parsedBody)
+			AccessToken = JSON.parse(parsedBody).access_token
+			downloadNewFile(parsedBody)
+
+		})
+		.catch(function (err) {
+			console.log(err)
+			window.alert('Login Failed ' + err.error)
+		});
+}
+
+
+
+
 function downloadNewFile(change_data) {
+	AccessToken = JSON.parse(change_data).access_token
 	//changedata.itemsRetrieveResponses = []
+	console.log(AccessToken)
 	LoadingScreenModal('block')
 
 	var request = require('request');
@@ -958,35 +885,7 @@ function downloadNewFile(change_data) {
 	}
 	)
 
-	function Access2(z) {
-		var options = {
-			'method': 'POST',
-			'url': 'https://' + SelectedConnection.url + '/api/authentication/access_token',
-			'headers': {
-				'Content-Type': ['application/x-www-form-urlencoded'],
-				'appkey': SelectedConnection.appKey
-			},
-			form: {
-				'username': SelectedConnection.username,
-				'password': SelectedConnection.password,
-				'client_id': SelectedConnection.auth_ID,
-				'client_secret': SelectedConnection.auth_secret,
-				'grant_type': 'password',
-				'auth_chain': 'OAuthLdapService'
-			}
-		};
-		rp(options)
-			.then(function (parsedBody) {
-				console.log(parsedBody)
-				AccessToken = JSON.parse(parsedBody).access_token
 
-			})
-			.catch(function (err) {
-				window.alert('Login Failed ' + err.error)
-			});
-	}
-
-	Access2()
 
 
 	ListOfColumns = []
@@ -1088,7 +987,7 @@ function downloadNewFile(change_data) {
 			'url': 'https://' + SelectedConnection.url + "/api/v1/commons/dataviews",
 			'headers': {
 				'appkey': SelectedConnection.appKey,
-				'Authorization': AccessToken,
+				'Authorization':  JSON.parse(change_data).access_token,
 				'Content-Type': ['application/json']
 			},
 			body: JSON.stringify(map)
@@ -1097,10 +996,10 @@ function downloadNewFile(change_data) {
 		rp(options4)
 						.then(function (parsedBody) {
 							console.log(parsedBody)
-							console.log(parsedBody.request.body)
+							console.log(parsedBody)
 							for (let y = 0, z = LoadingData.length; y < z; y++) {
-								if (LoadingData[y][1] ==  JSON.parse(parsedBody.request.body).name){
-									LoaderHOT.setDataAtCell(y,0,parsedBody.request.body)
+								if (LoadingData[y][1] ==  JSON.parse(parsedBody).name){
+									LoaderHOT.setDataAtCell(y,0,"Successfully Imported")
 									LoaderHOT.setCellMeta(y,0,'className', 'GreenCellBackground')
 									LoaderHOT.render()
 								}
@@ -1133,21 +1032,6 @@ function downloadNewFile(change_data) {
 
 	//---------------------------------------------------New Zip Stuff---------------------------------------------------
 
-	console.log(change_data.target.id)
-	if (change_data.target.id == "DownloadFinalFile") {
-		var JSZip = require('jszip')
-		var saveAs = require('file-saver');
-		var zip = new JSZip();
-		if (ExportConfig == '' || ExportConfig == null) { ExportConfig = { "sourceTenantId": "192.168.33.10", "targetTenantId": "C:\\Users\\Marcel Rottmann\\Desktop\\ParagonTransferManager\\XML\\test\\test_1588315981.zip" } }
-		zip.file("ExportConfig.json", JSON.stringify(ExportConfig))
-		zip.folder("AdjustmentRule")
-		zip.folder("AdjustmentRule").file("response.json", JSON.stringify(changedata))
-		datetimestamp = Date.now()
-		zip.generateAsync({ type: "blob" })
-			.then(function (blob) {
-				saveAs(blob, "PCDEditorExport_" + datetimestamp + ".zip");
-			});
-	}
 
 	//---------------------------------------------------End of New Zip Stuff--------------------------------------------
 
@@ -1193,9 +1077,9 @@ document.getElementById("EditConnection").addEventListener("click", (function (x
 	SelectedConnectionName = document.getElementById("Connection").options[document.getElementById("Connection").selectedIndex].value
 	console.log(SelectedConnectionName)
 	SelectedConnection = {}
-	for (let i = 0, l = global_data.length; i < l; i++) {
-		if (global_data[i].name == SelectedConnectionName) {
-			SelectedConnection = global_data[i]
+	for (let i = 0, l = connectionData.length; i < l; i++) {
+		if (connectionData[i].name == SelectedConnectionName) {
+			SelectedConnection = connectionData[i]
 		}
 	}
 	document.getElementById('CName').value = SelectedConnection.name
@@ -1219,7 +1103,7 @@ document.getElementById('AddPaycodeID').addEventListener('click', function (even
 		cusername = document.getElementById('username').value
 		cPassword = document.getElementById('Password').value
 
-		global_data.push(
+		connectionData.push(
 			{
 				"name": CName,
 				"url": CURL,
@@ -1232,7 +1116,7 @@ document.getElementById('AddPaycodeID').addEventListener('click', function (even
 
 		)
 		fs = require('fs')
-		fs.writeFileSync('./Settings/connections.json', JSON.stringify(global_data));
+		fs.writeFileSync('./Settings/connections.json', JSON.stringify(connectionData));
 		RefreshConnections()
 		document.getElementById("SideBarRight").style.width = "0";
 		document.getElementById('HandsOnTableValue').style.display = "block"
@@ -1250,7 +1134,7 @@ document.getElementById('AddPaycodeID').addEventListener('click', function (even
 //--------------------------------------------PayCode QuickEdit
 document.getElementById('AddPaycodeID').addEventListener('click', function (event) {
 	if (AddOrEdit == 'Edit') {
-		console.log(global_data)
+		console.log(connectionData)
 		CName = document.getElementById('CName').value
 		CURL = document.getElementById('URL').value
 		cappKey = document.getElementById('appKey').value
@@ -1274,16 +1158,16 @@ document.getElementById('AddPaycodeID').addEventListener('click', function (even
 
 		SelectedConnectionName = document.getElementById("Connection").options[document.getElementById("Connection").selectedIndex].value
 		SelectedConnection = {}
-		for (let i = 0, l = global_data.length; i < l; i++) {
-			if (global_data[i].name == SelectedConnectionName) {
-				Object.assign(global_data[i], ConnectionDetails)
+		for (let i = 0, l = connectionData.length; i < l; i++) {
+			if (connectionData[i].name == SelectedConnectionName) {
+				Object.assign(connectionData[i], ConnectionDetails)
 			}
 		}
 
 
 
-		fs = require('fs')
-		fs.writeFileSync('./Settings/connections.json', JSON.stringify(global_data));
+		
+		fs.writeFileSync('./Settings/connections.json', JSON.stringify(connectionData));
 		RefreshConnections()
 		document.getElementById("SideBarRight").style.width = "0";
 		document.getElementById('HandsOnTableValue').style.display = "block"
