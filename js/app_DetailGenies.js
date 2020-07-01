@@ -12,6 +12,7 @@ var SelectedVersionIndex;
 var currentFile;
 var paycodesResponse;
 var ExportConfig;
+var DataDictionary;
 const fs = require('fs')
 var request = require('request');
 var rp = require('request-promise')
@@ -557,8 +558,8 @@ function parseInputJson(data) {
 		"ColumnLabel",
 		"ColumnWidth",
 		"ColumnLUID",
-		//"PayCode",
-		//"AccrualCode",
+		"PayCode",
+		"AccrualCode",
 		"Calculate",
 		"Parameter"
 	]
@@ -759,7 +760,7 @@ function Access2(z) {
 		.then(function (parsedBody) {
 			console.log(parsedBody)
 			AccessToken = JSON.parse(parsedBody).access_token
-			downloadNewFile(parsedBody)
+			GETDD(parsedBody)
 
 		})
 		.catch(function (err) {
@@ -768,18 +769,57 @@ function Access2(z) {
 		});
 }
 
+function GETDD (change_data){
+	AccessToken = JSON.parse(change_data).access_token
+	var options4 = {
+		'method': 'GET',
+		'url': 'https://' + SelectedConnection.url + "/api/v1/commons/data_dictionary/data_elements",
+		'headers': {
+			'appkey': SelectedConnection.appKey,
+			'Authorization':  JSON.parse(change_data).access_token,
+			'Content-Type': ['application/json']
+		}
+	};
+	rp(options4)
+					.then(function (parsedBody) {
+						console.log(parsedBody)
+						DataDictionary = JSON.parse(parsedBody)
+						console.log(DataDictionary)
+						downloadNewFile(AccessToken)
+						
+					})
+					.catch(function (err) {
+						console.log('fail')
+						console.log(err)
+						window.alert(err.error)
+
+					});
+
+
+}
 
 
 
 function downloadNewFile(change_data) {
-	AccessToken = JSON.parse(change_data).access_token
+	AccessToken = change_data
+	PayCodeKeys = []
+	AccrualCodeKeys = []
+	for (let y = 0, x = DataDictionary.length; y < x; y++) {
+		if (DataDictionary[y].key == "TK_GENIE_ACTUAL_TOTAL_DAYS"){
+			PayCodeKeys = DataDictionary[y].properties
+		}
+		if (DataDictionary[y].key == "TK_AS_DLY_SMRY_AVBL_BLNC_DAYS"){
+			AccrualCodeKeys = DataDictionary[y].properties
+		}
+	}
+	console.log(PayCodeKeys,AccrualCodeKeys)
 	//changedata.itemsRetrieveResponses = []
 	console.log(AccessToken)
 	LoadingScreenModal('block')
 
 	var request = require('request');
 	var rp = require('request-promise')
-	AccessToken=""
+	
 
 	LoadingHandsOnTable = document.getElementById('LoadingHandsOnTable')
 
@@ -890,7 +930,21 @@ function downloadNewFile(change_data) {
 
 	ListOfColumns = []
 	for (let i = 0, l = ObjectArray.length; i < l; i++) {
-
+		Parameter = {}
+		if (ObjectArray[i].PayCode != "" && ObjectArray[i].PayCode != null){
+			for (let y = 0, z = PayCodeKeys.length; y < z; y++) {
+				if (ObjectArray[i].PayCode == PayCodeKeys[y].value){
+					Parameter = PayCodeKeys[y]
+				}
+			}
+		}
+		else if (ObjectArray[i].AccrualCode != "" && ObjectArray[i].AccrualCode != null){
+			for (let y = 0, z = AccrualCodeKeys.length; y < z; y++) {
+				if (ObjectArray[i].AccrualCode == AccrualCodeKeys[y].value){
+					Parameter = AccrualCodeKeys[y]
+				}
+			}
+		}
 
 		Column =
 		{
@@ -899,11 +953,7 @@ function downloadNewFile(change_data) {
 			"ColumnData": {
 				"key": ObjectArray[i].ColumnLUID,
 				"alias": ObjectArray[i].ColumnLUID + "_" + ObjectArray[i].ColumnNumber,
-				"properties": [
-					{
-						"value": ObjectArray[i].Parameter
-					}
-				],
+				"properties": [Parameter],
 				"label": ObjectArray[i].ColumnLabel,
 				"width": ObjectArray[i].ColumnWidth,
 				"selected": true
@@ -987,7 +1037,7 @@ function downloadNewFile(change_data) {
 			'url': 'https://' + SelectedConnection.url + "/api/v1/commons/dataviews",
 			'headers': {
 				'appkey': SelectedConnection.appKey,
-				'Authorization':  JSON.parse(change_data).access_token,
+				'Authorization': AccessToken,
 				'Content-Type': ['application/json']
 			},
 			body: JSON.stringify(map)
