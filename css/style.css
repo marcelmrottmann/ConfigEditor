@@ -726,6 +726,11 @@ font-size: max(1vh, 14px)
   color: #000000;
   background: rgb(255,255,0);
 }
+.htCore td.BlueCellBackground {
+  color: #000000;
+  background: rgb(51,255,255);
+}
+
 
 
 #hot_search_panel {
