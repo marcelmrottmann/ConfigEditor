@@ -228,52 +228,52 @@ function parseInputJson(data) {
 
 
 
-/*
-	//var Handsontable = require('handsontable')
-	try {
-		var zip = new AdmZip(SDMZipFileName)
-		var zipEntries = zip.getEntries();
-		console.log(zipEntries)
-		// an array of ZipEntry records
-	}
-	catch { window.alert("File not found"); CloseLoadingModal(); return; }
-
-	zipEntries.forEach(function (zipEntry) {
-		console.log(zipEntry.entryName)
-		if (zipEntry.entryName == "DATA_VIEWS\\response.json" || zipEntry.entryName == "DATA_VIEWS\response.json" || zipEntry.entryName == "DATA_VIEWS/response.json") {
-			var decompressedData = zip.readFile(zipEntry);
-			var data = zip.readAsText(zipEntry)
-			console.log(JSON.parse(data));
-			global_data = JSON.parse(data)
-
-		}
-
-		if (zipEntry.entryName == "WSAPayCode\\response.json" || zipEntry.entryName == "WSAPayCode/response.json") {
-			var decompressedData = zip.readFile(zipEntry);
-			paycodesResponse = zip.readAsText(zipEntry)
-			console.log(JSON.parse(paycodesResponse));
-			paycodesResponse = JSON.parse(paycodesResponse)
-		}
-
-
-		else if (zipEntry.entryName == "ExportConfig.json") {
-			var decompressedData = zip.readFile(zipEntry);
-			var exportdata = zip.readAsText(zipEntry)
-			console.log(JSON.parse(exportdata));
-			ExportConfig = JSON.parse(exportdata)
-
-
-		}
-		const fs = require('fs')
+	/*
+		//var Handsontable = require('handsontable')
 		try {
-			fs.renameSync('./RESPONSEJSON/DVresponse.json', './RESPONSEJSON/DVresponse_old.json')
+			var zip = new AdmZip(SDMZipFileName)
+			var zipEntries = zip.getEntries();
+			console.log(zipEntries)
+			// an array of ZipEntry records
 		}
-		catch { 'file not found for rename' }
-		fs.writeFileSync('./RESPONSEJSON/DVresponse.json', JSON.stringify(global_data));
-
-
-	});
-*/
+		catch { window.alert("File not found"); CloseLoadingModal(); return; }
+	
+		zipEntries.forEach(function (zipEntry) {
+			console.log(zipEntry.entryName)
+			if (zipEntry.entryName == "DATA_VIEWS\\response.json" || zipEntry.entryName == "DATA_VIEWS\response.json" || zipEntry.entryName == "DATA_VIEWS/response.json") {
+				var decompressedData = zip.readFile(zipEntry);
+				var data = zip.readAsText(zipEntry)
+				console.log(JSON.parse(data));
+				global_data = JSON.parse(data)
+	
+			}
+	
+			if (zipEntry.entryName == "WSAPayCode\\response.json" || zipEntry.entryName == "WSAPayCode/response.json") {
+				var decompressedData = zip.readFile(zipEntry);
+				paycodesResponse = zip.readAsText(zipEntry)
+				console.log(JSON.parse(paycodesResponse));
+				paycodesResponse = JSON.parse(paycodesResponse)
+			}
+	
+	
+			else if (zipEntry.entryName == "ExportConfig.json") {
+				var decompressedData = zip.readFile(zipEntry);
+				var exportdata = zip.readAsText(zipEntry)
+				console.log(JSON.parse(exportdata));
+				ExportConfig = JSON.parse(exportdata)
+	
+	
+			}
+			const fs = require('fs')
+			try {
+				fs.renameSync('./RESPONSEJSON/DVresponse.json', './RESPONSEJSON/DVresponse_old.json')
+			}
+			catch { 'file not found for rename' }
+			fs.writeFileSync('./RESPONSEJSON/DVresponse.json', JSON.stringify(global_data));
+	
+	
+		});
+	*/
 
 	//-----------------------------------------------New XML STUFF---------------
 
@@ -336,7 +336,7 @@ function parseInputJson(data) {
 	PayCodeData = JSON.parse(convert.xml2json(PayCodeData, { compact: true, spaces: 4 }))
 
 	Mapping = JSON.parse(fs.readFileSync('./Settings/ColumnMapping.json'))
-
+	ExceptionMapping = JSON.parse(fs.readFileSync('./Settings/ExceptionsMapping.json'))
 	console.log(AccrualCodeData, CombinedPayCodeData, DetailColumnSetData, DetailGenieData, PayCodeData)
 	console.log(JSON.stringify(DetailColumnSetData))
 
@@ -401,9 +401,27 @@ function parseInputJson(data) {
 			if (x.Response[1].WSADetailColumnSet.ColumnDetail.WSAColumnDetail[y].AccrualCode) {
 				AccrualCodeName = x.Response[1].WSADetailColumnSet.ColumnDetail.WSAColumnDetail[y].AccrualCode.WSAAccrualCode._attributes.Name
 			}
+			ExceptionCodeName = null
+			if (x.Response[1].WSADetailColumnSet.ColumnDetail.WSAColumnDetail[y].ExceptionType) {
+				ExceptionCodeName = x.Response[1].WSADetailColumnSet.ColumnDetail.WSAColumnDetail[y].ExceptionType.WSAExceptionType._attributes.ShortName
+				InPunchType = x.Response[1].WSADetailColumnSet.ColumnDetail.WSAColumnDetail[y]._attributes.InPunchType
+				for (let y = 0, z = ExceptionMapping.length; y < z; y++) {
+					if (ExceptionCodeName == ExceptionMapping[y].WFCNAME && InPunchType == ExceptionMapping[y].LUPARAM) {
+						ExceptionCodeName = ExceptionMapping[y].WFDNAME
+					}
+					else if (ExceptionCodeName == ExceptionMapping[y].WFCNAME && InPunchType != ExceptionMapping[y].LUPARAM && ExceptionMapping[y].LUPARAM == "NONE"){
+
+						ExceptionCodeName = ExceptionMapping[y].WFDNAME
+
+					}
+				}
+			}
+
+
 			Calculate = null
-			if (PayCodeName != null || AccrualCodeName != null) {
+			if (PayCodeName != null || AccrualCodeName != null || ExceptionCodeName!= null ) {
 				Calculate = "SUM"
+
 			}
 			ColumnSetList.push(
 				{
@@ -417,7 +435,9 @@ function parseInputJson(data) {
 					"PayCode": PayCodeName,
 					"AccrualCode": AccrualCodeName,
 					"Parameter": PayCodeName || AccrualCodeName || "",
-					"Calculate": Calculate
+					"Calculate": Calculate,
+					"CustomString": x.Response[1].WSADetailColumnSet.ColumnDetail.WSAColumnDetail[y]._attributes.CustomData,
+					"Exception": ExceptionCodeName
 				})
 		}
 	}
@@ -450,8 +470,16 @@ function parseInputJson(data) {
 
 	for (let i = 0, l = ColumnSetList.length; i < l; i++) {
 		for (let y = 0, z = Mapping.length; y < z; y++) {
-			if (ColumnSetList[i].ColumnLUID == Mapping[y].WFCNAME)
+			if (ColumnSetList[i].ColumnLUID == Mapping[y].WFCNAME){
 				ColumnSetList[i].ColumnLUID = Mapping[y].WFDNAME
+				if (ColumnSetList[i].ColumnLUID == "TK_EXCEPTIONCOUNT"
+				&& Mapping[y].Property!= null && Mapping[y].Property!="" ){
+					ColumnSetList[i].Exception = Mapping[y].Property
+					ColumnSetList[i].Calculate = "SUM"
+				}
+			}
+				
+			
 		}
 	}
 
@@ -560,8 +588,10 @@ function parseInputJson(data) {
 		"ColumnLUID",
 		"PayCode",
 		"AccrualCode",
-		"Calculate",
-		"Parameter"
+		"CustomString",
+		"Exception",
+		"Calculate"
+		//"Parameter"
 	]
 
 
@@ -769,31 +799,31 @@ function Access2(z) {
 		});
 }
 
-function GETDD (change_data){
+function GETDD(change_data) {
 	AccessToken = JSON.parse(change_data).access_token
 	var options4 = {
 		'method': 'GET',
 		'url': 'https://' + SelectedConnection.url + "/api/v1/commons/data_dictionary/data_elements",
 		'headers': {
 			'appkey': SelectedConnection.appKey,
-			'Authorization':  JSON.parse(change_data).access_token,
+			'Authorization': JSON.parse(change_data).access_token,
 			'Content-Type': ['application/json']
 		}
 	};
 	rp(options4)
-					.then(function (parsedBody) {
-						console.log(parsedBody)
-						DataDictionary = JSON.parse(parsedBody)
-						console.log(DataDictionary)
-						downloadNewFile(AccessToken)
-						
-					})
-					.catch(function (err) {
-						console.log('fail')
-						console.log(err)
-						window.alert(err.error)
+		.then(function (parsedBody) {
+			console.log(parsedBody)
+			DataDictionary = JSON.parse(parsedBody)
+			console.log(DataDictionary)
+			downloadNewFile(AccessToken)
 
-					});
+		})
+		.catch(function (err) {
+			console.log('fail')
+			console.log(err)
+			window.alert(err.error)
+
+		});
 
 
 }
@@ -804,22 +834,33 @@ function downloadNewFile(change_data) {
 	AccessToken = change_data
 	PayCodeKeys = []
 	AccrualCodeKeys = []
+	CustomStringKeys = []
+	ExceptionKeys = []
 	for (let y = 0, x = DataDictionary.length; y < x; y++) {
-		if (DataDictionary[y].key == "TK_GENIE_ACTUAL_TOTAL_DAYS"){
+		if (DataDictionary[y].key == "TK_GENIE_ACTUAL_TOTAL_DAYS") {
 			PayCodeKeys = DataDictionary[y].properties
 		}
-		if (DataDictionary[y].key == "TK_AS_DLY_SMRY_AVBL_BLNC_DAYS"){
+		if (DataDictionary[y].key == "TK_AS_DLY_SMRY_AVBL_BLNC_DAYS") {
 			AccrualCodeKeys = DataDictionary[y].properties
 		}
+		if (DataDictionary[y].key == "PEOPLE_CUSTOM") {
+			CustomStringKeys = DataDictionary[y].properties
+		}
+		if (DataDictionary[y].key == "TK_EXCEPTIONCOUNT") {
+			ExceptionKeys = DataDictionary[y].properties
+		}
+
+
+
 	}
-	console.log(PayCodeKeys,AccrualCodeKeys)
+	console.log(PayCodeKeys, AccrualCodeKeys, CustomStringKeys)
 	//changedata.itemsRetrieveResponses = []
 	console.log(AccessToken)
 	LoadingScreenModal('block')
 
 	var request = require('request');
 	var rp = require('request-promise')
-	
+
 
 	LoadingHandsOnTable = document.getElementById('LoadingHandsOnTable')
 
@@ -894,7 +935,7 @@ function downloadNewFile(change_data) {
 
 
 	Columns = [
-		{ data: "Status", editor: 'text', readOnly: true },
+		{ data: "Status", editor: 'text', readOnly: true, width:400 },
 		{ data: "Name", editor: 'text', readOnly: true }
 	]
 
@@ -931,20 +972,72 @@ function downloadNewFile(change_data) {
 	ListOfColumns = []
 	for (let i = 0, l = ObjectArray.length; i < l; i++) {
 		Parameter = {}
-		if (ObjectArray[i].PayCode != "" && ObjectArray[i].PayCode != null){
+		if (ObjectArray[i].PayCode != "" && ObjectArray[i].PayCode != null) {
 			for (let y = 0, z = PayCodeKeys.length; y < z; y++) {
-				if (ObjectArray[i].PayCode == PayCodeKeys[y].value){
+				if (ObjectArray[i].PayCode == PayCodeKeys[y].value) {
 					Parameter = PayCodeKeys[y]
 				}
 			}
 		}
-		else if (ObjectArray[i].AccrualCode != "" && ObjectArray[i].AccrualCode != null){
+		else if (ObjectArray[i].AccrualCode != "" && ObjectArray[i].AccrualCode != null) {
 			for (let y = 0, z = AccrualCodeKeys.length; y < z; y++) {
-				if (ObjectArray[i].AccrualCode == AccrualCodeKeys[y].value){
+				if (ObjectArray[i].AccrualCode == AccrualCodeKeys[y].value) {
 					Parameter = AccrualCodeKeys[y]
 				}
 			}
 		}
+		else if (ObjectArray[i].CustomString != "" && ObjectArray[i].CustomString != null) {
+			for (let y = 0, z = CustomStringKeys.length; y < z; y++) {
+				if (ObjectArray[i].CustomString == CustomStringKeys[y].value) {
+					Parameter = CustomStringKeys[y]
+				}
+			}
+		}
+		else if (ObjectArray[i].Exception != "" && ObjectArray[i].Exception != null) {
+			if (ObjectArray[i].Exception == "MISSED_IN_PUNCH&&MISSED_OUT_PUNCH"){
+
+
+				for (let y = 0, z = ExceptionKeys.length; y < z; y++) {
+					if (ObjectArray[i].Exception.split('&&')[0] == ExceptionKeys[y].value) {
+							Parameter = ExceptionKeys[y]
+						
+					}
+					else if (ObjectArray[i].Exception.split('&&')[1] == ExceptionKeys[y].value)
+					{
+						Parameter2 = ExceptionKeys[y]
+					}
+				
+				}
+
+			
+			}
+
+			else{
+			for (let y = 0, z = ExceptionKeys.length; y < z; y++) {
+				if (ObjectArray[i].Exception == ExceptionKeys[y].value) {
+						Parameter = ExceptionKeys[y]
+					}
+				}
+			}
+		}
+
+		if (ObjectArray[i].Exception != "" && ObjectArray[i].Exception != null && ObjectArray[i].Exception == "MISSED_IN_PUNCH&&MISSED_OUT_PUNCH"){
+			Column2 =
+			{
+				"GenieName": ObjectArray[i].DisplayName,
+				"Operation": ObjectArray[i].Calculate,
+				"ColumnData": {
+					"key": ObjectArray[i].ColumnLUID,
+					"alias": ObjectArray[i].ColumnLUID + "_" + ObjectArray[i].ColumnNumber + "IN",
+					"properties": [Parameter2],
+					"label": ObjectArray[i].ColumnLabel,
+					"width": ObjectArray[i].ColumnWidth,
+					"selected": true
+				}
+			}
+			ListOfColumns.push(Column2)
+		}
+
 
 		Column =
 		{
@@ -1006,7 +1099,7 @@ function downloadNewFile(change_data) {
 			if (ListOfDVs[i].Name == ListOfColumns[y].GenieName) {
 				if (ListOfColumns[y].ColumnData.key != "UNMAPPED" && ListOfColumns[y].ColumnData.key != "" && ListOfColumns[y].ColumnData.key != null) {
 					map.content.select.push(ListOfColumns[y].ColumnData)
-					if (ListOfColumns[y].ColumnData.properties) {
+					if (ListOfColumns[y].ColumnData.properties ) {
 						map.content.reduce.push(
 							{
 								"key": ListOfColumns[y].ColumnData.key,
@@ -1026,10 +1119,10 @@ function downloadNewFile(change_data) {
 
 		for (let y = 0, z = LoadingData.length; y < z; y++) {
 			console.log()
-				if (LoadingData[y][1] ==  map.name){
-					LoaderHOT.setDataAtCell(y,0,"Pending")
-					LoaderHOT.setCellMeta(y,0,'className', 'YellowCellBackground')
-				}
+			if (LoadingData[y][1] == map.name) {
+				LoaderHOT.setDataAtCell(y, 0, "Pending")
+				LoaderHOT.setCellMeta(y, 0, 'className', 'YellowCellBackground')
+			}
 		}
 		console.log(AccessToken)
 		var options4 = {
@@ -1044,31 +1137,39 @@ function downloadNewFile(change_data) {
 
 		};
 		rp(options4)
-						.then(function (parsedBody) {
-							console.log(parsedBody)
-							console.log(parsedBody)
-							for (let y = 0, z = LoadingData.length; y < z; y++) {
-								if (LoadingData[y][1] ==  JSON.parse(parsedBody).name){
-									LoaderHOT.setDataAtCell(y,0,"Successfully Imported")
-									LoaderHOT.setCellMeta(y,0,'className', 'GreenCellBackground')
-									LoaderHOT.render()
-								}
-								
+			.then(function (parsedBody) {
+				console.log(parsedBody)
+				console.log(parsedBody)
+				for (let y = 0, z = LoadingData.length; y < z; y++) {
+					if (LoadingData[y][1] == JSON.parse(parsedBody).name) {
+						LoaderHOT.setDataAtCell(y, 0, "Successfully Imported")
+						LoaderHOT.setCellMeta(y, 0, 'className', 'GreenCellBackground')
+						LoaderHOT.render()
+					}
+
+				}
+
+			})
+			.catch(function (err) {
+				console.log('fail')
+				console.log(err)
+				for (let y = 0, z = LoadingData.length; y < z; y++) {
+					if (LoadingData[y][1] == JSON.parse(err.options.body).name) {
+						LoaderHOT.setDataAtCell(y, 0, JSON.parse(err.error).errorCode + JSON.parse(err.error).message)
+						if (JSON.parse(err.error).errorCode ==  "WCO-106384"){
+							LoaderHOT.setCellMeta(y, 0, 'className', 'BlueCellBackground')
+
+						}
+						else{
+
+							LoaderHOT.setCellMeta(y, 0, 'className', 'RedCellBackground')
 						}
 						
-						})
-						.catch(function (err) {
-							console.log('fail')
-							console.log(err)
-							for (let y = 0, z = LoadingData.length; y < z; y++) {
-									if (LoadingData[y][1] ==  JSON.parse(err.options.body).name){
-										LoaderHOT.setDataAtCell(y,0,err.error)
-										LoaderHOT.setCellMeta(y,0,'className', 'RedCellBackground')
-										LoaderHOT.render()
-									}
-							}
+						LoaderHOT.render()
+					}
+				}
 
-						});
+			});
 
 	}
 
@@ -1216,7 +1317,7 @@ document.getElementById('AddPaycodeID').addEventListener('click', function (even
 
 
 
-		
+
 		fs.writeFileSync('./Settings/connections.json', JSON.stringify(connectionData));
 		RefreshConnections()
 		document.getElementById("SideBarRight").style.width = "0";
