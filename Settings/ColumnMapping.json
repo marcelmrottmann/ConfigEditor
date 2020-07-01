@@ -91,12 +91,12 @@
  },
  {
    "WFCNAME": "EXCEPTION",
-   "WFDNAME": "UNMAPPED",
+   "WFDNAME": "TK_EXCEPTIONCOUNT",
    "Property": ""
  },
  {
    "WFCNAME": "EXCEPTION_COUNTER",
-   "WFDNAME": "UNMAPPED",
+   "WFDNAME": "TK_EXCEPTIONCOUNT",
    "Property": ""
  },
  {
@@ -146,7 +146,7 @@
  },
  {
    "WFCNAME": "GENERAL_UNMARKED_EXCEPTION",
-   "WFDNAME": "UNMAPPED",
+   "WFDNAME": "TK_EXCEPTIONCOUNT",
    "Property": ""
  },
  {
@@ -407,6 +407,11 @@
  {
    "WFCNAME": "TOTALS_UP_TO_DATE",
    "WFDNAME": "TK_APPROVAL_SUMMARY_TOTALS_UPDATED",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "APPROVED_MANAGER_NAMES",
+   "WFDNAME": "TK_APPROVING_MANAGER_NAME",
    "Property": ""
  },
  {
