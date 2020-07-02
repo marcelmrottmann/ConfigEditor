@@ -66,6 +66,8 @@ function CloseLoadingModal() {
 }
 //DownloadCSV
 
+
+
 function reloadDropDown(x) {
 	console.log('trigger')
 	var request = require('request');
@@ -338,12 +340,12 @@ function parseInputJson(data) {
 
 		for (let i = 0, l = headers.length; i < l; i++) {
 			if (headers[i] == 'Action') { columneditorsettings.push({ data: headers[i], type: 'dropdown', source: ['None', 'Update'] }) }
-			else if (headers[i] == 'description') { columneditorsettings.push({ name: headers[i], data: headers[i], readOnly: true, width: '200' }) }
-			else if (headers[i] == "ItemList") { columneditorsettings.push({ name: headers[i], data: headers[i], readOnly: true, renderer: 'html' }) }
+			else if (headers[i] == 'description') { columneditorsettings.push({ name: headers[i], data: headers[i], readOnly: false, width: '200' }) }
+			else if (headers[i] == "ItemList") { columneditorsettings.push({ name: headers[i], data: headers[i], readOnly: false, renderer: 'html' }) }
 			//else if (headers[i] == "ExpirationDate") { columneditorsettings.push({ name: headers[i], data: headers[i], readOnly: false }) }
 			//else if (headers[i] == "EffectiveDate") { columneditorsettings.push({ name: headers[i], data: headers[i], readOnly: false }) }
 			//else if (headers[i] == "LastRevision") { columneditorsettings.push({ name: headers[i], data: headers[i], readOnly: false }) }
-			else { columneditorsettings.push({ name: headers[i], data: headers[i], readOnly: true }) }
+			else { columneditorsettings.push({ name: headers[i], data: headers[i], readOnly: false }) }
 		}
 
 		function checkRenderer(instance, td, row, col, prop, value, cellProperties) {
@@ -529,7 +531,7 @@ function parseInputJson(data) {
 
 document.getElementById("DownloadtoCSV").addEventListener('click', function () {
 	var exportPlugin = hotdata.getPlugin('exportFile');
-	exportPlugin.downloadFile('csv', { filename: RootNode, columnHeaders: true, });
+	exportPlugin.downloadFile('csv', { filename: "Mapping_Categories", columnHeaders: true, });
 });
 
 
