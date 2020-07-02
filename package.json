@@ -1,7 +1,7 @@
 {
   "name": "Configuration Editor",
   "displayName": "Configuration Editor",
-  "version": "1.0.35",
+  "version": "1.0.36",
   "description": "",
   "main": "index.html",
   "scripts": {
