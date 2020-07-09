@@ -904,7 +904,7 @@ function parseInputJson(data) {
 	for (let i = 0, l = headers.length; i < l; i++) {
 		if (headers[i] == 'timePeriod') { columneditorsettings.push({ data: headers[i], type: 'dropdown', source: ['Weekly', 'Shift', 'Pay Period'] }) }
 		else if (headers[i] == 'jobCodeType') { columneditorsettings.push({ data: headers[i], type: 'dropdown', source: ['Worked', 'Primary', 'Specify'] }) }
-		else if (headers[i] == 'type') { columneditorsettings.push({ data: headers[i], type: 'dropdown', source: ['Addition', 'Flat Rate', 'Multiplier'] }) }
+		else if (headers[i] == 'type') { columneditorsettings.push({ data: headers[i], type: 'dropdown', source: ['Addition', 'FlatRate', 'Multiplier'] }) }
 		else if (headers[i] == 'adjustmentType') { columneditorsettings.push({ data: headers[i], type: 'dropdown', source: ['Bonus', 'Wage'] }) }
 		else if (headers[i] == 'oncePerDay' || headers[i] == 'overrideIfPrimaryJobSwitch' || headers[i] == 'useHighestWageSwitch' || headers[i] == 'matchAnywhere') { columneditorsettings.push({ data: headers[i], type: 'dropdown', source: ['true', 'false'] }) }
 
