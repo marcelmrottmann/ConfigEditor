@@ -40,7 +40,7 @@ body{
 
 /* The navigation menu links */
 .sidenav a input {
-  padding: 8px 8px 8px 32px;
+  padding: 8px 8px 8px 16px;
   text-decoration: none;
   font-family: Garamond, Arial, sans-serif;
   font-size: 26px;
