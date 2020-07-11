@@ -8,7 +8,7 @@ var hot;
 var SelectedRuleIndex;
 var SelectedVersionIndex;
 var currentFile;
-var paycodesResponse;
+var shiftAssignmentResponse;
 var ExportConfig;
 
 //-----------------------------------------Read Properties file function
@@ -216,11 +216,11 @@ function parseInputJson(data) {
 
 			}
 
-			if (zipEntry.entryName == "WSAPayCode\\response.json" || zipEntry.entryName == "WSAPayCode/response.json") {
+			if (zipEntry.entryName == "ShiftSetAssignment\\response.json" || zipEntry.entryName == "ShiftSetAssignment/response.json" || zipEntry.entryName == "ShiftSetAssignment\response.json") {
 				var decompressedData = zip.readFile(zipEntry);
-				paycodesResponse = zip.readAsText(zipEntry)
-				console.log(JSON.parse(paycodesResponse));
-				paycodesResponse = JSON.parse(paycodesResponse)
+				shiftAssignmentResponse = zip.readAsText(zipEntry)
+				console.log(JSON.parse(shiftAssignmentResponse));
+				shiftAssignmentResponse = JSON.parse(shiftAssignmentResponse)
 			}
 
 
@@ -235,9 +235,11 @@ function parseInputJson(data) {
 			const fs = require('fs')
 			try {
 				fs.renameSync('./RESPONSEJSON/ShiftSet_WR.json', './RESPONSEJSON/ShiftSet_WR_old.json')
+				fs.renameSync('./RESPONSEJSON/ShiftSetAssignment_WR.json', './RESPONSEJSON/ShiftSetAssignment_WR_old.json')
 			}
 			catch { 'file not found for rename' }
 			fs.writeFileSync('./RESPONSEJSON/ShiftSet_WR.json', JSON.stringify(global_data));
+			fs.writeFileSync('./RESPONSEJSON/ShiftSetAssignment_WR.json', JSON.stringify(shiftAssignmentResponse));
 
 
 		});
@@ -245,6 +247,8 @@ function parseInputJson(data) {
 
 	data = global_data
 	//--------------------------------------------Store Data and check if empty-------------------------------
+
+
 
 
 
@@ -263,46 +267,76 @@ function parseInputJson(data) {
 	//-------------------------------------------------Filter Pay Codes and check if file exists
 	complete = []
 
-	for (let c = 0, d = data.itemsRetrieveResponses.length; c < d; c++) {
+	if (document.getElementById('ItemType').value == 'Assignment') {
+		for (let j = 0, k = shiftAssignmentResponse.itemsRetrieveResponses.length; j < k; j++) {
+			if (Array.isArray(shiftAssignmentResponse.itemsRetrieveResponses[j].responseObjectNode.ShiftSetAssignment.SDMLocationItems.SDMLocationItem) == false) {
+				shiftAssignmentResponse.itemsRetrieveResponses[j].responseObjectNode.ShiftSetAssignment.SDMLocationItems.SDMLocationItem =
+					[shiftAssignmentResponse.itemsRetrieveResponses[j].responseObjectNode.ShiftSetAssignment.SDMLocationItems.SDMLocationItem]
+			}
 
-		if (Array.isArray(data.itemsRetrieveResponses[c].responseObjectNode.StandardShiftSet.StandardShifts.StandardShift) != true) {
+			for (let n = 0, m = shiftAssignmentResponse.itemsRetrieveResponses[j].responseObjectNode.ShiftSetAssignment.SDMLocationItems.SDMLocationItem.length; n < m; n++) {
 
-			data.itemsRetrieveResponses[c].responseObjectNode.StandardShiftSet.StandardShifts.StandardShift =
-				[data.itemsRetrieveResponses[c].responseObjectNode.StandardShiftSet.StandardShifts.StandardShift]
+				complete.push(
+					{
+						"Name": shiftAssignmentResponse.itemsRetrieveResponses[j].itemDataInfo.title,
+						"LocationGUID": shiftAssignmentResponse.itemsRetrieveResponses[j].responseObjectNode.ShiftSetAssignment.SDMLocationItems.SDMLocationItem[n]['@Location'],
+						"QueryDateSpan": shiftAssignmentResponse.itemsRetrieveResponses[j].responseObjectNode.ShiftSetAssignment.SDMLocationItems.SDMLocationItem[n]['@QueryDateSpan']
+					}
+				)
 
+			}
 		}
+	}
+	else {
 
-		edata =
-			data.itemsRetrieveResponses[c]
-				.responseObjectNode
-				.StandardShiftSet
-				.StandardShifts
-				.StandardShift
+		for (let c = 0, d = data.itemsRetrieveResponses.length; c < d; c++) {
 
-		for (let e = 0, f = edata.length; e < f; e++) {
+			if (Array.isArray(data.itemsRetrieveResponses[c].responseObjectNode.StandardShiftSet.StandardShifts.StandardShift) != true) {
 
+				data.itemsRetrieveResponses[c].responseObjectNode.StandardShiftSet.StandardShifts.StandardShift =
+					[data.itemsRetrieveResponses[c].responseObjectNode.StandardShiftSet.StandardShifts.StandardShift]
 
-			console.log(data.itemsRetrieveResponses[c])
+			}
 
-
-			console.log(edata[e])
-
-
-
-
-
-
-
-			complete.push({
-				"Name": data.itemsRetrieveResponses[c].itemDataInfo.title,
-				"Description": data.itemsRetrieveResponses[c].responseObjectNode.StandardShiftSet['@Description'],
-				"Start": edata[e]['@BeginTime'] || "None",
-				"End": edata[e]['@EndTime'] || "None",
-				"ShiftName": edata[e]['@ShiftName'] || "None",
-			})
+			edata =
+				data.itemsRetrieveResponses[c]
+					.responseObjectNode
+					.StandardShiftSet
+					.StandardShifts
+					.StandardShift
 
 
 
+
+
+
+			for (let e = 0, f = edata.length; e < f; e++) {
+
+
+
+
+				console.log(data.itemsRetrieveResponses[c])
+
+
+				console.log(edata[e])
+
+
+
+
+
+
+
+				complete.push({
+					"Name": data.itemsRetrieveResponses[c].itemDataInfo.title,
+					"Description": data.itemsRetrieveResponses[c].responseObjectNode.StandardShiftSet['@Description'],
+					"Start": edata[e]['@BeginTime'] || "None",
+					"End": edata[e]['@EndTime'] || "None",
+					"ShiftName": edata[e]['@ShiftName'] || "None",
+				})
+
+
+
+			}
 		}
 	}
 
@@ -651,6 +685,160 @@ function downloadNewFile(change_data) {
 	changedata.itemsRetrieveResponses = []
 	console.log(changedata)
 
+	if (document.getElementById('ItemType').value == 'Assignment') {
+		changedata = {
+			"id": 326,
+			"name": "Workload Shift Sets Assignment",
+			"uniqueKey": "ShiftSetAssignment",
+			"itemsRetrieveResponseDTOs": [],
+			"itemsRetrieveResponses": [],
+			"additionalProperties": {},
+			"setupItemDTO": null,
+			"restProperties": null
+		}
+	
+		//console.log(JSON.stringify(resultdata))
+		var ConvertedArray = []
+		var WorkRuleNamesArray = []
+		var ShiftSets = []
+		for (let i = 0, l = ObjectArray.length; i < l; i++) {
+			x = ObjectArray[i]
+			WorkRuleNamesArray.push(x.Name)
+			ShiftSets.push(x)
+		}
+		var WorkRuleNamesArray = Array.from(new Set(WorkRuleNamesArray))
+		var ShiftSets = Array.from(new Set(ShiftSets))
+	
+	
+		console.log(ShiftSets)
+		for (let i = 0, l = WorkRuleNamesArray.length; i < l; i++) {
+			x = WorkRuleNamesArray[i].split('|')
+			name = encodeURIComponent(x[0])
+			console.log(x)
+			map =
+			{
+				"itemDataInfo": {
+					"title": x[0],
+					"key": name,
+					"env": null,
+					"urlparams": "ShiftSetName=" + x[0]
+				},
+				"responseObjectNode": {
+					"ShiftSetAssignment": {
+						"SDMLocationItems": {
+							"SDMLocationItem": []
+						},
+						"@ShiftSetName":x[0]
+					},
+					"@Status": "Success",
+					"@Action": "RetrieveForUpdate"
+				}
+			}
+
+			ConvertedArray.push(map)
+		}
+	
+	
+		changedata.itemsRetrieveResponses = Array.from(new Set(ConvertedArray))
+		console.log(ConvertedArray)
+		console.log(changedata)
+		InsertRuleIndex = ""
+	
+		for (let y = 0, z = ShiftSets.length; y < z; y++) {
+			InsertRuleIndex = ""
+			x = ShiftSets[y]
+			for (let i = 0, l = changedata.itemsRetrieveResponses.length; i < l; i++) {
+				if (x.Name == changedata.itemsRetrieveResponses[i].itemDataInfo.title) {
+					InsertRuleIndex = i
+				}
+				console.log(InsertRuleIndex)
+			}
+			console.log(ShiftSets[y])
+	
+			//window.alert(HCRULE,ZONERULE)
+	
+			map2 =
+			{
+				"@Location": x.LocationGUID,
+				"@QueryDateSpan": x.QueryDateSpan
+			}
+	
+	
+			console.log(map2)
+	
+			changedata.
+				itemsRetrieveResponses[InsertRuleIndex]
+				.responseObjectNode
+				.ShiftSetAssignment
+				.SDMLocationItems
+				.SDMLocationItem.push(map2)
+	
+			changedata.
+				itemsRetrieveResponses[InsertRuleIndex]
+				.responseObjectNode
+				.ShiftSetAssignment
+				.SDMLocationItems
+				.SDMLocationItem =
+				Array.from(new Set(changedata.
+					itemsRetrieveResponses[InsertRuleIndex]
+					.responseObjectNode
+					.ShiftSetAssignment
+					.SDMLocationItems
+					.SDMLocationItem))
+	
+			console.log(InsertRuleIndex)
+	
+	
+	
+		}
+	
+	
+	
+	
+		console.log(changedata)
+	
+		for (let y = 0, z = changedata.itemsRetrieveResponses.length; y < z; y++) {
+	
+			if (changedata.itemsRetrieveResponses[y].responseObjectNode.ShiftSetAssignment.SDMLocationItems.SDMLocationItem.length == 1) {
+				changedata.itemsRetrieveResponses[y].responseObjectNode.ShiftSetAssignment.SDMLocationItems.SDMLocationItem=
+				changedata.itemsRetrieveResponses[y].responseObjectNode.ShiftSetAssignment.SDMLocationItems.SDMLocationItem[0]
+			}
+		}
+	
+	
+	
+	
+	
+	
+		//Save Locally.
+		console.log(JSON.stringify(changedata))
+		console.log(changedata.itemsRetrieveResponses.length)
+		fs.renameSync('./RESPONSEJSON/ShiftSetAssignment_WR.json', './RESPONSEJSON/ShiftSetAssignment_WR_old.json')
+		changedata.itemsRetrieveResponses =
+			Array.from(new Set(changedata.itemsRetrieveResponses))
+		fs.writeFileSync('./RESPONSEJSON/ShiftSetAssignment_WR.json', JSON.stringify(changedata));
+		//End Save
+	
+		//---------------------------------------------------New Zip Stuff---------------------------------------------------
+	
+		console.log(change_data.target.id)
+		if (change_data.target.id == "DownloadFinalFile") {
+			var JSZip = require('jszip')
+			var saveAs = require('file-saver');
+			var zip = new JSZip();
+			if (ExportConfig == '' || ExportConfig == null) { ExportConfig = { "sourceTenantId": "192.168.33.10", "targetTenantId": "C:\\Users\\Marcel Rottmann\\Desktop\\ParagonTransferManager\\XML\\test\\test_1588315981.zip" } }
+			zip.file("ExportConfig.json", JSON.stringify(ExportConfig))
+			zip.folder("ShiftSetAssignment")
+			zip.folder("ShiftSetAssignment").file("response.json", JSON.stringify(changedata))
+			datetimestamp = Date.now()
+			zip.generateAsync({ type: "blob" })
+				.then(function (blob) {
+					saveAs(blob, "ConfigEditorExport_" + datetimestamp + ".zip");
+				});
+		}
+	}
+
+	else {
 	changedata = {
 		"id": 156,
 		"name": "Workload Shift Sets",
@@ -772,7 +960,7 @@ function downloadNewFile(change_data) {
 
 		if (changedata.itemsRetrieveResponses[y].responseObjectNode.StandardShiftSet.StandardShifts.StandardShift.length == 1) {
 			changedata.itemsRetrieveResponses[y].responseObjectNode.StandardShiftSet.StandardShifts.StandardShift =
-			changedata.itemsRetrieveResponses[y].responseObjectNode.StandardShiftSet.StandardShifts.StandardShift[0]
+				changedata.itemsRetrieveResponses[y].responseObjectNode.StandardShiftSet.StandardShifts.StandardShift[0]
 		}
 	}
 
@@ -807,6 +995,7 @@ function downloadNewFile(change_data) {
 				saveAs(blob, "ConfigEditorExport_" + datetimestamp + ".zip");
 			});
 	}
+}
 
 	//---------------------------------------------------End of New Zip Stuff--------------------------------------------
 
