@@ -273,7 +273,7 @@ function parseInputJson(data) {
 				shiftAssignmentResponse.itemsRetrieveResponses[j].responseObjectNode.ShiftSetAssignment.SDMLocationItems.SDMLocationItem =
 					[shiftAssignmentResponse.itemsRetrieveResponses[j].responseObjectNode.ShiftSetAssignment.SDMLocationItems.SDMLocationItem]
 			}
-
+			if (shiftAssignmentResponse.itemsRetrieveResponses[j].responseObjectNode.ShiftSetAssignment.SDMLocationItems.SDMLocationItem){
 			for (let n = 0, m = shiftAssignmentResponse.itemsRetrieveResponses[j].responseObjectNode.ShiftSetAssignment.SDMLocationItems.SDMLocationItem.length; n < m; n++) {
 
 				complete.push(
@@ -285,6 +285,17 @@ function parseInputJson(data) {
 				)
 
 			}
+
+		}
+		else {
+			complete.push(
+				{
+					"Name": shiftAssignmentResponse.itemsRetrieveResponses[j].itemDataInfo.title,
+					"LocationGUID": "",
+					"QueryDateSpan": ""
+				}
+			)
+		}
 		}
 	}
 	else {
