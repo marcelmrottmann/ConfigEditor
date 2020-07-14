@@ -261,7 +261,7 @@
  },
  {
    "WFCNAME": "PAY_CODE_TOTAL_MONEY",
-   "WFDNAME": "TK_GENIE_ACTUAL_TOTAL_MONEY_AMT_EXCLUDE_CORRECTIONS",
+   "WFDNAME": "TK_GENIE_ACTUAL_TOTAL_WAGES_EXCLUDE_CORRECTIONS",
    "Property": "Response__WSADetailColumnSet__ColumnDetail__WSAColumnDetail__PayCode__WSADPPayCode__Name"
  },
  {
@@ -371,6 +371,16 @@
  },
  {
    "WFCNAME": "PROJECTED_DEBITS",
+   "WFDNAME": "UNMAPPED",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "PROJECTED_CREDITS_DAY",
+   "WFDNAME": "UNMAPPED",
+   "Property": ""
+ },
+ {
+   "WFCNAME": "PROJECTED_DEBITS_DAY",
    "WFDNAME": "UNMAPPED",
    "Property": ""
  },
