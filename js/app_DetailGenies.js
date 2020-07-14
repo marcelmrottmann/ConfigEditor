@@ -9,6 +9,7 @@ var SDMZipFileName;
 var hot;
 var SelectedRuleIndex;
 var SelectedVersionIndex;
+var columneditorsettings;
 var currentFile;
 var paycodesResponse;
 var ExportConfig;
@@ -634,10 +635,11 @@ function parseInputJson(data) {
 		else if (headers[i] == 'ColumnSetDescription') { columneditorsettings.push({ data: headers[i], editor: 'text', width: 300, readOnly: true }) }
 		else if (headers[i] == 'Category') { columneditorsettings.push({ data: headers[i], type: 'dropdown', source: ["OTHER", "TIMEKEEPING", "SCHEDULING", "ATTENDANCE", "ANALYTICS", "LEAVE", "AUDIT", "WORK", "EMPLOYEE_SUMMARY"] }) }
 		else if (headers[i] == 'Calculate') { columneditorsettings.push({ data: headers[i], type: 'dropdown', source: ['SUM', 'AVG'] }) }
+		else if (headers[i] == 'ColumnLUID') { columneditorsettings.push({ data: headers[i], type: 'dropdown', source: [] }) }
 		else if (headers[i] == 'adjustmentType') { columneditorsettings.push({ data: headers[i], type: 'dropdown', source: ['Bonus', 'Wage'] }) }
 		else if (headers[i] == 'oncePerDay' || headers[i] == 'overrideIfPrimaryJobSwitch' || headers[i] == 'useHighestWageSwitch' || headers[i] == 'matchAnywhere') { columneditorsettings.push({ data: headers[i], type: 'dropdown', source: ['true', 'false'] }) }
 
-		else { columneditorsettings.push({ data: headers[i], editor: 'text', readOnly: true }) }
+		else { columneditorsettings.push({ data: headers[i], editor: 'text', readOnly: false }) }
 		//else if (i == 4) { columneditorsettings.push({ data: headers[i], editor: CustomTextEditor }) }
 		//else if (i >= 5) { columneditorsettings.push({ data: headers[i], editor: 'text' }) }
 	}
@@ -750,7 +752,7 @@ function parseInputJson(data) {
 	changedata = data
 	//console.log(changedata.itemsRetrieveResponses[SelectedRuleIndex].responseObjectNode.WSACFGPaycodeDistribution.DistributionAssignments.WSACFGDistributionAssignment.length)
 	console.log(changedata)
-
+	UpdateDropDownfromDD()
 
 }
 //console.log(document.getElementById("example").Handsontable)
@@ -815,6 +817,7 @@ function GETDD(change_data) {
 			console.log(parsedBody)
 			DataDictionary = JSON.parse(parsedBody)
 			console.log(DataDictionary)
+
 			downloadNewFile(AccessToken)
 
 		})
@@ -827,6 +830,80 @@ function GETDD(change_data) {
 
 
 }
+
+
+function UpdateDropDownfromDD(z) {
+	if (hotdata){
+	var options = {
+		'method': 'POST',
+		'url': 'https://' + SelectedConnection.url + '/api/authentication/access_token',
+		'headers': {
+			'Content-Type': ['application/x-www-form-urlencoded'],
+			'appkey': SelectedConnection.appKey
+		},
+		form: {
+			'username': SelectedConnection.username,
+			'password': SelectedConnection.password,
+			'client_id': SelectedConnection.auth_ID,
+			'client_secret': SelectedConnection.auth_secret,
+			'grant_type': 'password',
+			'auth_chain': 'OAuthLdapService'
+		}
+	};
+	rp(options)
+		.then(function (parsedBody) {
+			console.log(parsedBody)
+			AccessToken = JSON.parse(parsedBody).access_token
+			GETDDforDropdown(parsedBody)
+
+		})
+		.catch(function (err) {
+			console.log(err)
+			window.alert('Login Failed Could not Populate Dropdown for Key Names' + err.error)
+		});
+	}
+}
+
+function GETDDforDropdown(change_data) {
+	AccessToken = JSON.parse(change_data).access_token
+	var options4 = {
+		'method': 'GET',
+		'url': 'https://' + SelectedConnection.url + "/api/v1/commons/data_dictionary/data_elements",
+		'headers': {
+			'appkey': SelectedConnection.appKey,
+			'Authorization': JSON.parse(change_data).access_token,
+			'Content-Type': ['application/json']
+		}
+	};
+	rp(options4)
+		.then(function (parsedBody) {
+			console.log(parsedBody)
+			DataDictionary2 = JSON.parse(parsedBody)
+			console.log(DataDictionary2)
+			KeysFromDD = []
+			
+			for (let y = 0, x = DataDictionary2.length; y < x; y++) {
+				KeysFromDD.push(DataDictionary2[y].key)
+			}
+			KeysFromDD.push("UNMAPPED")
+			console.log(KeysFromDD)
+			columneditorsettings[12].source = KeysFromDD
+			hotdata.updateSettings({
+				columns:columneditorsettings
+			})
+
+
+		})
+		.catch(function (err) {
+			console.log('fail')
+			console.log(err)
+			window.alert(err.error)
+
+		});
+
+
+}
+
 
 
 
@@ -889,7 +966,7 @@ function downloadNewFile(change_data) {
 	*/
 	resultdata = hot2.getData();
 	headers = hot2.getColHeader();
-
+console.log(columneditorsettings)
 	//resultdata.splice(-1,1)
 
 	console.log(resultdata)
