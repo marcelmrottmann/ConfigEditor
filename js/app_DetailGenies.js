@@ -1099,7 +1099,7 @@ function downloadNewFile(change_data) {
 			if (ListOfDVs[i].Name == ListOfColumns[y].GenieName) {
 				if (ListOfColumns[y].ColumnData.key != "UNMAPPED" && ListOfColumns[y].ColumnData.key != "" && ListOfColumns[y].ColumnData.key != null) {
 					map.content.select.push(ListOfColumns[y].ColumnData)
-					if (ListOfColumns[y].ColumnData.properties ) {
+					if (ListOfColumns[y].ColumnData.properties && ListOfColumns[y].ColumnData.key != "PEOPLE_CUSTOM" ) {
 						map.content.reduce.push(
 							{
 								"key": ListOfColumns[y].ColumnData.key,
@@ -1266,7 +1266,7 @@ document.getElementById('AddPaycodeID').addEventListener('click', function (even
 			}
 
 		)
-		fs = require('fs')
+		if (!fs){fs = require('fs')}
 		fs.writeFileSync('./Settings/connections.json', JSON.stringify(connectionData));
 		RefreshConnections()
 		document.getElementById("SideBarRight").style.width = "0";
