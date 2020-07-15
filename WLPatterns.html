@@ -1,0 +1,317 @@
+<html>
+
+<head>
+	<meta name="viewport" content="width=device-width, user-scalable=yes">
+	<link rel="stylesheet" href="./node_modules/handsontable/dist/handsontable.full.css" rel="stylesheet">
+	<link href="./css/style.css" rel="stylesheet">
+	<title>WL Patterns</title>
+
+	<!-- The Modal -->
+	<div id="myModal" class="modal">
+		<!-- Modal content -->
+		<div id="myModalcontent" class="modal-content" style="height:80%">
+			<span class="close">&times;</span>
+			<embed src="./information/Detail to Dataview by Marcel Rottmann.pdf" width="100%" height="95%"></embed>
+			<p id="myModalcontenttext"></p>
+		</div>
+
+	</div>
+
+	<!-- The Loading Modal -->
+	<div id="loading" class="modal">
+		<!-- Modal content -->
+		<div id="loadingcontent" class="modal-content">
+			<span class="close">&times;</span>
+			<img src="./img/loading.gif" alt="Instructions">
+			<div id="loadingcontenttext" text>test</div>
+			<p id="myModalcontenttext"></p>
+		</div>
+
+	</div>
+
+</head>
+
+
+
+
+<body style="background-image: url(../img/RequestManager.png);">
+
+<div id="PopUpLoader" style="
+z-index: 999999999;
+position: absolute;
+top: 5%;left:5%;
+width: 90%;height: 90%;
+border-color: black;
+border:3pt solid rgba(236,86 , 34, 1);
+background-color: white;">
+<span class="close" style="z-index: 9999999999;margin-right: 1%;" onclick="LoadingScreenModal('none')">&times;</span>
+<div style="overflow: hidden;
+z-index: 9999999999;
+height: 95%;
+width: 97.5%;
+top: 4%;
+position: absolute;
+left: 1.25%;">
+	<div id = "LoadingHandsOnTable"></div>
+
+</div>
+
+</div>
+
+	<div id="SideBar" class="sidenav">
+		<a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+		<a href="#">
+			<form action="index.html">
+				<input type="submit" value="PCDs" />
+			</form>
+		</a>
+		<a href="#">
+			<form action="PayCodes.html">
+				<input type="submit" value="Pay Codes" />
+			</form>
+		</a>
+		<a href="#">
+			<form action="AdjustmentRules.html">
+				<input type="submit" value="Adjustment Rules" />
+			</form>
+		</a>
+		<a href="#">
+			<form action="Devices.html">
+				<input type="submit" value="Devices" />
+			</form>
+		</a>
+		<a href="#">
+			<form action="WorkRules.html">
+				<input type="submit" value="Work Rules" />
+			</form>
+		</a>
+		<a href="#">
+			<form action="RequestManager.html">
+				<input type="submit" value="Request Manager" />
+			</form>
+		</a>
+		<a href="#">
+			<form action="BSExtractor.html">
+				<input type="submit" value="BS Extracter" />
+			</form>
+		</a>
+		<a href="#">
+			<form action="PersonData.html">
+				<input type="submit" value="Person Data" />
+			</form>
+		</a>
+		<a href="#">
+			<form action="LCEL.html">
+				<input type="submit" value="LC Entry Lists" />
+			</form>
+		</a>
+		<a href="#">
+			<form action="DetailGenies.html">
+				<input type="submit" value="Detail Genie to DV" />
+			</form>
+		</a>
+		<a href="#">
+			<form action="HolidayProfiles.html">
+				<input type="submit" value="Holiday Profiles" />
+			</form>
+		</a>
+		<!--
+			 <a href="#">
+			<form action = "AccrualProfiles.html">
+			<input type="submit" value="Accrual Profiles"/>
+			</form>
+			</a>
+		-->
+	</div>
+		<div id ="SideBarRight" class = "sidenavRight">
+		
+ 			<a href="javascript:void(0)" class="closebtn" onclick="closeRight()">&times;</a>
+			<a href="#">
+				<label for="PCName" style="font-size: 3vh;">Add/Edit Connection</label>
+			</a>
+			<a href="#">
+				<label for="CName">Name unique to this connection</label><br>
+				<input type="text" id="CName" name="">
+			</a>
+			<a href="#">
+				<label for="URL">URL from Salesforce No Https://</label><br>
+				<input type="text" id="URL" value="">	
+			</a>
+			<a href="#">
+				<label for="appKey">App Key from My Apps</label><br>
+				<input type="text" id="appKey" value="">	
+			</a>
+			<a href="#">
+				<label for="auth_ID">Auth ID from Salesforce</label><br>
+				<input type="text" id="auth_ID" value="">	
+			</a>
+			<a href="#">
+				<label for="auth_secret">Auth Secret from Salesforce</label><br>
+				<input type="text" id="auth_secret" value="">	
+			</a>
+			<a href="#">
+				<label for="username">Username (not service-level)</label><br>
+				<input type="text" id="username" value="">	
+			</a>
+			<a href="#">
+				<label for="Password">Password</label><br>
+				<input type="text" id="Password" value=""">	
+			</a>
+			<a href="#">
+				<label for="search_field">Add/Edit Connection</label><br>
+				<input type="button" id="AddPaycodeID" value="Submit">	
+			</a>
+	   </div>
+	<header id="fullMenuBar">
+		<div class="form-group-wrapper-line" style="width:100%">
+			<div id = "hamburgermenuID" class="hamburgermenu" onclick="hamburgermenu(this)">
+  				<div class="bar1"></div>
+ 				<div class="bar2"></div>
+  				<div class="bar3"></div>
+			</div>		
+			<div class="logo" id="about">
+				<h1>WL Patterns</h1>
+			</div>
+			<div id="form-group-wrapper" class='form-group-wrapper' style = "width: 18%;">
+				<div id="form-wrapper-file" >
+					<label for="ChooseFile">Enter .Zip File Name Here</label>
+					<input id="ChooseFile" type="file" accept = ".zip" style ="top:-3; width:100%"/>
+				</div>
+			</div>
+			<div id="form-group-wrapper" class='form-group-wrapper' style = "width: 8%;">
+				<div id="form-wrapper">
+					<label for="UploadAndParse">Refresh data</label>
+					<input id="UploadAndParse" type="button" value="Refresh" />
+				</div>
+			</div>
+			<div id="form-group-wrapper" class='form-group-wrapper'style = "width: 8%;">
+				<div id="form-wrapper">
+					<label for="DownloadNewFile">Upload</label>
+					<input id="DownloadNewFile" type="button" value="Upload" />
+				</div>
+			</div>
+			<div id="form-group-wrapper" class='form-group-wrapper' style="width: 20%;">
+				<div id="form-wrapper">
+					<label for="Connection">Connection</label>
+					<select id="Connection" class="form-control" type="text" style="width: 100%;" onchange="RefreshConnections()">
+						<option value="Connection" selected disabled hidden>List of Connections</option>
+					</select>
+				</div>
+			</div>
+			<div id="form-group-wrapper" class='form-group-wrapper' style = "width: 9%;">
+				<div id="form-wrapper" >
+					<label for="AddPaycode">Add Connection</label>
+					<input id="AddPaycode" type="button" value="Add" />
+				</div>
+			</div>
+			<div id="form-group-wrapper" class='form-group-wrapper' style = "width: 9%;">
+				<div id="form-wrapper" >
+					<label for="EditConnection">Edit Connection</label>
+					<input id="EditConnection" type="button" value="Edit" />
+				</div>
+			</div>
+		</div>
+			<div class="form-group-wrapper-second-line">
+
+				<div id="form-group-wrapper" class='form-group-wrapper' style = "width: 15.5%;">
+					<div id="form-wrapper-text">
+						<label for="search_field">Search for</label><br>
+						<input type="text" id="search_field" name="search_field">
+					</div>
+				</div>
+				<!--
+				<div id="form-group-wrapper" class='form-group-wrapper' style="width: 12%;">
+					<div id="form-wrapper">
+						<label for="REQUESTTYPE">Type</label>
+						<select id="REQUESTTYPE" class="form-control" type="text" style="width: 100%;">
+							<option value="Availability Requests"> Availability</option>
+							<option value="Open Shift Requests" >Open Shifts</option>
+							
+							<option value="Self Schedule Requests" >Self Schedule</option>
+						
+							<option value="Shift Swap Requests" >Shift Swaps</option>
+							<option value="Time Off Requests" selected>Time Off</option>
+						</select>
+					</div>
+				</div>
+				<div id="form-group-wrapper" class='form-group-wrapper' style = "width: 10%;">
+					<div id="form-wrapper-text">
+						<label for="Hyperfind">Hyperfind</label><br>
+						<input type="text" id="Hyperfind" name="Hyperfind" value = "All Home">
+					</div>
+				</div>
+				<div id="form-group-wrapper" class='form-group-wrapper' style="width: 12%;">
+					<div id="form-wrapper">
+						<label for="Status">Status</label>
+						<select id="Status" class="form-control" type="text" style="width: 100%;">
+							<option value="INCOMPLETE" selected>Incomplete</option>
+							<option value="COMPLETE" >Complete</option>
+						</select>
+					</div>
+				</div>
+				<div id="form-group-wrapper" class='form-group-wrapper' style = "width: 10%;">
+					<div id="form-wrapper-text">
+						<label for="From Date">From Date</label><br>
+						<input type="text" id="From Date" name="From Date" value = "2020-01-01">
+					</div>
+				</div>
+				<div id="form-group-wrapper" class='form-group-wrapper' style = "width: 10%;">
+					<div id="form-wrapper-text">
+						<label for="To Date">From Date</label><br>
+						<input type="text" id="To Date" name="To Date" value = "2020-12-31">
+					</div>
+				</div>
+					<!--
+				<div id="form-group-wrapper" class='form-group-wrapper'>
+					<div id="form-wrapper" >
+						<label for="New Request">New Request</label>
+						<input id="New Request" type="button" value="Add" />
+					</div>
+				</div>
+			-->
+			</div>
+		</div>
+
+		
+
+
+		</div>
+		
+	</header>
+
+
+
+	<div id="load"></div>
+	<div id="HandsontableWrapper" class= "HandsontableWrapper">
+		<div id="HandsOnTableValue" style="width: 100%; height:50%"></div>
+	</div>
+	<script type="text/javascript" src="./js/app_WLPattern.js"></script>
+	<script src="./node_modules/handsontable/dist/handsontable.full.js"></script>
+
+
+
+
+
+</body>
+
+
+<script>
+	document.onreadystatechange = function () {
+	  var state = document.readyState
+	  console.log(state)
+	  if (state == 'interactive') {
+		   document.getElementById('HandsOnTableValue').style.visibility="hidden";
+	  } 
+	   else if (state == 'complete') {
+	
+			 document.getElementById('interactive');
+			 document.getElementById('load').style.visibility="hidden";
+			 document.getElementById('HandsOnTableValue').style.visibility="visible";
+		 
+	  }
+	}
+	</script>
+	
+
+
+</html>
