@@ -807,13 +807,14 @@ console.log(StandardShifts)
 		"Job",
 		"ScheduleZone",
 		"StandardShift",
+		"SUNDAY",
 		"MONDAY",
 		"TUESDAY",
 		"WEDNESDAY",
 		"THURSDAY",
 		"FRIDAY",
 		"SATURDAY",
-		"SUNDAY",
+
 		"HOLIDAY"
 	]
 
