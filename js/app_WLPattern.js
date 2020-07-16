@@ -45,6 +45,7 @@ function readLines(input, func) {
 function RefreshConnections(x) {
 
 	SelectedRuleIndex = document.getElementById("Connection").value
+	CurrentConnection = SelectedRuleIndex
 	var select = document.getElementById("Connection");
 	var length = select.options.length;
 	for (i = length - 1; i >= 0; i--) {
@@ -52,46 +53,217 @@ function RefreshConnections(x) {
 	}
 	const fs = require('fs')
 	const config = require('./Settings/connections.json')
-	connectionData = fs.readFileSync("./Settings/connections.json");
-	connectionData = JSON.parse(connectionData)
-	console.log(connectionData)
-	for (let i = 0, l = connectionData.length; i < l; i++) {
-		value = connectionData[i].name
+	global_data = fs.readFileSync("./Settings/connections.json");
+	global_data = JSON.parse(global_data)
+	console.log(global_data)
+	for (let i = 0, l = global_data.length; i < l; i++) {
+		value = global_data[i].name
 		var x = document.getElementById("Connection");
 		var option = document.createElement("option");
 		option.text = value;
 		x.add(option);
 	}
-	if (SelectedRuleIndex == '' || SelectedRuleIndex == null || SelectedRuleIndex == 'Connection') { SelectedRuleIndex = connectionData[0].name }
+	if (SelectedRuleIndex == '' || SelectedRuleIndex == null || SelectedRuleIndex == 'Connection') { SelectedRuleIndex = global_data[0].name }
 	console.log(SelectedRuleIndex)
 	console.log(document.getElementById("Connection").value)
 	document.getElementById("Connection").value = SelectedRuleIndex
 
-	try {
-		SelectedConnectionName = document.getElementById("Connection").options[document.getElementById("Connection").selectedIndex].value
-	}
-	catch {
-		SelectedRuleIndex = connectionData[0].name
-		document.getElementById("Connection").value = SelectedRuleIndex;
-		SelectedConnectionName = document.getElementById("Connection").options[document.getElementById("Connection").selectedIndex].value
-	}
-
-
-
+	SelectedConnectionName = document.getElementById("Connection").options[document.getElementById("Connection").selectedIndex].value
 	SelectedConnection = {}
-	for (let i = 0, l = connectionData.length; i < l; i++) {
-		if (connectionData[i].name == SelectedConnectionName) {
-			SelectedConnection = connectionData[i]
+	for (let i = 0, l = global_data.length; i < l; i++) {
+		if (global_data[i].name == SelectedConnectionName) {
+			SelectedConnection = global_data[i]
 		}
 	}
-
+	reloadDropDown()
 
 }
 
 
 RefreshConnections()
 
+function reloadDropDown(x) {
+	console.log('trigger')
+	var request = require('request');
+	var rp = require('request-promise')
+	SelectedConnectionName = document.getElementById("Connection").options[document.getElementById("Connection").selectedIndex].value
+	SelectedMapType = document.getElementById("Status").options[document.getElementById("Status").selectedIndex].value
+	SelectedConnection = {}
+	for (let i = 0, l = global_data.length; i < l; i++) {
+		if (global_data[i].name == SelectedConnectionName) {
+			SelectedConnection = global_data[i]
+		}
+	}
 
+
+	function GETBSROOTS(x) {
+		x = JSON.parse(x)
+
+		StartDate = document.getElementById("From Date").value
+		RootNode = document.getElementById("RootNode").value
+		AccessToken = x.access_token
+		BodyCreator = JSON.stringify(
+			{
+				"where": {
+					"query": {
+						"context": SelectedMapType,
+						"date": StartDate,
+						"q": "/"
+					}
+				}
+			}
+		)
+		console.log(BodyCreator)
+		console.log(SelectedConnection.url)
+		var options3 = {
+			'method': 'POST',
+			'url': 'https://' + SelectedConnection.url + '/api/v1/commons/locations/multi_read',
+			'headers': {
+				'appkey': SelectedConnection.appKey,
+				'Authorization': AccessToken,
+				'Content-Type': ['application/json']
+			},
+			body: BodyCreator
+
+		};
+		rp(options3)
+			.then(function (parsedBody) {
+				console.log(parsedBody)
+				parseresponse = JSON.parse(parsedBody)
+				var select = document.getElementById("RootNode");
+				var length = select.options.length;
+				RootNodeOptions = []
+				for (i = length - 1; i >= 0; i--) {
+					select.options[i] = null;
+					RootNodeOptions = []
+				}
+
+				for (let i = 0, l = parseresponse.length; i < l; i++) {
+					value = parseresponse[i].name
+					var x = document.getElementById("RootNode");
+					var option = document.createElement("option");
+					option.text = value;
+					RootNodeOptions.push(value)
+					x.add(option);
+				}
+
+				if (parseresponse.length > 0) {
+					RootNode = parseresponse[0].name
+					document.getElementById('RootNode').style.display = "block"
+					document.getElementById('RootNode2').style.display = "none"
+				}
+				else {
+					document.getElementById('RootNode').style.display = "none"
+					document.getElementById('RootNode2').style.display = "block"
+				}
+
+
+			})
+			.catch(function (err) {
+				console.log(err)
+				window.alert('Could not retrieve the business structure ' + err.error)
+				CloseLoadingModal()
+				return
+			});
+	}
+	function GETLCTYPES(x) {
+		x = JSON.parse(x)
+		AccessToken = x.access_token
+		var options3 = {
+			'method': 'GET',
+			'url': 'https://' + SelectedConnection.url + '/api/v1/commons/labor_categories',
+			'headers': {
+				'appkey': SelectedConnection.appKey,
+				'Authorization': AccessToken,
+				'Content-Type': ['application/json']
+			}
+			//,body: BodyCreator
+
+		};
+		rp(options3)
+			.then(function (parsedBody) {
+				console.log(parsedBody)
+				parseresponse = JSON.parse(parsedBody)
+				RootNodeOptions = []
+				var select = document.getElementById("RootNode");
+				var length = select.options.length;
+				for (i = length - 1; i >= 0; i--) {
+					select.options[i] = null;
+					RootNodeOptions = []
+				}
+
+				for (let i = 0, l = parseresponse.length; i < l; i++) {
+					value = parseresponse[i].name
+					idvalue = parseresponse[i].id
+					var x = document.getElementById("RootNode");
+					var option = document.createElement("option");
+					option.text = value;
+					option.value = idvalue
+					RootNodeOptions.push(value)
+					x.add(option);
+				}
+
+				if (parseresponse.length > 0) {
+					RootNode = parseresponse[0].name
+					document.getElementById('RootNode').style.display = "block"
+					document.getElementById('RootNode2').style.display = "none"
+				}
+				else {
+					document.getElementById('RootNode').style.display = "none"
+					document.getElementById('RootNode2').style.display = "block"
+				}
+
+
+			})
+			.catch(function (err) {
+				console.log(err)
+				window.alert('Could not retrieve the business structure ' + err.error)
+				CloseLoadingModal()
+				return
+			});
+	}
+	function Access2(z) {
+		SelectedMapType = document.getElementById("Status").options[document.getElementById("Status").selectedIndex].value
+		var options = {
+			'method': 'POST',
+			'url': 'https://' + SelectedConnection.url + '/api/authentication/access_token',
+			'headers': {
+				'Content-Type': ['application/x-www-form-urlencoded'],
+				'appkey': SelectedConnection.appKey
+			},
+			form: {
+				'username': SelectedConnection.username,
+				'password': SelectedConnection.password,
+				'client_id': SelectedConnection.auth_ID,
+				'client_secret': SelectedConnection.auth_secret,
+				'grant_type': 'password',
+				'auth_chain': 'OAuthLdapService'
+			}
+		};
+		rp(options)
+			.then(function (parsedBody) {
+				console.log(parsedBody)
+				if (SelectedMapType == 'LCENTRIES') {
+					GETLCTYPES(parsedBody)
+				}
+				else {
+					GETBSROOTS(parsedBody)
+				}
+
+			})
+			.catch(function (err) {
+
+				console.log(err)
+				window.alert('Login failed ' + err.error)
+				CloseLoadingModal()
+
+				return
+			});
+	}
+
+	Access2()
+
+}
 
 //------------------------------------------Close the loading thing---------------
 function CloseLoadingModal() {
@@ -216,16 +388,163 @@ document.getElementById("UploadAndParse").addEventListener("click", function () 
 
 function parseInputJson(data) {
 
+	var request = require('request');
+	var rp = require('request-promise')
+	AccessToken = ""
+	StartDate = document.getElementById("From Date").value
+	//EndDate= document.getElementById("To Date").value
+	RootNode = document.getElementById("RootNode").value
+	RootNode2 = document.getElementById("RootNode2")
+	if (window.getComputedStyle(RootNode2).display === "block") { RootNode = RootNode2.value }
+
+	console.log(global_data)
+	SelectedConnectionName = document.getElementById("Connection").options[document.getElementById("Connection").selectedIndex].value
+	SelectedMapType = document.getElementById("Status").options[document.getElementById("Status").selectedIndex].value
+	SelectedConnection = {}
+	for (let i = 0, l = global_data.length; i < l; i++) {
+		if (global_data[i].name == SelectedConnectionName) {
+			SelectedConnection = global_data[i]
+		}
+	}
+
+	function GETBS(x) {
+		x = JSON.parse(x)
+		AccessToken = x.access_token
+		BodyCreator = JSON.stringify(
+			{
+				"where": {
+					"descendantsOf": {
+						"context": SelectedMapType,
+						"date": StartDate,
+						"locationRef": {
+							"qualifier": RootNode
+						}
+					}
+				}
+			}
+		)
+		console.log(BodyCreator)
+		var options3 = {
+			'method': 'POST',
+			'url': 'https://' + SelectedConnection.url + '/api/v1/commons/locations/multi_read',
+			'headers': {
+				'appkey': SelectedConnection.appKey,
+				'Authorization': AccessToken,
+				'Content-Type': ['application/json']
+			},
+			body: BodyCreator
+
+		};
+		rp(options3)
+			.then(function (parsedBody) {
+				console.log(parsedBody)
+				GETWLPATTERNS(parsedBody)
+			})
+			.catch(function (err) {
+				console.log(err)
+				window.alert('Could not retrieve the business structure ' + err.error)
+				CloseLoadingModal()
+				return
+			});
+	}
 
 
+	function GETWLPATTERNS(x) {
+		x = JSON.parse(x)
+		ListOfLocations = []
+		for (let i = 0, l = x.length; i < l; i++) {
+			if (x[i].orgNodeTypeRef.qualifier != 'Job') {
+				ListOfLocations.push(x[i].nodeId)
+			}
+		}
+		AccessToken
+		BodyCreator = JSON.stringify(
+			{
+				"where": {
+					"endDate": StartDate,
+					"locations": {
+						"ids": ListOfLocations
+					},
+					"startDate": StartDate
+				}
+			}
+		)
+		console.log(BodyCreator)
+		var options3 = {
+			'method': 'POST',
+			'url': 'https://' + SelectedConnection.url + '/api/v1/scheduling/workload_patterns/multi_read',
+			'headers': {
+				'appkey': SelectedConnection.appKey,
+				'Authorization': AccessToken,
+				'Content-Type': ['application/json']
+			},
+			body: BodyCreator
+
+		};
+		rp(options3)
+			.then(function (parsedBody) {
+				console.log(parsedBody)
+				RenderHandsOnTable(parsedBody)
+			})
+			.catch(function (err) {
+				console.log(err)
+				window.alert('Could not retrieve the business structure ' + err.error)
+				CloseLoadingModal()
+				return
+			});
+	}
+
+
+	function Access(z) {
+		var options = {
+			'method': 'POST',
+			'url': 'https://' + SelectedConnection.url + '/api/authentication/access_token',
+			'headers': {
+				'Content-Type': ['application/x-www-form-urlencoded'],
+				'appkey': SelectedConnection.appKey
+			},
+			form: {
+				'username': SelectedConnection.username,
+				'password': SelectedConnection.password,
+				'client_id': SelectedConnection.auth_ID,
+				'client_secret': SelectedConnection.auth_secret,
+				'grant_type': 'password',
+				'auth_chain': 'OAuthLdapService'
+			}
+		};
+		rp(options)
+			.then(function (parsedBody) {
+				console.log(parsedBody)
+
+				GETBS(parsedBody)
+
+
+			})
+			.catch(function (err) {
+
+				console.log(err)
+				window.alert('Login failed ' + err.error)
+				CloseLoadingModal()
+
+				return
+			});
+	}
+
+	Access()
+
+}
+function RenderHandsOnTable(x) {
 
 	//--------------------------------------------Require functions----------------------------------------------
-	console.log(SDMZipFileName)
+
 	var firstBy = require('thenby');
 	var AdmZip = require('adm-zip');
-	var SDMZipFileName = document.getElementById("ChooseFile").value
 
-	console.log(data)
+
+	try {
+		if (hotdata) hotdata.destroy()
+	}
+	catch{ }
 
 	headers = []
 	overtimes = []
@@ -235,6 +554,7 @@ function parseInputJson(data) {
 	paycode = []
 	paycodecombinations = []
 	complete = []
+	Complete = []
 	currentFile = SDMZipFileName
 
 
@@ -259,6 +579,119 @@ function parseInputJson(data) {
 	}
 	headers = Array.from(new Set(headers))
 	console.log(JSON.stringify(headers))
+	FinalArray = JSON.parse(x)
+	if (FinalArray.length > 0) {
+
+		for (let i = 0, l = FinalArray.length; i < l; i++) {
+			g = FinalArray[i]
+
+			for (let m = 0, n = g.jobPatterns.length; m < n; m++) {
+				f = g.jobPatterns[m]
+				StandardShifts = []
+
+				for (let v = 0, w = f.workload.length; v < w; v++) {
+					if (f.workload[v].standardShift) {
+						if (StandardShifts.indexOf(f.workload[v].standardShift.qualifier) == -1) {
+							StandardShifts.push(f.workload[v].standardShift.qualifier)
+						}
+					}
+					else if (f.workload[v].scheduleZone) {
+						if (StandardShifts.indexOf(f.workload[v].scheduleZone.qualifier) == -1) {
+							StandardShifts.push(f.workload[v].scheduleZone.qualifier)
+						}
+					}
+				}
+				StandardShifts = Array.from(new Set(StandardShifts))
+				StandardShifts = StandardShifts.map(function (shifts) {
+					shiftsTemp = {
+						"Job": "",
+						"StandardShift": shifts,
+						"MONDAY": "",
+						"TUESDAY": "",
+						"WEDNESDAY": "",
+						"THURSDAY": "",
+						"FRIDAY": "",
+						"SATURDAY": "",
+						"SUNDAY": "",
+						"HOLIDAY": ""
+					}
+					return shiftsTemp
+				})
+				console.log(StandardShifts)
+				if (StandardShifts.length > 0) {
+					for (let o = 0, p = StandardShifts.length; o < p; o++) {
+						for (let v = 0, w = f.workload.length; v < w; v++) {
+							if (f.workload[v].standardShift) {
+								if (f.workload[v].standardShift.qualifier == StandardShifts[o].StandardShift) {
+									if (f.workload[v].dayOfWeek == "MONDAY") { StandardShifts[o].MONDAY = f.workload[v].count }
+									else if (f.workload[v].dayOfWeek == "TUESDAY") { StandardShifts[o].TUESDAY = f.workload[v].count }
+									else if (f.workload[v].dayOfWeek == "WEDNESDAY") { StandardShifts[o].WEDNESDAY = f.workload[v].count }
+									else if (f.workload[v].dayOfWeek == "THURSDAY") { StandardShifts[o].THURSDAY = f.workload[v].count }
+									else if (f.workload[v].dayOfWeek == "FRIDAY") { StandardShifts[o].FRIDAY = f.workload[v].count }
+									else if (f.workload[v].dayOfWeek == "SATURDAY") { StandardShifts[o].SATURDAY = f.workload[v].count }
+									else if (f.workload[v].dayOfWeek == "SUNDAY") { StandardShifts[o].SUNDAY = f.workload[v].count }
+									else if (f.workload[v].dayOfWeek == "HOLIDAY") { StandardShifts[o].HOLIDAY = f.workload[v].count }
+								}
+							}
+							else if (f.workload[v].scheduleZone) {
+								if (f.workload[v].scheduleZone.qualifier == StandardShifts[o].StandardShift) {
+									if (f.workload[v].dayOfWeek == "MONDAY") { StandardShifts[o].MONDAY = f.workload[v].count }
+									else if (f.workload[v].dayOfWeek == "TUESDAY") { StandardShifts[o].TUESDAY = f.workload[v].count }
+									else if (f.workload[v].dayOfWeek == "WEDNESDAY") { StandardShifts[o].WEDNESDAY = f.workload[v].count }
+									else if (f.workload[v].dayOfWeek == "THURSDAY") { StandardShifts[o].THURSDAY = f.workload[v].count }
+									else if (f.workload[v].dayOfWeek == "FRIDAY") { StandardShifts[o].FRIDAY = f.workload[v].count }
+									else if (f.workload[v].dayOfWeek == "SATURDAY") { StandardShifts[o].SATURDAY = f.workload[v].count }
+									else if (f.workload[v].dayOfWeek == "SUNDAY") { StandardShifts[o].SUNDAY = f.workload[v].count }
+									else if (f.workload[v].dayOfWeek == "HOLIDAY") { StandardShifts[o].HOLIDAY = f.workload[v].count }
+								}
+							}
+
+							console.log(StandardShifts[o])
+							StandardShifts[o].Job = f.job.qualifier.split('/')[f.job.qualifier.split('/').length - 1]
+						}
+
+						map =
+						{
+							"Location": g.location.qualifier,
+							"Type": g.planType,
+							"EffectiveDate": g.effectiveDate,
+							"ExpirationDate": g.expirationDate
+						}
+						Object.assign(map, StandardShifts[o])
+						Complete.push(map)
+						console.log(map)
+					}
+				}
+
+				else {
+					console.log("asdjdsajkdsajkdsakjdsa")
+					map = {
+						"Location": g.location.qualifier,
+						"Type": g.planType,
+						"EffectiveDate": g.effectiveDate,
+						"ExpirationDate": g.expirationDate,
+						"Job": f.job.qualifier.split('/')[f.job.qualifier.split('/').length - 1],
+						"StandardShift": "",
+						"MONDAY": "",
+						"TUESDAY": "",
+						"WEDNESDAY": "",
+						"THURSDAY": "",
+						"FRIDAY": "",
+						"SATURDAY": "",
+						"SUNDAY": "",
+						"HOLIDAY": ""
+					}
+					Complete.push(map)
+					console.log(map)
+				}
+
+
+
+
+
+			}
+		}
+	}
 
 
 	headers = [
@@ -279,7 +712,7 @@ function parseInputJson(data) {
 	]
 
 
-
+	FinalArray = Complete
 	console.log(FinalArray)
 	console.log(headers)
 	var container = document.getElementById('HandsOnTableValue');
@@ -431,9 +864,7 @@ function parseInputJson(data) {
 	console.log(JSON.stringify(hotdata.getColHeader()))
 
 	//-----------------------------------------------Empty master json combinations for rule------------------------------
-	changedata = data
-	//console.log(changedata.itemsRetrieveResponses[SelectedRuleIndex].responseObjectNode.WSACFGPaycodeDistribution.DistributionAssignments.WSACFGDistributionAssignment.length)
-	console.log(changedata)
+
 
 
 }
@@ -551,7 +982,7 @@ function downloadNewFile(change_data) {
 		if (i == 0 && ObjectArray[i].Location != '' && ObjectArray[i].Location != null) {
 			ListOfDVs.push(DetailGenie)
 		}
-		else if (LocationID != LocationIDMinus1  && ObjectArray[i].Location != '' && ObjectArray[i].Location != null) {
+		else if (LocationID != LocationIDMinus1 && ObjectArray[i].Location != '' && ObjectArray[i].Location != null) {
 			ListOfDVs.push(DetailGenie)
 		}
 	}
@@ -597,8 +1028,8 @@ function downloadNewFile(change_data) {
 
 
 	for (let i = 0, l = ObjectArray.length; i < l; i++) {
-		if (ObjectArray[i].Location != '' && ObjectArray[i].Location != null){
-		ListOfLocations.push(ObjectArray[i].Location + '-//-' + ObjectArray[i].EffectiveDate + '-//-' + ObjectArray[i].ExpirationDate)
+		if (ObjectArray[i].Location != '' && ObjectArray[i].Location != null) {
+			ListOfLocations.push(ObjectArray[i].Location + '-//-' + ObjectArray[i].EffectiveDate + '-//-' + ObjectArray[i].ExpirationDate)
 		}
 	}
 	ListOfLocations = Array.from(new Set(ListOfLocations))
@@ -735,17 +1166,17 @@ function downloadNewFile(change_data) {
 	FinalStuff = []
 	for (let i = 0, l = AllJobPatterns.length; i < l; i++) {
 		//KVP = ListOfDVs[i].split('&--&')
-		map = 
-			{
-			  "effectiveDate": AllJobPatterns[i].LocationID.split('-//-')[1],
-			  "expirationDate": AllJobPatterns[i].LocationID.split('-//-')[2],
-			  "jobPatterns":AllJobPatterns[i].jobPatterns ,
-			  "location": {
+		map =
+		{
+			"effectiveDate": AllJobPatterns[i].LocationID.split('-//-')[1],
+			"expirationDate": AllJobPatterns[i].LocationID.split('-//-')[2],
+			"jobPatterns": AllJobPatterns[i].jobPatterns,
+			"location": {
 				"qualifier": AllJobPatterns[i].LocationID.split('-//-')[0]
-			  },
-			  "planType": "BUDGET"
-			}
-		  
+			},
+			"planType": "BUDGET"
+		}
+
 		console.log(map)
 
 		FinalStuff.push(map)
@@ -777,7 +1208,7 @@ function downloadNewFile(change_data) {
 				console.log(parsedBody)
 				for (let y = 0, z = LoadingData.length; y < z; y++) {
 					RequestBody = JSON.parse(parsedBody)
-					if (LoadingData[y][1] == RequestBody.location.qualifier + '-' + RequestBody.effectiveDate + '-'+ RequestBody.expirationDate) {
+					if (LoadingData[y][1] == RequestBody[0].location.qualifier + '-' + RequestBody[0].effectiveDate + '-' + RequestBody[0].expirationDate) {
 						LoaderHOT.setDataAtCell(y, 0, "Successfully Imported")
 						LoaderHOT.setCellMeta(y, 0, 'className', 'GreenCellBackground')
 						LoaderHOT.render()
@@ -791,7 +1222,7 @@ function downloadNewFile(change_data) {
 				console.log(err)
 				for (let y = 0, z = LoadingData.length; y < z; y++) {
 					RequestBody = JSON.parse(err.options.body)
-					if (LoadingData[y][1] == RequestBody.location.qualifier + '-' + RequestBody.effectiveDate + '-'+ RequestBody.expirationDate) {
+					if (LoadingData[y][1] == RequestBody.location.qualifier + '-' + RequestBody.effectiveDate + '-' + RequestBody.expirationDate) {
 						LoaderHOT.setDataAtCell(y, 0, JSON.parse(err.error).errorCode + JSON.parse(err.error).message)
 						if (JSON.parse(err.error).errorCode == "WCO-106384") {
 							LoaderHOT.setCellMeta(y, 0, 'className', 'BlueCellBackground')
