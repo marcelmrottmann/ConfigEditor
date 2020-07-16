@@ -13,6 +13,8 @@ var currentFile;
 var paycodesResponse;
 var ExportConfig;
 var DataDictionary;
+var ShiftSets;
+var ZoneSets;
 const fs = require('fs')
 var request = require('request');
 var rp = require('request-promise')
@@ -409,7 +411,7 @@ function parseInputJson(data) {
 
 	function GETBS(x) {
 		x = JSON.parse(x)
-		AccessToken = x.access_token
+		//
 		BodyCreator = JSON.stringify(
 			{
 				"where": {
@@ -438,7 +440,9 @@ function parseInputJson(data) {
 		rp(options3)
 			.then(function (parsedBody) {
 				console.log(parsedBody)
+				
 				GETWLPATTERNS(parsedBody)
+
 			})
 			.catch(function (err) {
 				console.log(err)
@@ -494,6 +498,65 @@ function parseInputJson(data) {
 			});
 	}
 
+	function GETSHIFTSETS(x) {
+		x = JSON.parse(x)
+		AccessToken = x.access_token
+
+		var options3 = {
+			'method': 'GET',
+			'url': 'https://' + SelectedConnection.url + '/api/v1/scheduling/standard_shift_sets',
+			'headers': {
+				'appkey': SelectedConnection.appKey,
+				'Authorization': AccessToken,
+				'Content-Type': ['application/json']
+			}//,			body: BodyCreator
+
+		};
+		rp(options3)
+			.then(function (parsedBody) {
+				console.log(parsedBody)
+				ShiftSets =  JSON.parse(parsedBody)
+			
+				GETZONESETS(parsedBody)
+				
+			})
+			.catch(function (err) {
+				console.log(err)
+				window.alert('Could not retrieve the business structure ' + err.error)
+				CloseLoadingModal()
+				return
+			});
+
+	}
+
+	function GETZONESETS(x) {
+		x = JSON.parse(x)
+		console.log(BodyCreator)
+		var options3 = {
+			'method': 'GET',
+			'url': 'https://' + SelectedConnection.url + '/api/v1/scheduling/schedule_zone_sets',
+			'headers': {
+				'appkey': SelectedConnection.appKey,
+				'Authorization': AccessToken,
+				'Content-Type': ['application/json']
+			}//,			body: BodyCreator
+
+		};
+		rp(options3)
+			.then(function (parsedBody) {
+				console.log(parsedBody)
+				ZoneSets =  JSON.parse(parsedBody)
+				GETBS(parsedBody)
+				
+			})
+			.catch(function (err) {
+				console.log(err)
+				window.alert('Could not retrieve the business structure ' + err.error)
+				CloseLoadingModal()
+				return
+			});
+	}
+
 
 	function Access(z) {
 		var options = {
@@ -515,9 +578,9 @@ function parseInputJson(data) {
 		rp(options)
 			.then(function (parsedBody) {
 				console.log(parsedBody)
-
-				GETBS(parsedBody)
-
+			
+	
+				GETSHIFTSETS(parsedBody)
 
 			})
 			.catch(function (err) {
@@ -568,7 +631,7 @@ function RenderHandsOnTable(x) {
 	//headers = Object.keys(FinalArray[0])
 
 	//--------------------------------------------------Create headers and hide columns if needed---------------------------
-
+	console.log(ShiftSets,ZoneSets)
 	console.log(FinalArray)
 	headers = []
 	for (let i = 0, l = FinalArray.length; i < l; i++) {
@@ -585,11 +648,28 @@ function RenderHandsOnTable(x) {
 		for (let i = 0, l = FinalArray.length; i < l; i++) {
 			g = FinalArray[i]
 
+	
 			for (let m = 0, n = g.jobPatterns.length; m < n; m++) {
 				f = g.jobPatterns[m]
 				StandardShifts = []
 				ScheduleZones = []
-
+				if (g.standardShiftSet){
+					for (let b = 0, j = ShiftSets.length; b < j; b++) {
+							if (ShiftSets[b].id == g.standardShiftSet.id){
+								StandardShifts = ShiftSets[b].standardShifts.map(function(names){return names.name})
+							}
+					}
+					
+				}
+				else if (g.scheduleZoneSet){
+					for (let b = 0, j = ZoneSets.length; b < j; b++) {
+							if (ZoneSets[b].id == g.scheduleZoneSet.id){
+								ScheduleZones = ZoneSets[b].scheduleZones.map(function(names){return names.name})
+							}
+					}
+					
+				}
+/*
 				for (let v = 0, w = f.workload.length; v < w; v++) {
 					if (f.workload[v].standardShift) {
 						if (StandardShifts.indexOf(f.workload[v].standardShift.qualifier) == -1) {
@@ -602,12 +682,14 @@ function RenderHandsOnTable(x) {
 						}
 					}
 				}
-				StandardShifts = Array.from(new Set(StandardShifts))
-				StandardShifts = StandardShifts.map(function (shifts) {
+*/
+
+				//StandardShifts = Array.from(new Set(StandardShifts))
+				StandardShifts = StandardShifts.map(function (shiftsparam) {
 					shiftsTemp = {
 						"Job": "",
 						"ScheduleZone":"",
-						"StandardShift": shifts,
+						"StandardShift": shiftsparam,
 						"MONDAY": "",
 						"TUESDAY": "",
 						"WEDNESDAY": "",
@@ -619,7 +701,7 @@ function RenderHandsOnTable(x) {
 					}
 					return shiftsTemp
 				})
-
+console.log(StandardShifts)
 				ScheduleZones = Array.from(new Set(ScheduleZones))
 				ScheduleZones = ScheduleZones.map(function (zones) {
 					zonesTemp = {
@@ -669,9 +751,9 @@ function RenderHandsOnTable(x) {
 							}
 
 							console.log(StandardShifts[o])
-							StandardShifts[o].Job = f.job.qualifier.split('/')[f.job.qualifier.split('/').length - 1]
+							
 						}
-
+						StandardShifts[o].Job = f.job.qualifier.split('/')[f.job.qualifier.split('/').length - 1]
 						map =
 						{
 							"Location": g.location.qualifier,
