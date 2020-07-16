@@ -588,6 +588,7 @@ function RenderHandsOnTable(x) {
 			for (let m = 0, n = g.jobPatterns.length; m < n; m++) {
 				f = g.jobPatterns[m]
 				StandardShifts = []
+				ScheduleZones = []
 
 				for (let v = 0, w = f.workload.length; v < w; v++) {
 					if (f.workload[v].standardShift) {
@@ -596,8 +597,8 @@ function RenderHandsOnTable(x) {
 						}
 					}
 					else if (f.workload[v].scheduleZone) {
-						if (StandardShifts.indexOf(f.workload[v].scheduleZone.qualifier) == -1) {
-							StandardShifts.push(f.workload[v].scheduleZone.qualifier)
+						if (ScheduleZones.indexOf(f.workload[v].scheduleZone.qualifier) == -1) {
+							ScheduleZones.push(f.workload[v].scheduleZone.qualifier)
 						}
 					}
 				}
@@ -605,6 +606,7 @@ function RenderHandsOnTable(x) {
 				StandardShifts = StandardShifts.map(function (shifts) {
 					shiftsTemp = {
 						"Job": "",
+						"ScheduleZone":"",
 						"StandardShift": shifts,
 						"MONDAY": "",
 						"TUESDAY": "",
@@ -617,6 +619,26 @@ function RenderHandsOnTable(x) {
 					}
 					return shiftsTemp
 				})
+
+				ScheduleZones = Array.from(new Set(ScheduleZones))
+				ScheduleZones = ScheduleZones.map(function (zones) {
+					zonesTemp = {
+						"Job": "",
+						"ScheduleZone": zones,
+						"StandardShift":"",
+						"MONDAY": "",
+						"TUESDAY": "",
+						"WEDNESDAY": "",
+						"THURSDAY": "",
+						"FRIDAY": "",
+						"SATURDAY": "",
+						"SUNDAY": "",
+						"HOLIDAY": ""
+					}
+					return zonesTemp
+				})
+
+				StandardShifts = StandardShifts.concat(ScheduleZones)
 				console.log(StandardShifts)
 				if (StandardShifts.length > 0) {
 					for (let o = 0, p = StandardShifts.length; o < p; o++) {
@@ -634,7 +656,7 @@ function RenderHandsOnTable(x) {
 								}
 							}
 							else if (f.workload[v].scheduleZone) {
-								if (f.workload[v].scheduleZone.qualifier == StandardShifts[o].StandardShift) {
+								if (f.workload[v].scheduleZone.qualifier == StandardShifts[o].ScheduleZone) {
 									if (f.workload[v].dayOfWeek == "MONDAY") { StandardShifts[o].MONDAY = f.workload[v].count }
 									else if (f.workload[v].dayOfWeek == "TUESDAY") { StandardShifts[o].TUESDAY = f.workload[v].count }
 									else if (f.workload[v].dayOfWeek == "WEDNESDAY") { StandardShifts[o].WEDNESDAY = f.workload[v].count }
@@ -671,6 +693,7 @@ function RenderHandsOnTable(x) {
 						"EffectiveDate": g.effectiveDate,
 						"ExpirationDate": g.expirationDate,
 						"Job": f.job.qualifier.split('/')[f.job.qualifier.split('/').length - 1],
+						"ScheduleZone":"",
 						"StandardShift": "",
 						"MONDAY": "",
 						"TUESDAY": "",
@@ -700,6 +723,7 @@ function RenderHandsOnTable(x) {
 		"EffectiveDate",
 		"ExpirationDate",
 		"Job",
+		"ScheduleZone",
 		"StandardShift",
 		"MONDAY",
 		"TUESDAY",
@@ -1079,7 +1103,7 @@ function downloadNewFile(change_data) {
 					&& AllJobPatterns[i].jobPatterns[j].job.qualifier == (ObjectArray[m].Location + '/' + ObjectArray[m].Job)) {
 
 
-
+				if (ObjectArray[m].StandardShift != null && ObjectArray[m].StandardShift != ""){
 					Monday =
 					{
 						"count": parseInt(ObjectArray[m].MONDAY, 10),
@@ -1144,6 +1168,73 @@ function downloadNewFile(change_data) {
 							"qualifier": ObjectArray[m].StandardShift
 						}
 					}
+				}
+				else {
+					Monday =
+					{
+						"count": parseInt(ObjectArray[m].MONDAY, 10),
+						"dayOfWeek": "MONDAY",
+						"scheduleZone": {
+							"qualifier": ObjectArray[m].ScheduleZone
+						}
+					}
+					Tuesday =
+					{
+						"count": parseInt(ObjectArray[m].TUESDAY, 10),
+						"dayOfWeek": "TUESDAY",
+						"scheduleZone": {
+							"qualifier": ObjectArray[m].ScheduleZone
+						}
+					}
+					Wednesday =
+					{
+						"count": parseInt(ObjectArray[m].WEDNESDAY, 10),
+						"dayOfWeek": "WEDNESDAY",
+						"scheduleZone": {
+							"qualifier": ObjectArray[m].ScheduleZone
+						}
+					}
+					Thursday =
+					{
+						"count": parseInt(ObjectArray[m].THURSDAY, 10),
+						"dayOfWeek": "THURSDAY",
+						"scheduleZone": {
+							"qualifier": ObjectArray[m].ScheduleZone
+						}
+					}
+					Friday =
+					{
+						"count": parseInt(ObjectArray[m].FRIDAY, 10),
+						"dayOfWeek": "FRIDAY",
+						"scheduleZone": {
+							"qualifier": ObjectArray[m].ScheduleZone
+						}
+					}
+					Saturday =
+					{
+						"count": parseInt(ObjectArray[m].SATURDAY, 10),
+						"dayOfWeek": "SATURDAY",
+						"scheduleZone": {
+							"qualifier": ObjectArray[m].ScheduleZone
+						}
+					}
+					Sunday =
+					{
+						"count": parseInt(ObjectArray[m].SUNDAY, 10),
+						"dayOfWeek": "SUNDAY",
+						"scheduleZone": {
+							"qualifier": ObjectArray[m].ScheduleZone
+						}
+					}
+					Holiday =
+					{
+						"count": parseInt(ObjectArray[m].HOLIDAY, 10),
+						"dayOfWeek": "HOLIDAY",
+						"scheduleZone": {
+							"qualifier": ObjectArray[m].ScheduleZone
+						}
+					}
+				}
 
 					if (ObjectArray[m].MONDAY != null && ObjectArray[m].MONDAY != "") { AllJobPatterns[i].jobPatterns[j].workload.push(Monday) }
 					if (ObjectArray[m].TUESDAY != null && ObjectArray[m].TUESDAY != "") { AllJobPatterns[i].jobPatterns[j].workload.push(Tuesday) }
