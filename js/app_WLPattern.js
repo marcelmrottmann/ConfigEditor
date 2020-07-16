@@ -1098,8 +1098,8 @@ function downloadNewFile(change_data) {
 
 
 	Columns = [
-		{ data: "Status", editor: 'text', readOnly: true, width: 400 },
-		{ data: "Name", editor: 'text', readOnly: true }
+		{ data: "Status", editor: 'text', readOnly: false, width: 400 },
+		{ data: "Name", editor: 'text', readOnly: false }
 	]
 
 	ColumnHeaders = [
@@ -1108,6 +1108,7 @@ function downloadNewFile(change_data) {
 	var LoaderHOT = new Handsontable(LoadingHandsOnTable, {
 		data: ListOfDVs,
 		colHeaders: ColumnHeaders,
+		//rowHeaders:true,
 		contextMenu: ['copy'],
 		columnSorting: false,
 		columns: Columns,
@@ -1120,11 +1121,11 @@ function downloadNewFile(change_data) {
 		trimDropdown: true,
 		//fixedColumnsLeft: fixcolumns,
 		outsideClickDeselects: false,
-		wordWrap: false,
+		wordWrap: true,
 		//hiddenColumns: hiddencolumn,
 		undo: true,
 		licenseKey: 'non-commercial-and-evaluation',
-		stretchH: 'all',
+		//stretchH: 'all',
 		afterRender: CloseLoadingModal()
 	}
 	)
@@ -1396,7 +1397,7 @@ function downloadNewFile(change_data) {
 				for (let y = 0, z = LoadingData.length; y < z; y++) {
 					RequestBody = JSON.parse(err.options.body)
 					if (LoadingData[y][1] == RequestBody.location.qualifier + '-' + RequestBody.effectiveDate + '-' + RequestBody.expirationDate) {
-						LoaderHOT.setDataAtCell(y, 0, JSON.parse(err.error).errorCode + JSON.parse(err.error).message)
+						LoaderHOT.setDataAtCell(y, 0, JSON.parse(err.error).errorCode + JSON.parse(err.error).details.results[0].error.message)
 						if (JSON.parse(err.error).errorCode == "WCO-106384") {
 							LoaderHOT.setCellMeta(y, 0, 'className', 'BlueCellBackground')
 
