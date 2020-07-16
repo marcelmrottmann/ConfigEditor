@@ -1419,8 +1419,8 @@ function downloadNewFile(change_data) {
 
 	console.log(FinalStuff)
 
-	fs.renameSync('./RESPONSEJSON/DVresponse.json', './RESPONSEJSON/DVresponse_old.json')
-	fs.writeFileSync('./RESPONSEJSON/DVresponse.json', JSON.stringify(FinalStuff));
+	//fs.renameSync('./RESPONSEJSON/DVresponse.json', './RESPONSEJSON/DVresponse_old.json')
+	//fs.writeFileSync('./RESPONSEJSON/DVresponse.json', JSON.stringify(FinalStuff));
 	//End Save
 
 	//---------------------------------------------------New Zip Stuff---------------------------------------------------
