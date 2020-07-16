@@ -1582,3 +1582,8 @@ function LoadingScreenModal(YN) {
 }
 
 LoadingScreenModal('none')
+
+document.getElementById("DownloadtoCSV").addEventListener('click', function () {
+	var exportPlugin = hotdata.getPlugin('exportFile');
+	exportPlugin.downloadFile('csv', { filename: RootNode, columnHeaders: true, });
+});
