@@ -798,7 +798,7 @@ console.log(StandardShifts)
 		}
 	}
 
-
+if (document.getElementById('DayOfWeek').value == "Sunday"){
 	headers = [
 		"Location",
 		"Type",
@@ -814,9 +814,26 @@ console.log(StandardShifts)
 		"THURSDAY",
 		"FRIDAY",
 		"SATURDAY",
-
 		"HOLIDAY"
-	]
+	]}
+	else {headers = [
+		"Location",
+		"Type",
+		"EffectiveDate",
+		"ExpirationDate",
+		"Job",
+		"ScheduleZone",
+		"StandardShift",
+		
+		"MONDAY",
+		"TUESDAY",
+		"WEDNESDAY",
+		"THURSDAY",
+		"FRIDAY",
+		"SATURDAY",
+		"SUNDAY",
+		"HOLIDAY"
+	]}
 
 
 	FinalArray = Complete
