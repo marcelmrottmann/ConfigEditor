@@ -84,6 +84,7 @@ function reloadDropDown(x) {
 
 	function GETBSROOTS(x) {
 		x = JSON.parse(x)
+		
 		AccessToken = x.access_token
 		BodyCreator = JSON.stringify(
 			{
@@ -732,7 +733,8 @@ function parseInputJson(data) {
 					"currency": Currencies,
 					"externalID": g.externalId,
 					"nodeID": g.nodeId,
-					"GUID": g.persistentId
+					"GUID": g.persistentId,
+					"NumberOfParentNodes":g.parentNodeRef.qualifier.split('/').length
 				}
 
 				Complete.push(map)
@@ -779,6 +781,7 @@ function parseInputJson(data) {
 				"externalID",
 				"nodeID",
 				"GUID",
+				"NumberOfParentNodes"
 			]
 
 
@@ -979,6 +982,7 @@ function downloadNewFile(change_data) {
 						"externalId": ObjectArray[i].externalID
 					}
 					if (ObjectArray[i].Type != "Job") { delete BodyCreator.genericJobRef }
+					else {delete BodyCreator.transferable}
 					if (ObjectArray[i].currency == "Inherited") { delete BodyCreator.currencyRef }
 					if (ObjectArray[i]['Cost Center'] == "" || ObjectArray[i]['Cost Center'] == null) { delete BodyCreator.costCenterRef }
 					if (ObjectArray[i].externalId == "" || ObjectArray[i].externalId == null) { delete BodyCreator.externalId }
