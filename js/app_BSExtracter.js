@@ -84,7 +84,7 @@ function reloadDropDown(x) {
 
 	function GETBSROOTS(x) {
 		x = JSON.parse(x)
-		
+
 		AccessToken = x.access_token
 		BodyCreator = JSON.stringify(
 			{
@@ -734,7 +734,7 @@ function parseInputJson(data) {
 					"externalID": g.externalId,
 					"nodeID": g.nodeId,
 					"GUID": g.persistentId,
-					"NumberOfParentNodes":g.parentNodeRef.qualifier.split('/').length
+					"NumberOfParentNodes": g.parentNodeRef.qualifier.split('/').length
 				}
 
 				Complete.push(map)
@@ -982,10 +982,10 @@ function downloadNewFile(change_data) {
 						"externalId": ObjectArray[i].externalID
 					}
 					if (ObjectArray[i].Type != "Job") { delete BodyCreator.genericJobRef }
-					else {delete BodyCreator.transferable}
+					else { delete BodyCreator.transferable }
 					if (ObjectArray[i].currency == "Inherited") { delete BodyCreator.currencyRef }
 					if (ObjectArray[i]['Cost Center'] == "" || ObjectArray[i]['Cost Center'] == null) { delete BodyCreator.costCenterRef }
-					if (ObjectArray[i].externalId == "" || ObjectArray[i].externalId == null) { delete BodyCreator.externalId }
+					if (ObjectArray[i].externalID == "" || ObjectArray[i].externalID == null) { delete BodyCreator.externalID }
 					if (ObjectArray[i].directWorkPercent == "" || ObjectArray[i].directWorkPercent == null) { delete BodyCreator.directWorkPercent }
 					if (ObjectArray[i].indirectWorkPercent == "" || ObjectArray[i].indirectWorkPercent == null) { delete BodyCreator.indirectWorkPercent }
 					if (ObjectArray[i].address == "" || ObjectArray[i].address == null) { delete BodyCreator.address }
@@ -1059,7 +1059,7 @@ function downloadNewFile(change_data) {
 							'appkey': SelectedConnection.appKey,
 							'Authorization': AccessToken,
 							'Content-Type': ['application/json']
-											
+
 						},
 
 
@@ -1076,21 +1076,22 @@ function downloadNewFile(change_data) {
 							ID = parsedBody.request.path.split('/labor_entries/')[1]
 							StatusResponse = "Successfully Deleted"
 							for (let iz = 0, lz = ObjectArray.length; iz < lz; iz++) {
-								console.log(ID,ObjectArray[i].Id)
-								if (ObjectArray[iz].Id == ID){
-							hot2.setDataAtCell(iz, 1, StatusResponse)
-							hot2.setDataAtCell(iz, 0, "None");
-							hot2.setCellMeta(iz, 1, 'className', 'GreenCellBackground')
-							hot2.render()
-								}}
+								console.log(ID, ObjectArray[i].Id)
+								if (ObjectArray[iz].Id == ID) {
+									hot2.setDataAtCell(iz, 1, StatusResponse)
+									hot2.setDataAtCell(iz, 0, "None");
+									hot2.setCellMeta(iz, 1, 'className', 'GreenCellBackground')
+									hot2.render()
+								}
+							}
 
 
-/*
-							hot2.setDataAtCell(i, 1, ObjectArray[i].Action)
-							hot2.setDataAtCell(i, 0, "None");
-							hot2.setCellMeta(i, 1, 'className', 'GreenCellBackground')
-							hot2.render()
-*/							
+							/*
+														hot2.setDataAtCell(i, 1, ObjectArray[i].Action)
+														hot2.setDataAtCell(i, 0, "None");
+														hot2.setCellMeta(i, 1, 'className', 'GreenCellBackground')
+														hot2.render()
+							*/
 							//StartOffAPIS(parsedBody)
 
 						})
@@ -1100,7 +1101,7 @@ function downloadNewFile(change_data) {
 
 							ID = err.options.url.split('/labor_entries/')[1]
 							for (let iz = 0, lz = ObjectArray.length; iz < lz; iz++) {
-								if (ObjectArray[iz].Id == ID){
+								if (ObjectArray[iz].Id == ID) {
 									hot2.setDataAtCell(iz, 1, "Error" + err.error);
 									hot2.setDataAtCell(iz, 0, "None");
 									hot2.setCellMeta(iz, 1, 'className', 'RedCellBackground')
