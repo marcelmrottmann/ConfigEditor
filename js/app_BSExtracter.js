@@ -700,45 +700,107 @@ function parseInputJson(data) {
 
 		else {
 
-			for (let i = 0, l = FinalArray.length; i < l; i++) {
-				g = FinalArray[i]
-				var CostCenters
-				var TimeZones
-				var Currencies
 
 
-				if (g.costCenterRef == "" || g.costCenterRef == null) { CostCenters = null } else CostCenters = g.costCenterRef.qualifier
-				if (g.timezoneRef == "" || g.timezoneRef == null) { TimeZones = null } else TimeZones = g.timezoneRef.qualifier
-				if (g.currencyRef == "" || g.currencyRef == null) { Currencies = "Inherited" } else Currencies = g.currencyRef.qualifier
-
-				map =
-				{
-					"Action": "None",
-					"Status": "None",
-					"Type": g.orgNodeTypeRef.qualifier,
-					"Full Node Path": g.parentNodeRef.qualifier + '/' + g.name,
-					"parentNode": g.parentNodeRef.qualifier,
-					"name": g.name,
-					"FullName": g.fullName,
-					"description": g.description,
-					"EffectiveDate": g.effectiveDate,
-					"ExpirationDate": g.expirationDate,
-					"LastRevision": g.lastRevision,
-					"address": g.address,
-					"Cost Center": CostCenters,
-					"directWorkPercent": g.directWorkPercent,
-					"indirectWorkPercent": g.indirectWorkPercent,
-					"timezoneRef": g.TimeZones,
-					"transferable": g.transferable,
-					"currency": Currencies,
-					"externalID": g.externalId,
-					"nodeID": g.nodeId,
-					"GUID": g.persistentId,
-					"NumberOfParentNodes": g.parentNodeRef.qualifier.split('/').length
+				if (FinalArray.length > 6000) {
+					window.alert('You have a lot of data, this will continue to load in the background, please be patient')
+	
+					BatchedDataFinalArray = FinalArray.chunk(200)
+					for (let z = 0, a = BatchedDataFinalArray.length; z < a; z++) {
+						console.log(BatchedDataFinalArray[z])
+						setTimeout(() => {
+							for (let i = 0, l = BatchedDataFinalArray[z].length; i < l; i++) {
+								g = BatchedDataFinalArray[z][i]
+								var CostCenters
+								var TimeZones
+								var Currencies
+				
+				
+								if (g.costCenterRef == "" || g.costCenterRef == null) { CostCenters = null } else CostCenters = g.costCenterRef.qualifier
+								if (g.timezoneRef == "" || g.timezoneRef == null) { TimeZones = null } else TimeZones = g.timezoneRef.qualifier
+								if (g.currencyRef == "" || g.currencyRef == null) { Currencies = "Inherited" } else Currencies = g.currencyRef.qualifier
+				
+								map =
+								{
+									"Action": "None",
+									"Status": "None",
+									"Type": g.orgNodeTypeRef.qualifier,
+									"Full Node Path": g.parentNodeRef.qualifier + '/' + g.name,
+									"parentNode": g.parentNodeRef.qualifier,
+									"name": g.name,
+									"FullName": g.fullName,
+									"description": g.description,
+									"EffectiveDate": g.effectiveDate,
+									"ExpirationDate": g.expirationDate,
+									"LastRevision": g.lastRevision,
+									"address": g.address,
+									"Cost Center": CostCenters,
+									"directWorkPercent": g.directWorkPercent,
+									"indirectWorkPercent": g.indirectWorkPercent,
+									"timezoneRef": g.TimeZones,
+									"transferable": g.transferable,
+									"currency": Currencies,
+									"externalID": g.externalId,
+									"nodeID": g.nodeId,
+									"GUID": g.persistentId,
+									"NumberOfParentNodes": g.parentNodeRef.qualifier.split('/').length
+								}
+				
+								Complete.push(map)
+							}
+						}, 1000);
+	
+					}
 				}
+				else {
+					for (let i = 0, l = FinalArray.length; i < l; i++) {
+						g = FinalArray[i]
+						var CostCenters
+						var TimeZones
+						var Currencies
+		
+		
+						if (g.costCenterRef == "" || g.costCenterRef == null) { CostCenters = null } else CostCenters = g.costCenterRef.qualifier
+						if (g.timezoneRef == "" || g.timezoneRef == null) { TimeZones = null } else TimeZones = g.timezoneRef.qualifier
+						if (g.currencyRef == "" || g.currencyRef == null) { Currencies = "Inherited" } else Currencies = g.currencyRef.qualifier
+		
+						map =
+						{
+							"Action": "None",
+							"Status": "None",
+							"Type": g.orgNodeTypeRef.qualifier,
+							"Full Node Path": g.parentNodeRef.qualifier + '/' + g.name,
+							"parentNode": g.parentNodeRef.qualifier,
+							"name": g.name,
+							"FullName": g.fullName,
+							"description": g.description,
+							"EffectiveDate": g.effectiveDate,
+							"ExpirationDate": g.expirationDate,
+							"LastRevision": g.lastRevision,
+							"address": g.address,
+							"Cost Center": CostCenters,
+							"directWorkPercent": g.directWorkPercent,
+							"indirectWorkPercent": g.indirectWorkPercent,
+							"timezoneRef": g.TimeZones,
+							"transferable": g.transferable,
+							"currency": Currencies,
+							"externalID": g.externalId,
+							"nodeID": g.nodeId,
+							"GUID": g.persistentId,
+							"NumberOfParentNodes": g.parentNodeRef.qualifier.split('/').length
+						}
+		
+						Complete.push(map)
+					}
+				}
+	
 
-				Complete.push(map)
-			}
+
+
+
+
+			
+
 
 
 			FinalArray = Complete
@@ -1273,3 +1335,17 @@ Object.defineProperty(Array.prototype, 'chunk', {
 		return temporal;
 	}
 });
+
+function ToggleRootNode (){
+if (document.getElementById('RootNode').style.display == "block"){
+	document.getElementById('RootNode').style.display = "none"
+	document.getElementById('RootNode2').style.display = "block"
+}
+else{
+	document.getElementById('RootNode').style.display = "block"
+	document.getElementById('RootNode2').style.display = "none"
+
+}
+
+
+}
