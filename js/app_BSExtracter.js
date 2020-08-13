@@ -228,6 +228,34 @@ function reloadDropDown(x) {
 				if (SelectedMapType == 'LCENTRIES') {
 					GETLCTYPES(parsedBody)
 				}
+				else if (SelectedMapType =='ORGSETS'){
+					document.getElementById('RootNode').style.display = "block"
+					document.getElementById('RootNode2').style.display = "none"// document.getElementById('RootNode2').value = 'N/A'
+					var select = document.getElementById("RootNode");
+					var length = select.options.length;
+					for (i = length - 1; i >= 0; i--) {
+						select.options[i] = null;
+						RootNodeOptions = []
+					}
+	
+						var x = document.getElementById("RootNode");
+						var option = document.createElement("option");
+						option.text = "BS";
+						option.value = "ORG"
+						RootNodeOptions.push(value)
+						x.add(option);
+
+						var x = document.getElementById("RootNode");
+						var option = document.createElement("option");
+						option.text = "Forecast Map";
+						option.value = "FORECAST"
+						RootNodeOptions.push(value)
+						x.add(option);
+					
+
+
+
+				}
 				else {
 					GETBSROOTS(parsedBody)
 				}
@@ -448,6 +476,47 @@ function parseInputJson(data) {
 			});
 	}
 
+	function GETLOCATIONSETS(x) {
+		x = JSON.parse(x)
+		AccessToken = x.access_token
+		BodyCreator = JSON.stringify(
+			{
+				"where": {
+					"context": RootNode,
+					"date": StartDate,
+					"types": {
+						"ids": [
+							1,2,3
+						]
+					}
+				}
+			}
+		)
+		console.log(BodyCreator)
+		var options3 = {
+			'method': 'POST',
+			'url': 'https://' + SelectedConnection.url + '/api/v1/commons/location_sets/multi_read',
+			'headers': {
+				'appkey': SelectedConnection.appKey,
+				'Authorization': AccessToken,
+				'Content-Type': ['application/json']
+			},
+			body: BodyCreator
+
+		};
+		rp(options3)
+			.then(function (parsedBody) {
+				console.log(parsedBody)
+				RenderHandsOnTable(parsedBody)
+			})
+			.catch(function (err) {
+				console.log(err)
+				window.alert('Could not retrieve the business structure ' + err.error)
+				CloseLoadingModal()
+				return
+			});
+	}
+
 
 	function GETLCENTRIES(x) {
 		x = JSON.parse(x)
@@ -557,6 +626,9 @@ function parseInputJson(data) {
 				console.log(parsedBody)
 				if (SelectedMapType == 'LCENTRIES') {
 					GETLCENTRIES(parsedBody)
+				}
+				else if (SelectedMapType =='ORGSETS'){
+					GETLOCATIONSETS(parsedBody)
 				}
 				else {
 					GETBS(parsedBody)
@@ -697,6 +769,136 @@ function parseInputJson(data) {
 				}
 			}
 		}
+else if (SelectedMapType == 'ORGSETS') {
+
+	if (FinalArray.length > 6000) {
+		window.alert('You have a lot of data, this will continue to load in the background, please be patient')
+
+		BatchedDataFinalArray = FinalArray.chunk(200)
+		for (let z = 0, a = BatchedDataFinalArray.length; z < a; z++) {
+			console.log(BatchedDataFinalArray[z])
+			setTimeout(() => {
+				for (let i = 0, l = BatchedDataFinalArray[z].length; i < l; i++) {
+					g = BatchedDataFinalArray[z][i]
+
+					nodeRefs = g.nodeRefs.map(function(gg){return gg.qualifier}).join(',')
+					nodeIds = g.nodeRefs.map(function(gg){return gg.id}).join(',')
+		
+					if (g.typeId ==  1)Type = 'All_Org_Groups'
+					else if (g.typeId ==  2)Type ='Manager_Org_Groups'
+					else if (g.typeId ==  3)Type ='Transfer_Org_Groups'
+		
+		
+					map =
+					{
+						//"Action": "None",
+						//"Status": "None",
+						"Type": Type,
+						"TypeID":g.typeId,
+						"name": g.name,
+						"description": g.description,
+						"NodeReferences":nodeRefs,
+						"NodeIds":nodeIds,
+						"Id": g.id
+					}
+					Complete.push(map)
+				}
+			}, 1000);
+
+		}
+	}
+	else {
+		for (let i = 0, l = FinalArray.length; i < l; i++) {
+			g = FinalArray[i]
+
+			nodeRefs = g.nodeRefs.map(function(gg){return gg.qualifier}).join(',')
+			nodeIds = g.nodeRefs.map(function(gg){return gg.id}).join(',')
+
+			if (g.typeId ==  1)Type = 'All_Org_Groups'
+			else if (g.typeId ==  2)Type ='Manager_Org_Groups'
+			else if (g.typeId ==  3)Type ='Transfer_Org_Groups'
+
+
+			map =
+			{
+				//"Action": "None",
+				//"Status": "None",
+				"Type": Type,
+				"TypeID":g.typeId,
+				"name": g.name,
+				"description": g.description,
+				"NodeReferences":nodeRefs,
+				"NodeIds":nodeIds,
+				"Id": g.id
+			}
+
+			Complete.push(map)
+		}
+	}
+
+
+	FinalArray = Complete
+	//console.log(FinalArray)
+	try {
+		for (let y = 0, x = FinalArray.length; y < x; y++) {
+			for (let x = 0, z = FinalArray.length; x < z; x++) {
+				headers.push(Object.keys(FinalArray[y])[x])
+			}
+		}
+	}
+	catch { window.alert("File is empty"); CloseLoadingModal(); return; }
+
+
+
+	headers = Array.from(new Set(headers))
+	var container = document.getElementById('HandsOnTableValue');
+	headers = headers.filter(function (fil) { return fil != null })
+	console.log(headers)
+
+	headers = [
+	//	"Action",
+	//	"Status",
+		"Type",
+		"TypeID",
+		"name",
+		"description",
+		"NodeReferences",
+		"NodeIds",
+		"Id"
+	]
+
+
+	for (let i = 0, l = headers.length; i < l; i++) {
+		if (headers[i] == 'Action') { columneditorsettings.push({ data: headers[i], type: 'dropdown', source: ['None', 'Delete'] }) }
+		//else if (headers[i] == 'GUID') { columneditorsettings.push({ name: headers[i], data: headers[i], readOnly: true, width: '300' }) }
+		//else if (headers[i] == "periods") { columneditorsettings.push({ name: headers[i], data: headers[i], readOnly: true, renderer: 'html' }) }
+		//else if (headers[i] == "ExpirationDate") { columneditorsettings.push({ name: headers[i], data: headers[i], readOnly: false }) }
+		//else if (headers[i] == "EffectiveDate") { columneditorsettings.push({ name: headers[i], data: headers[i], readOnly: false }) }
+		//else if (headers[i] == "LastRevision") { columneditorsettings.push({ name: headers[i], data: headers[i], readOnly: false }) }
+		else { columneditorsettings.push({ name: headers[i], data: headers[i], readOnly: true }) }
+	}
+
+	function checkRenderer(instance, td, row, col, prop, value, cellProperties) {
+		Handsontable.renderers.CheckboxRenderer.apply(this, arguments);
+		if (value == true) {
+			td.style.color = 'black';
+			td.style.background = '#90ee90';
+		} else if (value == false) {
+			td.style.color = 'black';
+			td.style.background = '#ffcccb';
+		}
+	}
+	function checktextRenderer(instance, td, row, col, prop, value, cellProperties) {
+		Handsontable.renderers.TextRenderer.apply(this, arguments);
+		if (value == true) {
+			td.style.color = 'black';
+			td.style.background = '#90ee90';
+		} else if (value == false) {
+			td.style.color = 'black';
+			td.style.background = '#ffcccb';
+		}
+	}
+}
 
 		else {
 
