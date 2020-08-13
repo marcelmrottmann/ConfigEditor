@@ -526,6 +526,7 @@ function parseInputJson(data) {
 			}
 
 			console.log(FinalArray)
+			console.log(JSON.stringify(FinalArray))
 
 
 
@@ -778,6 +779,10 @@ function parseInputJson(data) {
 					})
 				}
 
+				PRIMLC = ""
+				PRIMJOB = ""
+				if (g.allExtension.employeeExtension.effDatedPrimaryJobAccountForSnapshotDate[0]){PRIMLC = g.allExtension.employeeExtension.effDatedPrimaryJobAccountForSnapshotDate[0].primaryLaborCategory
+				PRIMJOB=g.allExtension.employeeExtension.effDatedPrimaryJobAccountForSnapshotDate[0].primaryJob}
 
 
 				map =
@@ -788,8 +793,8 @@ function parseInputJson(data) {
 					"Short Name": g.allExtension.employeeExtension.shortName,
 					"Middle Initial": g.allExtension.employeeExtension.middleName,
 					"Pay Rule": g.allExtension.timekeepingExtension.payRuleName,
-					"Primary Job": g.allExtension.employeeExtension.effDatedPrimaryJobAccountForSnapshotDate[0].primaryJob,
-					"Primary LC": g.allExtension.employeeExtension.effDatedPrimaryJobAccountForSnapshotDate[0].primaryLaborCategory,
+					"Primary Job": PRIMJOB,
+					"Primary LC": PRIMLC,
 					"ETerm": Eterm,
 					"Accrual Profile": AccrualProfile,
 					"FTE %": FTE,
@@ -885,6 +890,7 @@ function parseInputJson(data) {
 
 			FinalArray = Complete
 			console.log(FinalArray)
+			console.log(JSON.stringify(FinalArray))
 			try {
 				for (let y = 0, x = FinalArray.length; y < x; y++) {
 					for (let x = 0, z = FinalArray.length; x < z; x++) {
