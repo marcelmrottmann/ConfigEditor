@@ -405,6 +405,7 @@ function parseInputJson(data) {
 			}
 		}
 		else if (SelectedMapType == 'TS') {
+			if (!FinalArray[0].accrualTransactions){window.alert('No transactions found for range');return}
 			for (let i = 0, l = FinalArray[0].accrualTransactions.length; i < l; i++) {
 				g = FinalArray[0].accrualTransactions[i]
 
