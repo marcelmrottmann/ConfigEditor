@@ -991,7 +991,7 @@ function parseInputJson(data) {
 	hotdata = hot
 	document.getElementById("DownloadtoCSV").addEventListener('click', function () {
 		var exportPlugin = hotdata.getPlugin('exportFile');
-		exportPlugin.downloadFile('csv', { filename: RootNode, columnHeaders: true, });
+		exportPlugin.downloadFile('csv', { filename: "AdjustmentRules", columnHeaders: true, });
 	});
 	//--------------------------------------------------------Feature fields-------------------------
 	SearchField = document.getElementById('search_field')

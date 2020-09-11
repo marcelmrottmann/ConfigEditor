@@ -471,7 +471,7 @@ function parseInputJson(data) {
 	
 	document.getElementById("DownloadtoCSV").addEventListener('click', function () {
 		var exportPlugin = hotdata.getPlugin('exportFile');
-		exportPlugin.downloadFile('csv', { filename: RootNode, columnHeaders: true, });
+		exportPlugin.downloadFile('csv', { filename: "ShiftSets", columnHeaders: true, });
 	});
 	
 	//--------------------------------------------------------Feature fields-------------------------
