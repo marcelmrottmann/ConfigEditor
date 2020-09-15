@@ -42,6 +42,8 @@ function readLines(input, func) {
 	});
 }
 
+
+
 //-----------------------------------------Fill Connections Dropdown.
 function RefreshConnections(x) {
 
@@ -410,7 +412,7 @@ function parseInputJson(data) {
 					if (ExceptionCodeName == ExceptionMapping[y].WFCNAME && InPunchType == ExceptionMapping[y].LUPARAM) {
 						ExceptionCodeName = ExceptionMapping[y].WFDNAME
 					}
-					else if (ExceptionCodeName == ExceptionMapping[y].WFCNAME && InPunchType != ExceptionMapping[y].LUPARAM && ExceptionMapping[y].LUPARAM == "NONE"){
+					else if (ExceptionCodeName == ExceptionMapping[y].WFCNAME && InPunchType != ExceptionMapping[y].LUPARAM && ExceptionMapping[y].LUPARAM == "NONE") {
 
 						ExceptionCodeName = ExceptionMapping[y].WFDNAME
 
@@ -420,7 +422,7 @@ function parseInputJson(data) {
 
 
 			Calculate = null
-			if (PayCodeName != null || AccrualCodeName != null || ExceptionCodeName!= null ) {
+			if (PayCodeName != null || AccrualCodeName != null || ExceptionCodeName != null) {
 				Calculate = "SUM"
 
 			}
@@ -471,16 +473,16 @@ function parseInputJson(data) {
 
 	for (let i = 0, l = ColumnSetList.length; i < l; i++) {
 		for (let y = 0, z = Mapping.length; y < z; y++) {
-			if (ColumnSetList[i].ColumnLUID == Mapping[y].WFCNAME){
+			if (ColumnSetList[i].ColumnLUID == Mapping[y].WFCNAME) {
 				ColumnSetList[i].ColumnLUID = Mapping[y].WFDNAME
 				if (ColumnSetList[i].ColumnLUID == "TK_EXCEPTIONCOUNT"
-				&& Mapping[y].Property!= null && Mapping[y].Property!="" ){
+					&& Mapping[y].Property != null && Mapping[y].Property != "") {
 					ColumnSetList[i].Exception = Mapping[y].Property
 					ColumnSetList[i].Calculate = "SUM"
 				}
 			}
-				
-			
+
+
 		}
 	}
 
@@ -833,34 +835,34 @@ function GETDD(change_data) {
 
 
 function UpdateDropDownfromDD(z) {
-	if (hotdata){
-	var options = {
-		'method': 'POST',
-		'url': 'https://' + SelectedConnection.url + '/api/authentication/access_token',
-		'headers': {
-			'Content-Type': ['application/x-www-form-urlencoded'],
-			'appkey': SelectedConnection.appKey
-		},
-		form: {
-			'username': SelectedConnection.username,
-			'password': SelectedConnection.password,
-			'client_id': SelectedConnection.auth_ID,
-			'client_secret': SelectedConnection.auth_secret,
-			'grant_type': 'password',
-			'auth_chain': 'OAuthLdapService'
-		}
-	};
-	rp(options)
-		.then(function (parsedBody) {
-			console.log(parsedBody)
-			AccessToken = JSON.parse(parsedBody).access_token
-			GETDDforDropdown(parsedBody)
+	if (hotdata) {
+		var options = {
+			'method': 'POST',
+			'url': 'https://' + SelectedConnection.url + '/api/authentication/access_token',
+			'headers': {
+				'Content-Type': ['application/x-www-form-urlencoded'],
+				'appkey': SelectedConnection.appKey
+			},
+			form: {
+				'username': SelectedConnection.username,
+				'password': SelectedConnection.password,
+				'client_id': SelectedConnection.auth_ID,
+				'client_secret': SelectedConnection.auth_secret,
+				'grant_type': 'password',
+				'auth_chain': 'OAuthLdapService'
+			}
+		};
+		rp(options)
+			.then(function (parsedBody) {
+				console.log(parsedBody)
+				AccessToken = JSON.parse(parsedBody).access_token
+				GETDDforDropdown(parsedBody)
 
-		})
-		.catch(function (err) {
-			console.log(err)
-			window.alert('Login Failed Could not Populate Dropdown for Key Names' + err.error)
-		});
+			})
+			.catch(function (err) {
+				console.log(err)
+				window.alert('Login Failed Could not Populate Dropdown for Key Names' + err.error)
+			});
 	}
 }
 
@@ -881,7 +883,7 @@ function GETDDforDropdown(change_data) {
 			DataDictionary2 = JSON.parse(parsedBody)
 			console.log(DataDictionary2)
 			KeysFromDD = []
-			
+
 			for (let y = 0, x = DataDictionary2.length; y < x; y++) {
 				KeysFromDD.push(DataDictionary2[y].key)
 			}
@@ -889,7 +891,7 @@ function GETDDforDropdown(change_data) {
 			console.log(KeysFromDD)
 			columneditorsettings[12].source = KeysFromDD
 			hotdata.updateSettings({
-				columns:columneditorsettings
+				columns: columneditorsettings
 			})
 
 
@@ -966,7 +968,7 @@ function downloadNewFile(change_data) {
 	*/
 	resultdata = hot2.getData();
 	headers = hot2.getColHeader();
-console.log(columneditorsettings)
+	console.log(columneditorsettings)
 	//resultdata.splice(-1,1)
 
 	console.log(resultdata)
@@ -1012,7 +1014,7 @@ console.log(columneditorsettings)
 
 
 	Columns = [
-		{ data: "Status", editor: 'text', readOnly: true, width:400 },
+		{ data: "Status", editor: 'text', readOnly: true, width: 400 },
 		{ data: "Name", editor: 'text', readOnly: true }
 	]
 
@@ -1071,34 +1073,33 @@ console.log(columneditorsettings)
 			}
 		}
 		else if (ObjectArray[i].Exception != "" && ObjectArray[i].Exception != null) {
-			if (ObjectArray[i].Exception == "MISSED_IN_PUNCH&&MISSED_OUT_PUNCH"){
+			if (ObjectArray[i].Exception == "MISSED_IN_PUNCH&&MISSED_OUT_PUNCH") {
 
 
 				for (let y = 0, z = ExceptionKeys.length; y < z; y++) {
 					if (ObjectArray[i].Exception.split('&&')[0] == ExceptionKeys[y].value) {
-							Parameter = ExceptionKeys[y]
-						
+						Parameter = ExceptionKeys[y]
+
 					}
-					else if (ObjectArray[i].Exception.split('&&')[1] == ExceptionKeys[y].value)
-					{
+					else if (ObjectArray[i].Exception.split('&&')[1] == ExceptionKeys[y].value) {
 						Parameter2 = ExceptionKeys[y]
 					}
-				
+
 				}
 
-			
+
 			}
 
-			else{
-			for (let y = 0, z = ExceptionKeys.length; y < z; y++) {
-				if (ObjectArray[i].Exception == ExceptionKeys[y].value) {
+			else {
+				for (let y = 0, z = ExceptionKeys.length; y < z; y++) {
+					if (ObjectArray[i].Exception == ExceptionKeys[y].value) {
 						Parameter = ExceptionKeys[y]
 					}
 				}
 			}
 		}
 
-		if (ObjectArray[i].Exception != "" && ObjectArray[i].Exception != null && ObjectArray[i].Exception == "MISSED_IN_PUNCH&&MISSED_OUT_PUNCH"){
+		if (ObjectArray[i].Exception != "" && ObjectArray[i].Exception != null && ObjectArray[i].Exception == "MISSED_IN_PUNCH&&MISSED_OUT_PUNCH") {
 			Column2 =
 			{
 				"GenieName": ObjectArray[i].DisplayName,
@@ -1137,6 +1138,62 @@ console.log(columneditorsettings)
 	FinalStuff = []
 	for (let i = 0, l = ListOfDVs.length; i < l; i++) {
 		//KVP = ListOfDVs[i].split('&--&')
+		TimePeriodList =
+			[
+				{
+					"WFCNAME": "Last_Week",
+					"WFDID": 7
+				},
+				{
+					"WFCNAME": "Today",
+					"WFDID": 13
+				},
+				{
+					"WFCNAME": "Current_Payperiod",
+					"WFDID": 1
+				},
+				{
+					"WFCNAME": "Previous_Payperiod",
+					"WFDID": 0
+				},
+				{
+					"WFCNAME": "Yesterday",
+					"WFDID": 8
+				},
+				{
+					"WFCNAME": "Week_to_Date",
+					"WFDID": 6
+				},
+				{
+					"WFCNAME": "Current_Payperiod",
+					"WFDID": 1
+				}
+			]
+
+
+
+			function inDexOFProperty(array, object, searchstring) {
+				found = false
+				for (let i = 0, l = array.length; i < l; i++) {
+				//console.log(array[i][object],searchstring)
+					if (array[i][object] == searchstring) {
+						found = true
+						return i
+					}
+				}
+				if (found == false) { return -1 }
+			}
+var Timeperiod
+console.log(inDexOFProperty(TimePeriodList, "WFCNAME",  ListOfDVs[i].TimePeriod) )
+
+if (inDexOFProperty(TimePeriodList, "WFCNAME",  ListOfDVs[i].TimePeriod) > -1){
+	index = inDexOFProperty(TimePeriodList, "WFCNAME",  ListOfDVs[i].TimePeriod)
+		console.log(index)
+		Timeperiod = TimePeriodList[parseInt(index,10)].WFDID
+		console.log(TimePeriodList,TimePeriodList[parseInt(index,10)].WFDID)
+}
+else {Timeperiod = 1}
+console.log(Timeperiod)
 		map = {
 			"name": ListOfDVs[i].Name,
 			"consumer": "SPRING",
@@ -1156,7 +1213,7 @@ console.log(columneditorsettings)
 						},
 						"dateRange": {
 							"symbolicPeriod": {
-								"id": 1
+								"id": Timeperiod
 							}
 						}
 					},
@@ -1176,7 +1233,7 @@ console.log(columneditorsettings)
 			if (ListOfDVs[i].Name == ListOfColumns[y].GenieName) {
 				if (ListOfColumns[y].ColumnData.key != "UNMAPPED" && ListOfColumns[y].ColumnData.key != "" && ListOfColumns[y].ColumnData.key != null) {
 					map.content.select.push(ListOfColumns[y].ColumnData)
-					if (ListOfColumns[y].ColumnData.properties && ListOfColumns[y].ColumnData.key != "PEOPLE_CUSTOM" ) {
+					if (ListOfColumns[y].ColumnData.properties && ListOfColumns[y].ColumnData.key != "PEOPLE_CUSTOM") {
 						map.content.reduce.push(
 							{
 								"key": ListOfColumns[y].ColumnData.key,
@@ -1233,15 +1290,15 @@ console.log(columneditorsettings)
 				for (let y = 0, z = LoadingData.length; y < z; y++) {
 					if (LoadingData[y][1] == JSON.parse(err.options.body).name) {
 						LoaderHOT.setDataAtCell(y, 0, JSON.parse(err.error).errorCode + JSON.parse(err.error).message)
-						if (JSON.parse(err.error).errorCode ==  "WCO-106384"){
+						if (JSON.parse(err.error).errorCode == "WCO-106384") {
 							LoaderHOT.setCellMeta(y, 0, 'className', 'BlueCellBackground')
 
 						}
-						else{
+						else {
 
 							LoaderHOT.setCellMeta(y, 0, 'className', 'RedCellBackground')
 						}
-						
+
 						LoaderHOT.render()
 					}
 				}
@@ -1343,7 +1400,7 @@ document.getElementById('AddPaycodeID').addEventListener('click', function (even
 			}
 
 		)
-		if (!fs){fs = require('fs')}
+		if (!fs) { fs = require('fs') }
 		fs.writeFileSync('./Settings/connections.json', JSON.stringify(connectionData));
 		RefreshConnections()
 		document.getElementById("SideBarRight").style.width = "0";
