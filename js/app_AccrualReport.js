@@ -444,6 +444,7 @@ function parseInputJson(data) {
 						"Accrual Type":g.accrualCode.typeName,
 						"Effective Date":g.effectiveDate,
 						"Transaction Type":g.type,
+						"Disqualified":g.disqualified,
 						"Amount":Amount ,
 						"Probation Amount":ProbationAmount,
 						"Grant Amount":GrantAmount ,
