@@ -685,7 +685,7 @@ function downloadNewFile(change_data) {
 					"@WageAddition": x['@WageAddition'],
 					"@Type": x['@Type'],
 					"@UnjustAutoResExpAsWorked": x['@UnjustAutoResExpAsWorked'],
-					"@ScheduleHoursType": ['@ScheduleHoursType'],
+					"@ScheduleHoursType": x['@ScheduleHoursType'],
 					"@VisibleInMainArea": x['@VisibleInMainArea'],
 					"@IsMoneyCategory": false,
 					"@EditExcuseAbsn": x['@EditExcuseAbsn'],
