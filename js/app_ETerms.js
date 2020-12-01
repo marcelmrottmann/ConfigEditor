@@ -650,7 +650,7 @@ function downloadNewFile(change_data) {
 							"amount": a[2],
 							"datePattern": a[0],
 							"payCode": {
-								"qualifier": a[4]
+								"qualifier": a[5]
 							},
 							"targetAmountType": a[1],
 							"useContractShift": a[4],
