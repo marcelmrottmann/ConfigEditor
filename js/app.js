@@ -546,6 +546,11 @@ function parseInputJson(data) {
 		},
 		trimDropdown: false,
 		stretchH: 'all',
+		modifyColWidth: function(width, col){
+			if(width > 500){
+				return 500
+			}
+		  },
 		afterRender: CloseLoadingModal()
 		
 
