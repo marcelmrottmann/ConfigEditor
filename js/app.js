@@ -1093,7 +1093,7 @@ function OldSchoolView(data) {
 	for (let x = 0, l = content_temp.length; x < l; x++) {
 		for (let y = 0, m = content.length; y < m; y++) {
 			for (let z = 0, n = headers.length; z < n; z++) {
-				if (content_temp[x].Zones == content[y].Zones && content_temp[x].Schedule_Deviations == content[y].Schedule_Deviations) {
+				if (content_temp[x].Zones == content[y].Zones && content_temp[x].Schedule_Deviations == content[y].Schedule_Deviations &&  content_temp[x].Extensions == content[y].Extensions) {
 					if (content_temp[x][headers[z]] != content[y][headers[z]] && content_temp[x][headers[z]] == '') {
 						content_temp[x][headers[z]] = content[y][headers[z]]
 					}
