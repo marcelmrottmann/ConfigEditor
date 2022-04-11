@@ -612,7 +612,8 @@ function ReplaceValueFunction () {
 	SearchField = document.getElementById('search_field')		
 	ReplaceField = document.getElementById('replace_field');		
 			replace = ReplaceField.value
-		for (row = 0, r_len = queryResult.length; row < r_len; row++) {
+			//var queryResult = hot.getSelected();
+	/*	for (row = 0, r_len = queryResult.length; row < r_len; row++) {
 
 	if (DisableEditing == true && queryResult[row].col > 3) {
 		currentValue = hot.getDataAtCell(queryResult[row].row, queryResult[row].col)
@@ -636,6 +637,48 @@ function ReplaceValueFunction () {
 			hot.setDataAtCell(queryResult[row].row, queryResult[row].col, finalCellValue);
 		}
 	}
+	*/
+try{
+	if (hot && hot.getSelected().length > 0){
+	var selected = hot.getSelected();
+	console.log(selected)
+	for (var index = 0; index < selected.length; index += 1) {
+		var item = selected[index];
+		var startRow = Math.min(item[0], item[2]);
+		var endRow = Math.max(item[0], item[2]);
+		var startCol = Math.min(item[1], item[3]);
+		var endCol = Math.max(item[1], item[3]);
+
+		for (var rowIndex = startRow; rowIndex <= endRow; rowIndex += 1) {
+			for (var columnIndex = startCol; columnIndex <= endCol; columnIndex += 1) {
+
+
+				if (DisableEditing == true && columnIndex > 3) {
+
+					currentValue = hot.getDataAtCell(rowIndex, columnIndex)
+					replaceValue = replace.toString()
+					FinalValue = currentValue.replace(SearchField.value, replaceValue)
+					FinalValue = FinalValue.replace(/(^[,\s]+)|([,\s]+$)/g, '')
+					FinalValue = FinalValue.replace(',,', ',')
+					hot.setDataAtCell(rowIndex, columnIndex, FinalValue);
+					}
+				else if (DisableEditing == false){ 
+						currentValue = hot.getDataAtCell(rowIndex, columnIndex)
+						replaceValue = replace.toString()
+						FinalValue = currentValue.replace(SearchField.value, replaceValue)
+						FinalValue = FinalValue.replace(/(^[,\s]+)|([,\s]+$)/g, '')
+						FinalValue = FinalValue.replace(',,', ',')
+						hot.setDataAtCell(rowIndex, columnIndex, FinalValue);
+
+				}
+
+				
+			}
+		}
+	}
+}
+}
+catch{window.alert('Please make a selection')}
 
 		console.log('test')
 		SearchField = "";
@@ -828,6 +871,7 @@ function downloadNewFile(change_data) {
 	var dataconvert = ObjectArray.map(function (x) {
 		y = { "Extensions": x['0'], "Zones": x['1'], "Schedule Deviation": x['2'], "Overtimes": x['3'], "Paycodes": x['4'] }
 		//y = { "Extensions": x['0'],"Schedule Deviation": x['1'], "Overtimes": x['2'], "Zones": x['3'], "Paycodes": x['4'] }
+		console.log(x)
 		console.log(y)
 		console.log(x['2'])
 
@@ -1059,12 +1103,12 @@ function OldSchoolView(data) {
 		test2 = headers.indexOf(OvertimeValueTemp) + 3
 		test4 = headers.indexOf(OvertimeValueTemp)
 		test5 = headers[test4]
-		//console.log(test5)
+		console.log(test2,test5,test4)
 		content[i][test2][test5] = data[i]['Pay Codes']
 		content[i][0] = { "Schedule_Deviations": data[i]['Schedule Deviations'] }
 		content[i][1] = { "Zones": data[i]['Zones'] }
 		content[i][2] = { "Extensions": data[i]['Extensions'] }
-		//console.log(test2)
+		console.log(content[i])
 	}
 
 	Array.prototype.unique = function () {
@@ -1078,15 +1122,20 @@ function OldSchoolView(data) {
 
 		return a;
 	};
+
 	content_temp = []
 	for (let i = 0, l = content.length; i < l; i++) {
 		content_temp.push(Object.assign({}, ...content[i]))
+		
 	}
 	content = content_temp
 	content_temp = []
 	content_temp.push(content[0])
 	for (let i = 0, l = content.length - 1; i < l; i++) {
+		console.log(content[i])
 		if (content[i].Zones != content[i + 1].Zones || content[i].Schedule_Deviations != content[i + 1].Schedule_Deviations || content[i].Extensions != content[i + 1].Extensions) { content_temp.push(content[i + 1]) }
+		console.log(content[i + 1])
+		console.log(content_temp)
 	}
 	content_temp = Array.from(new Set(content_temp))
 	console.log(content_temp)
