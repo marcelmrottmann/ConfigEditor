@@ -1250,5 +1250,13 @@ function firstRowRenderer(instance, td, row, col, prop, value, cellProperties) {
 }
 
 
+document.getElementById("DownloadtoCSV").addEventListener('click', function () {
+
+	var fe = document.getElementById("ruleName");
+	console.log(fe.options[fe.selectedIndex].text)
+	var exportPlugin = hotdata.getPlugin('exportFile');
+	exportPlugin.downloadFile('csv', { filename: fe.options[fe.selectedIndex].text, columnHeaders: true, });
+
+});
 
 
